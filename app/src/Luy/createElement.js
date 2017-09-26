@@ -34,14 +34,16 @@ function createElement(type: string | Function, config, ...children: array) {
         //巧妙的将key转化为字符串
         key = config.key === undefined ? null : '' + config.key
         ref = config.ref === undefined ? null : config.ref
+        
         for (let propName in config) {
+
             // 除去一些不需要的属性,key,ref等
             if (RESERVED_PROPS.hasOwnProperty(propName)) continue
             //保证所有的属性都不是undefined
-            if (config.hasOwnProperty(propsName)) {
-                props[propsName] = config[propsName]
+            if (config.hasOwnProperty(propName)) {
+                props[propName] = config[propName]
             }
-
+            
         }
     }
     if (childLength === 1) {
