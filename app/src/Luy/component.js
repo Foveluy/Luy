@@ -1,6 +1,5 @@
 // @flow
-import { instantiateReactComponent } from './vdom'
-
+import {update} from './vdom'
 // 用户用来继承的 Component 类
 class ReactClass {
   constructor(props, context) {
@@ -15,16 +14,18 @@ class ReactClass {
   updateComponent() {
     const prevState = this.state
     const oldVnode = this.Vnode
-
+    
     if (this.nextState !== prevState) {
       this.state = this.nextState;
     }
 
     this.nextState = null
-    const nextVnode = this.render()
-    this.Vnode = nextVnode
-    let newComponent = instantiateReactComponent(nextVnode)
-    newComponent.mountComponent()
+    const newVnode = this.render()
+    
+    this.Vnode = newVnode
+    
+    update(oldVnode, newVnode, this.dom)
+
   }
   setState(partialNewState, callback) {
 

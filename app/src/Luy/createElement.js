@@ -46,12 +46,14 @@ function createElement(type: string | Function, config, ...children: array) {
             
         }
     }
+
     if (childLength === 1) {
         props.children = typeNumber(children[0]) > 2 ? children[0] : []
 
     } else if (childLength > 1) {
         props.children = children
     }
+
     /**设置defaultProps */
     let defaultProps = type.defaultProps;
     if (defaultProps) {
@@ -65,5 +67,6 @@ function createElement(type: string | Function, config, ...children: array) {
 }
 
 export {
-    createElement
+    createElement,
+    Vnode
 }

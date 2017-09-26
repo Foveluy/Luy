@@ -5,25 +5,25 @@ import Component from './Luy'
 let a = [1, 2, 3, 4, 5]
 
 class App extends React.Component {
-  constructor(props) {
+  constructor() {
     super()
-
-    // setInterval(() => {
-    //   this.setState()
-    // }, 1000);
+    this.state = {
+      counter: 1
+    }
+    setTimeout(() => {
+      this.setState({ counter: this.state.counter + 2 })
+    }, 500);
   }
   render() {
     return (
-      <div>
-        <div style={{ background: 'rgba(120,120,120,0.3)', color: 'white' }}>
-          it works!
-        </div>
+      <div style={{height:`${10 * this.state.counter}px`,border:'1px solid black',transition:'all 0.2s'}}>
+        asdasdasd
       </div>
     )
   }
 }
 
 ReactDOM.render(
-  <App />,
+  <App/>,
   document.getElementById('root')
 );
