@@ -2,24 +2,60 @@
 import { typeNumber } from "./utils";
 
 
-export function update(oldVnode, newVnode, parentDomNode) {
-    
-    if (oldVnode.type === newVnode.type) {
-        if (typeof oldVnode.type === 'string') {
-            const dom = parentDomNode
+function updateText(oldText, newText, parentDomNode: Element) {
 
+    if (oldText !== newText) {
+        parentDomNode.firstChild.nodeValue = newText
+    }
+}
+
+function updateChild(oldChild, newChild, parentDomNode) {
+    let dom = newChild
+    //如果不是array就转化成array
+    if (!Array.isArray(oldChild)) {
+        oldChild = [oldChild]
+    }
+    if (!Array.isArray(newChild)) {
+        newChild = [newChild]
+    }
+
+    let TwoMaxlength = Math.max(oldChild.length, newChild.length)
+
+    for (let i = 0; i < TwoMaxlength; i++) {
+        const oldChildVnode = oldChild[i]
+        const newChildVnode = newChild[i]
+
+
+        if ((typeof oldChildVnode === 'string' && typeof newChildVnode === 'string') ||
+            (typeof oldChildVnode === 'number' && typeof newChildVnode === 'number')
+        ) {//如果虚拟节点是文字节点
+            updateText(oldChildVnode, newChildVnode, parentDomNode)
+        } else {//如果虚拟节点不是文字节点，直接去update
+            console.log(oldChildVnode, newChildVnode)
+            update(oldChildVnode, newChildVnode, parentDomNode)
+        }
+
+    }
+}
+
+export function update(oldVnode, newVnode, parentDomNode: Element) {
+
+    if (oldVnode.type === newVnode.type) {
+        if (typeof oldVnode.type === 'string') {//原生html
+            const dom = parentDomNode
             newVnode.dom = dom
 
-            console.log(newVnode)
+            console.log(oldVnode)
+            updateChild(oldVnode.props.children, newVnode.props.children, parentDomNode)
+
             const nextStyle = newVnode.props.style;
-            
             if (oldVnode.props.style !== nextStyle) {
-                
                 Object.keys(nextStyle).forEach((s) => dom.style[s] = nextStyle[s])
             }
         }
     } else {
         /**整个元素都不同了，直接替换 */
+
     }
 }
 
@@ -47,8 +83,6 @@ function renderByLuy(Vnode, container) {
     } else {
         domNode = renderComponent(Vnode, container)
     }
-
-
 
     if (children) {
         let childType = typeNumber(children)

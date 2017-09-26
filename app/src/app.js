@@ -16,14 +16,14 @@ class App extends React.Component {
   }
   render() {
     return (
-      <div style={{height:`${10 * this.state.counter}px`,border:'1px solid black',transition:'all 0.2s'}}>
-        asdasdasd
+      <div style={{ height: `${10 * this.state.counter}px`, border: '1px solid black', transition: 'all 0.2s' }}>
+        {this.state.counter === 1 ? <div></div> : <h1>哈哈哈</h1>}
       </div>
     )
   }
 }
 
 ReactDOM.render(
-  <App/>,
+  <App />,
   document.getElementById('root')
 );
