@@ -15,7 +15,6 @@ class Vnode {
         this.props = props
         this.key = key
         this.ref = ref
-
     }
 }
 
@@ -30,7 +29,7 @@ function createElement(type: string | Function, config, ...children: array) {
         key = null,
         ref = null,
         childLength = children.length;
-    
+
     if (config != null) {
         //巧妙的将key转化为字符串
         key = config.key === undefined ? null : '' + config.key
@@ -43,17 +42,14 @@ function createElement(type: string | Function, config, ...children: array) {
                 props[propsName] = config[propsName]
             }
 
-            props.children = children
-            // if (childLength === 1) {
-            //     props.children = typeNumber(children[0]) > 2 ? children[0] : []
-            // } else if (childLength > 1) {
-                
-            // }
         }
     }
+    if (childLength === 1) {
+        props.children = typeNumber(children[0]) > 2 ? children[0] : []
 
-
-
+    } else if (childLength > 1) {
+        props.children = children
+    }
     /**设置defaultProps */
     let defaultProps = type.defaultProps;
     if (defaultProps) {
@@ -63,9 +59,7 @@ function createElement(type: string | Function, config, ...children: array) {
             }
         }
     }
-
-    
-    return new Vnode(type, key, ref, props);
+    return new Vnode(type, props, key, ref);
 }
 
 export {
