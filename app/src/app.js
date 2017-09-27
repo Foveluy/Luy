@@ -12,12 +12,12 @@ class App extends React.Component {
     }
     setTimeout(() => {
       this.setState({ counter: this.state.counter + 2 })
-    }, 500);
+    }, 1500);
   }
   render() {
     return (
       <div style={{ height: `${10 * this.state.counter}px`, border: '1px solid black', transition: 'all 0.2s' }}>
-        {this.state.counter === 1 ? <div></div> : <h1>哈哈哈</h1>}
+        {this.state.counter === 1 ? <div>1</div> : <h1>1</h1>}
       </div>
     )
   }

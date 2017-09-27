@@ -5,11 +5,12 @@ import { typeNumber } from "./utils";
 function updateText(oldText, newText, parentDomNode: Element) {
 
     if (oldText !== newText) {
+
         parentDomNode.firstChild.nodeValue = newText
     }
 }
 
-function updateChild(oldChild, newChild, parentDomNode) {
+function updateChild(oldChild, newChild, parentDomNode: Element) {
     let dom = newChild
     //如果不是array就转化成array
     if (!Array.isArray(oldChild)) {
@@ -31,7 +32,7 @@ function updateChild(oldChild, newChild, parentDomNode) {
         ) {//如果虚拟节点是文字节点
             updateText(oldChildVnode, newChildVnode, parentDomNode)
         } else {//如果虚拟节点不是文字节点，直接去update
-            console.log(oldChildVnode, newChildVnode)
+            console.log(newChildVnode)
             update(oldChildVnode, newChildVnode, parentDomNode)
         }
 
@@ -45,7 +46,6 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
             const dom = parentDomNode
             newVnode.dom = dom
 
-            console.log(oldVnode)
             updateChild(oldVnode.props.children, newVnode.props.children, parentDomNode)
 
             const nextStyle = newVnode.props.style;
@@ -53,9 +53,17 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
                 Object.keys(nextStyle).forEach((s) => dom.style[s] = nextStyle[s])
             }
         }
-    } else {
-        /**整个元素都不同了，直接替换 */
+        if (typeof oldVnode.type === 'function') {//非原生
 
+        }
+    } else {
+        /**整个元素都不同了，直接删除再插入一个新的 */
+        if (typeof newVnode.type === 'string') { //新的元素是html原生元素
+            renderByLuy(newVnode, parentDomNode, true)
+        }
+        if (typeof newVnode.type === 'function') {//非原生
+
+        }
     }
 }
 
@@ -69,16 +77,22 @@ function renderComponent(Vnode, parentDomNode) {
     instance.Vnode = renderedVnode
     instance.dom = domNode
 
+
     return domNode
 }
 
-
-
-function renderByLuy(Vnode, container) {
+/**
+ * ReactDOM.render()函数入口
+ * 渲染组件，组件的子组件，都在这里
+ * @param {*} Vnode 
+ * @param {Element} container 
+ * @param {boolean} isUpdate 
+ */
+function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
     const { type, props } = Vnode
     const { className, style, children } = props
     let domNode
-    if (typeNumber(type) !== 5) {
+    if (typeof type !== 'function') {
         domNode = document.createElement(type)
     } else {
         domNode = renderComponent(Vnode, container)
@@ -91,7 +105,6 @@ function renderByLuy(Vnode, container) {
         }
         if (childType === 7) {//list
             props.children.forEach((item) => {
-                console.log(item)
                 renderByLuy(item, domNode)
             })
         }
@@ -110,11 +123,21 @@ function renderByLuy(Vnode, container) {
         })
     }
 
-    container.appendChild(domNode)
+    if (isUpdate) {
+        console.log(container)
+        container.removeChild()
+        console.log(container)
+        container.appendChild(domNode)
+    } else {
+        container.appendChild(domNode)
+    }
+
 
     return domNode
 }
 
 export function render(Vnode, container) {
-    return renderByLuy(Vnode, container)
+    const rootDom = renderByLuy(Vnode, container)
+    console.log(Vnode)
+    return rootDom
 }

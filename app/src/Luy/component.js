@@ -28,7 +28,6 @@ class ReactClass {
 
   }
   setState(partialNewState, callback) {
-
     this.nextState = Object.assign({}, this.state, partialNewState)
     this.updateComponent()
   }
