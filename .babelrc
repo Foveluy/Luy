@@ -19,7 +19,8 @@
     }],
     "external-helpers",
     "transform-flow-strip-types",
-    "syntax-flow"
+    "syntax-flow",
+    "transform-es2015-modules-commonjs"
       // 开启react代码的模块热替换（HMR）
   ]
 }

@@ -1,11 +1,13 @@
 //@flow
 import { typeNumber } from "./utils";
-
+import { flattenChildren } from './createElement'
 
 function updateText(oldText, newText, parentDomNode: Element) {
 
     if (oldText !== newText) {
-
+        // parentDomNode.removeChild(Vnode._hostNode)
+        // container.appendChild(domNode)
+        console.log(oldText)
         parentDomNode.firstChild.nodeValue = newText
     }
 }
@@ -25,14 +27,13 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
     for (let i = 0; i < TwoMaxlength; i++) {
         const oldChildVnode = oldChild[i]
         const newChildVnode = newChild[i]
-
+        console.log(oldChildVnode)
 
         if ((typeof oldChildVnode === 'string' && typeof newChildVnode === 'string') ||
             (typeof oldChildVnode === 'number' && typeof newChildVnode === 'number')
         ) {//如果虚拟节点是文字节点
             updateText(oldChildVnode, newChildVnode, parentDomNode)
         } else {//如果虚拟节点不是文字节点，直接去update
-            console.log(newChildVnode)
             update(oldChildVnode, newChildVnode, parentDomNode)
         }
 
@@ -41,16 +42,17 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
 
 export function update(oldVnode, newVnode, parentDomNode: Element) {
 
+    newVnode._hostNode = oldVnode._hostNode
     if (oldVnode.type === newVnode.type) {
         if (typeof oldVnode.type === 'string') {//原生html
-            const dom = parentDomNode
-            newVnode.dom = dom
 
-            updateChild(oldVnode.props.children, newVnode.props.children, parentDomNode)
+            updateChild(oldVnode.props.children, newVnode.props.children, newVnode._hostNode)
+
 
             const nextStyle = newVnode.props.style;
+            //更新css
             if (oldVnode.props.style !== nextStyle) {
-                Object.keys(nextStyle).forEach((s) => dom.style[s] = nextStyle[s])
+                Object.keys(nextStyle).forEach((s) => newVnode._hostNode.style[s] = nextStyle[s])
             }
         }
         if (typeof oldVnode.type === 'function') {//非原生
@@ -66,20 +68,53 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
         }
     }
 }
-
-function renderComponent(Vnode, parentDomNode) {
+/**
+ * 渲染自定义组件
+ * @param {*} Vnode 
+ * @param {Element} parentDomNode 
+ */
+function renderComponent(Vnode, parentDomNode: Element) {
     const { type, props } = Vnode
     const Component = type
     const instance = new Component(props)
     const renderedVnode = instance.render()
-
+    if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了')
     const domNode = renderByLuy(renderedVnode, parentDomNode)
     instance.Vnode = renderedVnode
     instance.dom = domNode
-
+    instance.Vnode._hostNode = domNode
 
     return domNode
 }
+
+function mountNativeElement(Vnode, parentDomNode: Element) {
+    const domNode = renderByLuy(Vnode, parentDomNode)
+    Vnode._hostNode = domNode
+}
+function mountTextComponent(Vnode, domNode: Element) {
+    let textDomNode = document.createTextNode(Vnode.props)
+    domNode.appendChild(textDomNode)
+    Vnode._hostNode = textDomNode
+    return textDomNode
+}
+
+function mountChild(childrenVnode, parentDomNode: Element) {
+    let childType = typeNumber(childrenVnode)
+    if (childType === 8) { //Vnode
+        mountNativeElement(childrenVnode, parentDomNode)
+    }
+    if (childType === 7) {//list
+        let flattenChildList = flattenChildren(childrenVnode)
+        flattenChildList.forEach((item) => {
+            renderByLuy(item, parentDomNode)
+        })
+    }
+    if (childType === 4 || childType === 3) {//string or number
+        mountTextComponent(flattenChildren(childrenVnode), parentDomNode)
+    }
+}
+
+
 
 /**
  * ReactDOM.render()函数入口
@@ -88,29 +123,22 @@ function renderComponent(Vnode, parentDomNode) {
  * @param {Element} container 
  * @param {boolean} isUpdate 
  */
+let depth = 0
 function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
     const { type, props } = Vnode
     const { className, style, children } = props
     let domNode
-    if (typeof type !== 'function') {
-        domNode = document.createElement(type)
-    } else {
+    if (typeof type === 'function') {
         domNode = renderComponent(Vnode, container)
+    } else if (typeof type === 'string' && type === '#text') {
+        domNode = mountTextComponent(Vnode,container)
+    } else {
+        domNode = document.createElement(type)
+        
     }
 
     if (children) {
-        let childType = typeNumber(children)
-        if (childType === 8) { //Vode
-            renderByLuy(children, domNode)
-        }
-        if (childType === 7) {//list
-            props.children.forEach((item) => {
-                renderByLuy(item, domNode)
-            })
-        }
-        if (childType === 4 || childType === 3) {//string or number
-            domNode.textContent = children
-        }
+        mountChild(children, domNode)
     }
 
     if (className !== undefined) {
@@ -124,9 +152,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
     }
 
     if (isUpdate) {
-        console.log(container)
-        container.removeChild()
-        console.log(container)
+        container.removeChild(Vnode._hostNode)
         container.appendChild(domNode)
     } else {
         container.appendChild(domNode)
@@ -138,6 +164,6 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
 
 export function render(Vnode, container) {
     const rootDom = renderByLuy(Vnode, container)
-    console.log(Vnode)
+
     return rootDom
 }

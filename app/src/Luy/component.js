@@ -21,7 +21,7 @@ class ReactClass {
 
     this.nextState = null
     const newVnode = this.render()
-    
+    console.log(oldVnode)
     this.Vnode = newVnode
     
     update(oldVnode, newVnode, this.dom)
