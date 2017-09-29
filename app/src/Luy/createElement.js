@@ -66,6 +66,7 @@ function createElement(type: string | Function, config, ...children: array) {
 }
 
 export function flattenChildren(children: Array) {
+    
     let length = children.length
     let ary = [],
         isLastSimple = false, //判断上一个元素是否是string 或者 number

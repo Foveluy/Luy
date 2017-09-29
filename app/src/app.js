@@ -17,16 +17,20 @@ class App extends React.Component {
     this.state = {
       counter: 1
     }
-    setInterval(() => {
+    setTimeout(() => {
       this.setState({ counter: this.state.counter + 1 })
     }, 1500);
+    setTimeout(() => {
+      this.setState({ counter: this.state.counter + 1 })
+    }, 1800);
   }
   render() {
     return (
       <div key={1} >
-        {/* {this.state.counter}{this.state.counter}{this.state.counter} */}
-        {this.state.counter%2 ===0?<div>1</div>:<C/>}
         {this.state.counter}{this.state.counter}{this.state.counter}
+        {this.state.counter%2 ===0?<div>1</div>:1}
+        {this.state.counter}{this.state.counter}{this.state.counter}
+        <div>ccccc</div>
       </div>
     )
   }

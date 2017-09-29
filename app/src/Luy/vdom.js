@@ -3,7 +3,7 @@ import { typeNumber } from "./utils";
 import { flattenChildren } from './createElement'
 
 function updateText(oldTextVnode, newTextVnode, parentDomNode: Element) {
-    let dom:Element = oldTextVnode._hostNode
+    let dom: Element = oldTextVnode._hostNode
     if (oldTextVnode.props !== newTextVnode.props) {
         dom.nodeValue = newTextVnode.props
     }
@@ -20,28 +20,33 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
     }
 
     let TwoMaxlength = Math.max(oldChild.length, newChild.length)
+    // if(oldChild.length > newChild.length){
+    //     while(parentDomNode.firstChild){
+    //         parentDomNode.removeChild(parentDomNode.firstChild)
+    //     }
+    // }
+    console.log(TwoMaxlength)
     for (let i = 0; i < TwoMaxlength; i++) {
         const oldChildVnode = oldChild[i]
         const newChildVnode = newChild[i]
-
-        if(oldChildVnode._hostNode){
+        
+        if (newChildVnode && oldChildVnode && oldChildVnode._hostNode) {
             newChildVnode._hostNode = oldChildVnode._hostNode
         }
-        if (oldChildVnode.type === newChildVnode.type) {
+        if (newChildVnode && oldChildVnode && oldChildVnode.type === newChildVnode.type) {
             if (oldChildVnode.type === '#text') {
-                updateText(oldChildVnode, newChildVnode,parentDomNode)
-            }else{
-                update(oldChildVnode,newChildVnode,oldChildVnode._hostNode)
+                updateText(oldChildVnode, newChildVnode, parentDomNode)
+            } else {
+                update(oldChildVnode, newChildVnode, oldChildVnode._hostNode)
             }
         } else {
             //如果类型都不一样了，直接替换
-            renderByLuy(newChildVnode,parentDomNode,true)
-            if (typeof newChildVnode.type === 'string') { 
-                console.log(oldChildVnode)
-                
-            }
-            if (typeof newChildVnode.type === 'function') {//非原生
-    
+            //当节点变多和变少的时候，可能会造成节点数量不相同的情况
+            //此时就会出现length不相等
+            if (newChildVnode) {
+                renderByLuy(newChildVnode, parentDomNode, true)
+            }else{
+                parentDomNode.removeChild(oldChildVnode._hostNode)
             }
         }
     }
@@ -66,8 +71,8 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
     } else {
         /**整个元素都不同了，直接删除再插入一个新的 */
         // if (typeof newVnode.type === 'string') { //新的元素是html原生元素
-            
-            
+
+
         // }
         // if (typeof newVnode.type === 'function') {//非原生
 
@@ -85,14 +90,14 @@ function renderComponent(Vnode, parentDomNode: Element) {
     const { type, props } = Vnode
     const Component = type
     const instance = new Component(props)
-    
+
     const renderedVnode = instance.render()
     if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了')
     const domNode = renderByLuy(renderedVnode, parentDomNode)
     instance.Vnode = renderedVnode
     instance.dom = domNode
     instance.Vnode._hostNode = domNode//用于在更新时期oldVnode的时候获取_hostNode
-    
+
     return domNode
 }
 
@@ -116,7 +121,6 @@ function mountChild(childrenVnode, parentDomNode: Element) {
     }
     if (childType === 7) {//list
         flattenChildList = flattenChildren(childrenVnode)
-        console.log(childrenVnode)
         flattenChildList.forEach((item) => {
             renderByLuy(item, parentDomNode)
         })
@@ -125,7 +129,7 @@ function mountChild(childrenVnode, parentDomNode: Element) {
         flattenChildList = flattenChildren(childrenVnode)
         mountTextComponent(flattenChildList, parentDomNode)
     }
-    
+
     return flattenChildList
 }
 
@@ -140,7 +144,6 @@ function mountChild(childrenVnode, parentDomNode: Element) {
  */
 let depth = 0
 function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
-    
     const { type, props } = Vnode
     const { className, style, children } = props
     let domNode
@@ -150,7 +153,6 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
         domNode = mountTextComponent(Vnode, container)
     } else {
         domNode = document.createElement(type)
-
     }
 
     if (children) {
@@ -168,12 +170,13 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
     }
 
     if (isUpdate) {
-        if(Vnode._hostNode){
-            container.insertBefore(domNode,Vnode._hostNode)
-        }else{
+        if (Vnode._hostNode) {
+            container.insertBefore(domNode, Vnode._hostNode)
+            container.removeChild(Vnode._hostNode)
+        } else {
             container.appendChild(domNode)
         }
-        container.removeChild(Vnode._hostNode)        
+
     } else {
         container.appendChild(domNode)
     }
@@ -183,6 +186,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
 }
 
 export function render(Vnode, container) {
+
     const rootDom = renderByLuy(Vnode, container)
 
     return rootDom
