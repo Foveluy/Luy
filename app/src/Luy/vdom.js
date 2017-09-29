@@ -7,18 +7,24 @@ let mountIndex = 0 //全局变量
 
 function updateText(oldTextVnode, newTextVnode, parentDomNode: Element) {
     let dom: Element = oldTextVnode._hostNode
-
+    
     if (oldTextVnode.props !== newTextVnode.props) {
+       
         dom.nodeValue = newTextVnode.props
     }
 }
 
 function updateChild(oldChild, newChild, parentDomNode: Element) {
     newChild = flattenChildren(newChild)
-
+    
     if (oldChild.type === newChild.type && oldChild.type === "#text") {
         newChild._hostNode = oldChild._hostNode //更新一个dom节点
         updateText(oldChild, newChild)
+        return newChild
+    }
+    if(oldChild.type === newChild.type && typeNumber(newChild) !==7){
+        newChild._hostNode = oldChild._hostNode //更新一个dom节点
+        update(oldChild,newChild,newChild._hostNode)
         return newChild
     }
 
@@ -36,14 +42,16 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
     let insertQueue = []
     let keyed = []
     oldChild.forEach((item) => {
+        
         if (item.key) {
             hash[item.key] = item
         } else {
             removedQueue.push(item)
         }
     })
-
+    
     newChild.forEach((newVnode, index) => {
+        
         let oldVnode = hash[newVnode.key]
         if (oldVnode) {//如果存在key相同的，则看看是否需要update
             update(oldVnode, newVnode, newVnode._hostNode)
@@ -55,6 +63,7 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
             newVnode._mountIndex = oldVnode._mountIndex //让新的也拥有同样的mountIndex
         }
     })
+    
     let One = keyed.shift()
     if(One){
         newChild.forEach((item, index) => {
@@ -71,9 +80,10 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
             if(keyed.length !== 0 && One.index === index )One = keyed.shift()
          })
          removedQueue.forEach((item) => {
-            parentDomNode.removeChild(item._hostNode)
+            // parentDomNode.removeChild(item._hostNode)
         })    
     }else{
+        
         newChild.forEach((item)=>{
             let dom = renderByLuy(item,parentDomNode,true)
             parentDomNode.appendChild(dom)
@@ -84,9 +94,7 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
     
     }
 
-
-
-
+    
 
     return newChild
 }
@@ -107,6 +115,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
 
         }
     } else {
+        
        let dom = renderByLuy(newVnode, parentDomNode, true)
        if(newVnode._hostNode){
         parentDomNode.insertBefore(dom,newVnode._hostNode)
@@ -127,7 +136,6 @@ function renderComponent(Vnode, parentDomNode: Element) {
 
     const Component = type
     const instance = new Component(props)
-    console.log(instance)
 
     const renderedVnode = instance.render()
     if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了')
@@ -159,11 +167,8 @@ function mountChild(childrenVnode, parentDomNode: Element) {
         flattenChildList._hostNode = mountNativeElement(flattenChildList, parentDomNode)
     }
     if (childType === 7) {//list
-        
         flattenChildList = flattenChildren(childrenVnode)
-        console.log(flattenChildList)
         flattenChildList.forEach((item) => {
-            
             renderByLuy(item, parentDomNode)
         })
     }
@@ -186,9 +191,6 @@ function mountChild(childrenVnode, parentDomNode: Element) {
  */
 let depth = 0
 function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
-    if (typeof type === 'string' && type === '#text') {
-        return mountTextComponent(Vnode, container)
-    }
     const { type, props } = Vnode
     const { className, style, children } = props
     let domNode

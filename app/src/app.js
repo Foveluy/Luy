@@ -29,8 +29,8 @@ class App extends React.Component {
       <div key={1} style={{background:`rgb(99,99,${this.state.counter + 1})`}}>
         <div>
           {[1,2,3].map((el,index)=>{ return(<span key={"x"+index}>{el}</span>)  })}
-          xxx
-
+          xxxx
+          {[1,2,3].map((el,index)=>{ return(<span key={"x"+index}>{el}</span>)  })}
         </div>
       </div>
     )
