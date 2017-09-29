@@ -2,18 +2,15 @@
 import { typeNumber } from "./utils";
 import { flattenChildren } from './createElement'
 
-function updateText(oldText, newText, parentDomNode: Element) {
-
-    if (oldText !== newText) {
-        // parentDomNode.removeChild(Vnode._hostNode)
-        // container.appendChild(domNode)
-        console.log(oldText)
-        parentDomNode.firstChild.nodeValue = newText
+function updateText(oldTextVnode, newTextVnode, parentDomNode: Element) {
+    let dom:Element = oldTextVnode._hostNode
+    if (oldTextVnode.props !== newTextVnode.props) {
+        dom.nodeValue = newTextVnode.props
     }
 }
 
 function updateChild(oldChild, newChild, parentDomNode: Element) {
-    let dom = newChild
+    newChild = flattenChildren(newChild)
     //如果不是array就转化成array
     if (!Array.isArray(oldChild)) {
         oldChild = [oldChild]
@@ -23,32 +20,40 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
     }
 
     let TwoMaxlength = Math.max(oldChild.length, newChild.length)
-
     for (let i = 0; i < TwoMaxlength; i++) {
         const oldChildVnode = oldChild[i]
         const newChildVnode = newChild[i]
-        console.log(oldChildVnode)
 
-        if ((typeof oldChildVnode === 'string' && typeof newChildVnode === 'string') ||
-            (typeof oldChildVnode === 'number' && typeof newChildVnode === 'number')
-        ) {//如果虚拟节点是文字节点
-            updateText(oldChildVnode, newChildVnode, parentDomNode)
-        } else {//如果虚拟节点不是文字节点，直接去update
-            update(oldChildVnode, newChildVnode, parentDomNode)
+        if(oldChildVnode._hostNode){
+            newChildVnode._hostNode = oldChildVnode._hostNode
         }
-
+        if (oldChildVnode.type === newChildVnode.type) {
+            if (oldChildVnode.type === '#text') {
+                updateText(oldChildVnode, newChildVnode,parentDomNode)
+            }else{
+                update(oldChildVnode,newChildVnode,oldChildVnode._hostNode)
+            }
+        } else {
+            //如果类型都不一样了，直接替换
+            renderByLuy(newChildVnode,parentDomNode,true)
+            if (typeof newChildVnode.type === 'string') { 
+                console.log(oldChildVnode)
+                
+            }
+            if (typeof newChildVnode.type === 'function') {//非原生
+    
+            }
+        }
     }
+    return newChild
 }
 
 export function update(oldVnode, newVnode, parentDomNode: Element) {
-
     newVnode._hostNode = oldVnode._hostNode
     if (oldVnode.type === newVnode.type) {
         if (typeof oldVnode.type === 'string') {//原生html
-
-            updateChild(oldVnode.props.children, newVnode.props.children, newVnode._hostNode)
-
-
+            //更新后的child，返回给组件
+            newVnode.props.children = updateChild(oldVnode.props.children, newVnode.props.children, newVnode._hostNode)
             const nextStyle = newVnode.props.style;
             //更新css
             if (oldVnode.props.style !== nextStyle) {
@@ -60,13 +65,16 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
         }
     } else {
         /**整个元素都不同了，直接删除再插入一个新的 */
-        if (typeof newVnode.type === 'string') { //新的元素是html原生元素
-            renderByLuy(newVnode, parentDomNode, true)
-        }
-        if (typeof newVnode.type === 'function') {//非原生
+        // if (typeof newVnode.type === 'string') { //新的元素是html原生元素
+            
+            
+        // }
+        // if (typeof newVnode.type === 'function') {//非原生
 
-        }
+        // }
+        renderByLuy(newVnode, parentDomNode, true)
     }
+    return newVnode
 }
 /**
  * 渲染自定义组件
@@ -77,19 +85,21 @@ function renderComponent(Vnode, parentDomNode: Element) {
     const { type, props } = Vnode
     const Component = type
     const instance = new Component(props)
+    
     const renderedVnode = instance.render()
     if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了')
     const domNode = renderByLuy(renderedVnode, parentDomNode)
     instance.Vnode = renderedVnode
     instance.dom = domNode
-    instance.Vnode._hostNode = domNode
-
+    instance.Vnode._hostNode = domNode//用于在更新时期oldVnode的时候获取_hostNode
+    
     return domNode
 }
 
 function mountNativeElement(Vnode, parentDomNode: Element) {
     const domNode = renderByLuy(Vnode, parentDomNode)
     Vnode._hostNode = domNode
+    return domNode
 }
 function mountTextComponent(Vnode, domNode: Element) {
     let textDomNode = document.createTextNode(Vnode.props)
@@ -100,18 +110,23 @@ function mountTextComponent(Vnode, domNode: Element) {
 
 function mountChild(childrenVnode, parentDomNode: Element) {
     let childType = typeNumber(childrenVnode)
+    let flattenChildList = childrenVnode;
     if (childType === 8) { //Vnode
-        mountNativeElement(childrenVnode, parentDomNode)
+        flattenChildList._hostNode = mountNativeElement(flattenChildList, parentDomNode)
     }
     if (childType === 7) {//list
-        let flattenChildList = flattenChildren(childrenVnode)
+        flattenChildList = flattenChildren(childrenVnode)
+        console.log(childrenVnode)
         flattenChildList.forEach((item) => {
             renderByLuy(item, parentDomNode)
         })
     }
     if (childType === 4 || childType === 3) {//string or number
-        mountTextComponent(flattenChildren(childrenVnode), parentDomNode)
+        flattenChildList = flattenChildren(childrenVnode)
+        mountTextComponent(flattenChildList, parentDomNode)
     }
+    
+    return flattenChildList
 }
 
 
@@ -125,20 +140,21 @@ function mountChild(childrenVnode, parentDomNode: Element) {
  */
 let depth = 0
 function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
+    
     const { type, props } = Vnode
     const { className, style, children } = props
     let domNode
     if (typeof type === 'function') {
         domNode = renderComponent(Vnode, container)
     } else if (typeof type === 'string' && type === '#text') {
-        domNode = mountTextComponent(Vnode,container)
+        domNode = mountTextComponent(Vnode, container)
     } else {
         domNode = document.createElement(type)
-        
+
     }
 
     if (children) {
-        mountChild(children, domNode)
+        props.children = mountChild(children, domNode)//flatten之后的child 要保存下来
     }
 
     if (className !== undefined) {
@@ -152,13 +168,17 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
     }
 
     if (isUpdate) {
-        container.removeChild(Vnode._hostNode)
-        container.appendChild(domNode)
+        if(Vnode._hostNode){
+            container.insertBefore(domNode,Vnode._hostNode)
+        }else{
+            container.appendChild(domNode)
+        }
+        container.removeChild(Vnode._hostNode)        
     } else {
         container.appendChild(domNode)
     }
 
-
+    Vnode._hostNode = domNode
     return domNode
 }
 

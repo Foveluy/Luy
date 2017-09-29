@@ -14,5 +14,9 @@ describe('flattenChildren', () => {
             const ary = flattenChildren('1asc')
             expect(ary).toEqual({ "key": null, "props": "1asc", "ref": null, "type": "#text" }, { "a": 4 })
         });
+        it('[{a:123},2,3]', () => {
+            const ary = flattenChildren([{a:123},2,3])
+            expect(ary).toEqual([{"a": 123}, {"key": null, "props": "23", "ref": null, "type": "#text"}])
+        });
     });
 });

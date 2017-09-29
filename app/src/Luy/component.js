@@ -22,9 +22,9 @@ class ReactClass {
     this.nextState = null
     const newVnode = this.render()
     console.log(oldVnode)
-    this.Vnode = newVnode
     
-    update(oldVnode, newVnode, this.dom)
+    this.Vnode = update(oldVnode, newVnode, this.dom)//这个函数返回一个新的Vnode
+    console.log(this.Vnode)
 
   }
   setState(partialNewState, callback) {

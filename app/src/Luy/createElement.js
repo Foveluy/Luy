@@ -61,6 +61,7 @@ function createElement(type: string | Function, config, ...children: array) {
             }
         }
     }
+    
     return new Vnode(type, props, key, ref);
 }
 
@@ -71,35 +72,37 @@ export function flattenChildren(children: Array) {
         lastString = '',
         childType = typeNumber(children)
 
-    if(childType === 4 || childType === 3){
+    if (childType === 4 || childType === 3) {
         return new Vnode('#text', children, null, null)
     }
 
-    if (length > 1) {
-        children.forEach((item, index) => {
-            if (typeNumber(item) === 3 || typeNumber(item) === 4) {
-                lastString += item
-                isLastSimple = true
-            }
-            if (typeNumber(item) !== 3 && typeNumber(item) !== 4) {
-                if (isLastSimple) {//上一个节点是简单节点
-                    ary.push(lastString)
-                    ary.push(item)
-                    lastString = ''
-                    isLastSimple = false
-                }
-            }
-            if (length - 1 === index) {
+    if(childType !== 7)return children
+
+    children.forEach((item, index) => {
+        if (typeNumber(item) === 3 || typeNumber(item) === 4) {
+            lastString += item
+            isLastSimple = true
+        }
+        if (typeNumber(item) !== 3 && typeNumber(item) !== 4) {
+            if (isLastSimple) {//上一个节点是简单节点
                 ary.push(lastString)
+                ary.push(item)
+                lastString = ''
+                isLastSimple = false
+            }else{
+                ary.push(item)
             }
-        })
-        ary = ary.map((item) => {
-            if (typeNumber(item) === 4) {
-                item = new Vnode('#text', item, null, null)
-            }
-            return item
-        })
-    }
+        }
+        if (length - 1 === index) {
+            ary.push(lastString)
+        }
+    })
+    ary = ary.map((item) => {
+        if (typeNumber(item) === 4) {
+            item = new Vnode('#text', item, null, null)
+        }
+        return item
+    })
     return ary
 }
 
