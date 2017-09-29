@@ -27,10 +27,9 @@ class App extends React.Component {
 
     return (
       <div key={1} style={{background:`rgb(99,99,${this.state.counter + 1})`}}>
-        {this.state.counter}{this.state.counter}{this.state.counter}
-        {this.state.counter%2 ===0?<div>1</div>:<h1></h1>}
-        {this.state.counter%2 ===0?<div>1</div>:<h1></h1>}
-        <div>ccccc</div>
+        <div>{[1,2,3].map((el,index)=>{ return (<span key={"x"+index}>{el}</span>)  })}
+        sss
+        </div>
       </div>
     )
   }
