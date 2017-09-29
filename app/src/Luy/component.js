@@ -9,6 +9,7 @@ class ReactClass {
 
     this.nextState = null
     this._renderCallbacks = []
+    
   }
 
   updateComponent() {

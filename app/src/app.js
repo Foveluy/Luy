@@ -12,24 +12,24 @@ class C extends React.Component {
 }
 
 class App extends React.Component {
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
+    
     this.state = {
       counter: 1
     }
-    setTimeout(() => {
-      this.setState({ counter: this.state.counter + 1 })
-    }, 1500);
-    setTimeout(() => {
-      this.setState({ counter: this.state.counter + 1 })
-    }, 1800);
+    // setInterval(() => {
+    //   this.setState({ counter: this.state.counter + 1 })
+    // }, 1500);
+
   }
-  render() {
+  render(some) {
+
     return (
-      <div key={1} >
+      <div key={1} style={{background:`rgb(99,99,${this.state.counter + 1})`}}>
         {this.state.counter}{this.state.counter}{this.state.counter}
-        {this.state.counter%2 ===0?<div>1</div>:1}
-        {this.state.counter}{this.state.counter}{this.state.counter}
+        {this.state.counter%2 ===0?<div>1</div>:<h1></h1>}
+        {this.state.counter%2 ===0?<div>1</div>:<h1></h1>}
         <div>ccccc</div>
       </div>
     )

@@ -2,6 +2,9 @@
 import { typeNumber } from "./utils";
 import { flattenChildren } from './createElement'
 
+let mountIndex = 0 //全局变量
+
+
 function updateText(oldTextVnode, newTextVnode, parentDomNode: Element) {
     let dom: Element = oldTextVnode._hostNode
     if (oldTextVnode.props !== newTextVnode.props) {
@@ -20,16 +23,25 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
     }
 
     let TwoMaxlength = Math.max(oldChild.length, newChild.length)
-    // if(oldChild.length > newChild.length){
-    //     while(parentDomNode.firstChild){
-    //         parentDomNode.removeChild(parentDomNode.firstChild)
-    //     }
-    // }
-    console.log(TwoMaxlength)
+    if (oldChild.length > newChild.length || oldChild.length < newChild.length) {
+        while (parentDomNode.firstChild) {
+            parentDomNode.removeChild(parentDomNode.firstChild)
+        }
+    }
+
     for (let i = 0; i < TwoMaxlength; i++) {
         const oldChildVnode = oldChild[i]
         const newChildVnode = newChild[i]
-        
+
+        if (oldChild.length > newChild.length && newChildVnode) {
+            renderByLuy(newChildVnode, parentDomNode)
+            continue
+        }
+        if (oldChild.length < newChild.length) {
+            renderByLuy(newChildVnode, parentDomNode)
+            continue
+        }
+
         if (newChildVnode && oldChildVnode && oldChildVnode._hostNode) {
             newChildVnode._hostNode = oldChildVnode._hostNode
         }
@@ -39,16 +51,18 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
             } else {
                 update(oldChildVnode, newChildVnode, oldChildVnode._hostNode)
             }
+            if (oldChild.length > newChild.length) console.log(newChildVnode)
         } else {
             //如果类型都不一样了，直接替换
             //当节点变多和变少的时候，可能会造成节点数量不相同的情况
             //此时就会出现length不相等
             if (newChildVnode) {
                 renderByLuy(newChildVnode, parentDomNode, true)
-            }else{
-                parentDomNode.removeChild(oldChildVnode._hostNode)
             }
         }
+    }
+    if (oldChild.length < newChild.length) {
+        console.log(oldChild, newChild)
     }
     return newChild
 }
@@ -69,14 +83,6 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
 
         }
     } else {
-        /**整个元素都不同了，直接删除再插入一个新的 */
-        // if (typeof newVnode.type === 'string') { //新的元素是html原生元素
-
-
-        // }
-        // if (typeof newVnode.type === 'function') {//非原生
-
-        // }
         renderByLuy(newVnode, parentDomNode, true)
     }
     return newVnode
@@ -88,9 +94,10 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
  */
 function renderComponent(Vnode, parentDomNode: Element) {
     const { type, props } = Vnode
+
     const Component = type
     const instance = new Component(props)
-
+    console.log(instance)
     const renderedVnode = instance.render()
     if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了')
     const domNode = renderByLuy(renderedVnode, parentDomNode)
@@ -144,6 +151,8 @@ function mountChild(childrenVnode, parentDomNode: Element) {
  */
 let depth = 0
 function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
+    mountIndex++
+    Vnode._mountIndex = mountIndex
     const { type, props } = Vnode
     const { className, style, children } = props
     let domNode
@@ -188,6 +197,6 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
 export function render(Vnode, container) {
 
     const rootDom = renderByLuy(Vnode, container)
-
+    
     return rootDom
 }

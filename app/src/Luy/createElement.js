@@ -61,7 +61,7 @@ function createElement(type: string | Function, config, ...children: array) {
             }
         }
     }
-    
+    console.log(props)
     return new Vnode(type, props, key, ref);
 }
 
