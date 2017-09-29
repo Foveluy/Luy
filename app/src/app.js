@@ -18,17 +18,19 @@ class App extends React.Component {
     this.state = {
       counter: 1
     }
-    // setInterval(() => {
-    //   this.setState({ counter: this.state.counter + 1 })
-    // }, 1500);
+    setInterval(() => {
+      this.setState({ counter: this.state.counter + 1 })
+    }, 1500);
 
   }
   render(some) {
 
     return (
       <div key={1} style={{background:`rgb(99,99,${this.state.counter + 1})`}}>
-        <div>{[1,2,3].map((el,index)=>{ return (<span key={"x"+index}>{el}</span>)  })}
-        sss
+        <div>
+          {[1,2,3].map((el,index)=>{ return(<span key={"x"+index}>{el}</span>)  })}
+          xxx
+
         </div>
       </div>
     )

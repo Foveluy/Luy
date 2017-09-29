@@ -161,9 +161,9 @@ function mountChild(childrenVnode, parentDomNode: Element) {
     if (childType === 7) {//list
         
         flattenChildList = flattenChildren(childrenVnode)
-       
+        console.log(flattenChildList)
         flattenChildList.forEach((item) => {
-            console.log(item)
+            
             renderByLuy(item, parentDomNode)
         })
     }

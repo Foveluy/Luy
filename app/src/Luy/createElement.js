@@ -84,13 +84,19 @@ export function flattenChildren(children: Array) {
             isLastSimple = true
         }
         if (typeNumber(item) !== 3 && typeNumber(item) !== 4) {
-            if (isLastSimple) {//上一个节点是简单节点
-                ary.push(lastString)
-                ary.push(item)
-                lastString = ''
-                isLastSimple = false
+            if(typeNumber(item) === 7){
+                item.forEach((item)=>{
+                    ary.push(item)
+                })
             }else{
-                ary.push(item)
+                if (isLastSimple) {//上一个节点是简单节点
+                    ary.push(lastString)
+                    ary.push(item)
+                    lastString = ''
+                    isLastSimple = false
+                }else{
+                    ary.push(item)
+                }
             }
         }
         if (length - 1 === index) {
