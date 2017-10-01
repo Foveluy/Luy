@@ -81,6 +81,16 @@ export function flattenChildren(children: Array) {
     if(childType !== 7)return children
 
     children.forEach((item, index) => {
+        if(typeNumber(item) === 7){
+            if(isLastSimple){
+                ary.push(lastString)
+            }
+            item.forEach((item)=>{
+                ary.push(item)
+            })
+            lastString = ''
+            isLastSimple = false
+        }
         if (typeNumber(item) === 3 || typeNumber(item) === 4) {
             lastString += item
             isLastSimple = true
@@ -97,12 +107,7 @@ export function flattenChildren(children: Array) {
             
         }
         if (length - 1 === index) {
-            ary.push(lastString)
-        }
-        if(typeNumber(item) === 7){
-            item.forEach((item)=>{
-                ary.push(item)
-            })
+            if(lastString)ary.push(lastString)
         }
     })
     ary = ary.map((item) => {

@@ -14,23 +14,24 @@ class C extends React.Component {
 class App extends React.Component {
   constructor(props) {
     super(props)
-    
+
     this.state = {
-      counter: 1
+      counter: 2
     }
     setInterval(() => {
       this.setState({ counter: this.state.counter + 1 })
-    }, 1500);
-
+    },1500)
+    // 
   }
-  render(some) {
+  render() {
 
     return (
-      <div key={1} style={{background:`rgb(99,99,${this.state.counter + 1})`}}>
+      <div key={1} style={{ background: `rgb(99,99,${this.state.counter + 1})` }}>
         <div>
-          {[1,2,3].map((el,index)=>{ return(<span key={"x"+index}>{el}</span>)  })}
-          xxxx
-          {[1,2,3].map((el,index)=>{ return(<span key={"x"+index}>{el}</span>)  })}
+          {this.state.counter%2 ===0?1:[1,2,34,5].map((el,index)=>{
+            if(index === 1)return <div>{this.state.counter}</div>
+            return <div>{index}</div>
+          })}
         </div>
       </div>
     )

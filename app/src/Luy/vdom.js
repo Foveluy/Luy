@@ -3,108 +3,145 @@ import { typeNumber } from "./utils";
 import { flattenChildren } from './createElement'
 
 let mountIndex = 0 //全局变量
-
+function mountIndexAdd() {
+    return mountIndex++
+}
 
 function updateText(oldTextVnode, newTextVnode, parentDomNode: Element) {
     let dom: Element = oldTextVnode._hostNode
-    
+
     if (oldTextVnode.props !== newTextVnode.props) {
-       
+
         dom.nodeValue = newTextVnode.props
     }
+}
+function isSameVnode(pre, next) {
+    if (pre.type === next.type && pre.key === next.key) {
+        return true
+    }
+    return false
+}
+
+function mapKeyToIndex(old) {
+    let hascode = {}
+    old.forEach((el, index) => {
+        if (el.key) {
+            hascode[el.key] = index
+        }
+    })
+    return hascode
 }
 
 function updateChild(oldChild, newChild, parentDomNode: Element) {
     newChild = flattenChildren(newChild)
-    
-    if (oldChild.type === newChild.type && oldChild.type === "#text") {
-        newChild._hostNode = oldChild._hostNode //更新一个dom节点
-        updateText(oldChild, newChild)
+   
+    if (!Array.isArray(oldChild)) oldChild = [oldChild]
+    if (!Array.isArray(newChild)) newChild = [newChild]
+    let oldLength = oldChild.length,
+        newLength = newChild.length,
+        oldStartIndex = 0, newStartIndex = 0,
+        oldEndIndex = oldLength - 1,
+        newEndIndex = newLength - 1,
+        oldStartVnode = oldChild[0],
+        newStartVnode = newChild[0],
+        oldEndVnode = oldChild[oldEndIndex],
+        newEndVnode = newChild[newEndIndex],
+        hascode = {};
+
+    if (newLength && !oldLength) {
+        newChild.forEach((newVnode) => {
+            renderByLuy(newVnode, parentDomNode)
+        })
         return newChild
     }
-    if(oldChild.type === newChild.type && typeNumber(newChild) !==7){
-        newChild._hostNode = oldChild._hostNode //更新一个dom节点
-        update(oldChild,newChild,newChild._hostNode)
-        return newChild
-    }
 
-    //如果不是array就转化成array
-    if (!Array.isArray(oldChild)) {
-        oldChild = [oldChild]
-    }
-    if (!Array.isArray(newChild)) {
-        newChild = [newChild]
-    }
-
-    let hash = {}
-    let updateQueue = []
-    let removedQueue = []
-    let insertQueue = []
-    let keyed = []
-    oldChild.forEach((item) => {
-        
-        if (item.key) {
-            hash[item.key] = item
-        } else {
-            removedQueue.push(item)
+    while (oldStartIndex <= oldEndIndex && newStartIndex <= newEndIndex) {
+        if (oldStartVnode === undefined) {
+            oldStartVnode = oldChild[++oldStartIndex]
         }
-    })
-    
-    newChild.forEach((newVnode, index) => {
-        
-        let oldVnode = hash[newVnode.key]
-        if (oldVnode) {//如果存在key相同的，则看看是否需要update
-            update(oldVnode, newVnode, newVnode._hostNode)
-            keyed.push({
-                Vnode: oldVnode,
-                index: index
-            })
-
-            newVnode._mountIndex = oldVnode._mountIndex //让新的也拥有同样的mountIndex
+        else if (oldEndVnode === undefined) {
+            oldEndVnode = oldChild[--oldEndIndex]
         }
-    })
-    
-    let One = keyed.shift()
-    if(One){
-        newChild.forEach((item, index) => {
+        else if (isSameVnode(oldStartVnode, newStartVnode)) {
+            update(oldStartVnode, newStartVnode, newStartVnode._hostNode)
+            oldStartVnode = oldChild[++oldStartIndex]
+            newStartVnode = newChild[++newStartIndex]
+        }
+        else if (isSameVnode(oldEndVnode, newEndVnode)) {
+            update(oldEndVnode, newEndVnode, newEndVnode._hostNode)
+            oldEndVnode = oldChild[--oldEndIndex]
+            newEndVnode = newChild[--newEndIndex]
+        }
+        else if (isSameVnode(oldStartVnode, newEndVnode)) {
+            let dom = oldStartVnode._hostNode
+            parentDomNode.insertBefore(dom, oldEndVnode.nextSibling)
+            update(oldStartVnode, newEndVnode, oldStartVnode._hostNode._hostNode)
+            oldStartVnode = oldChild[++oldStartIndex]
+            newEndVnode = newChild[--newEndIndex]
+        } else if (isSameVnode(oldEndVnode, newStartVnode)) {
+            let dom = oldEndVnode._hostNode
+            parentDomNode.insertBefore(dom, oldStartVnode._hostNode)
+            update(oldStartVnode, newEndVnode, oldStartVnode._hostNode)
+            oldEndVnode = oldChild[--oldEndIndex]
+            newStartVnode = newChild[++newStartIndex]
+        }
+        else {
+            if (hascode === undefined) hascode = mapKeyToIndex(oldChild)
+
+            let indexInOld = hascode[newStartVnode.key]
+
+            if (indexInOld === undefined) {
+                let newElm = renderByLuy(newStartVnode, parentDomNode, true)
+                parentDomNode.insertBefore(newElm, oldStartVnode._hostNode)
+                newStartVnode = newChild[++newStartIndex]
+            } else {
+                let moveVnode = oldChild[indexInOld]
+                update(moveVnode, newStartVnode, moveVnode._hostNode)
+                parentDomNode.insertBefore(moveVnode._hostNode, oldStartVnode._hostNode)
+                oldChild[indexInOld] = undefined
+                newStartVnode = newChild[++newStartIndex]
+            }
+        }
+        if (oldStartIndex > oldEndIndex) {
             
-            if(index < One.index && One.index !== index){
+            for (; newStartIndex-1 < newEndIndex; newStartIndex++) {
                 
-                let dom = renderByLuy(item,parentDomNode,true)
-                parentDomNode.insertBefore(dom,One.Vnode._hostNode)
+                if(newChild[newStartIndex]){
+                    renderByLuy(newChild[newStartIndex],parentDomNode)
+                }
             }
-            if(keyed.length === 0 &&One.index < index && One.index !== index){
-             let dom = renderByLuy(item,parentDomNode,true)
-             parentDomNode.appendChild(dom)
+            
+        }else if (newStartIndex > newEndIndex){
+            
+            for (; oldStartIndex -1 < oldEndIndex; oldStartIndex++) {
+                if(oldChild[oldStartIndex]){
+                    parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
+                }
             }
-            if(keyed.length !== 0 && One.index === index )One = keyed.shift()
-         })
-         removedQueue.forEach((item) => {
-            // parentDomNode.removeChild(item._hostNode)
-        })    
-    }else{
-        
-        newChild.forEach((item)=>{
-            let dom = renderByLuy(item,parentDomNode,true)
-            parentDomNode.appendChild(dom)
-        })
-        oldChild.forEach((item) => {
-            parentDomNode.removeChild(item._hostNode)
-        })
-    
+        }
     }
-
     
-
     return newChild
 }
 
 export function update(oldVnode, newVnode, parentDomNode: Element) {
     newVnode._hostNode = oldVnode._hostNode
+    // if (!oldVnode && newVnode) {
+    //     renderByLuy(newVnode, parentDomNode)
+    //     return newVnode
+    // }
+
+    
     if (oldVnode.type === newVnode.type) {
+        if (oldVnode.type === "#text") {
+            newVnode._hostNode = oldVnode._hostNode //更新一个dom节点
+            updateText(oldVnode, newVnode)
+            
+            return newVnode
+        }
         if (typeof oldVnode.type === 'string') {//原生html
             //更新后的child，返回给组件
-            newVnode.props.children = updateChild(oldVnode.props.children, newVnode.props.children, newVnode._hostNode)
+            newVnode.props.children = updateChild(oldVnode.props.children, newVnode.props.children, oldVnode._hostNode)
             const nextStyle = newVnode.props.style;
             //更新css
             if (oldVnode.props.style !== nextStyle) {
@@ -115,14 +152,14 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
 
         }
     } else {
-        
-       let dom = renderByLuy(newVnode, parentDomNode, true)
-       if(newVnode._hostNode){
-        parentDomNode.insertBefore(dom,newVnode._hostNode)
-        parentDomNode.removeChild(newVnode._hostNode)
-       }else{
-        parentDomNode.appendChild(dom)
-       }
+
+        let dom = renderByLuy(newVnode, parentDomNode, true)
+        if (newVnode._hostNode) {
+            parentDomNode.insertBefore(dom, newVnode._hostNode)
+            parentDomNode.removeChild(newVnode._hostNode)
+        } else {
+            parentDomNode.appendChild(dom)
+        }
     }
     return newVnode
 }
@@ -138,11 +175,13 @@ function renderComponent(Vnode, parentDomNode: Element) {
     const instance = new Component(props)
 
     const renderedVnode = instance.render()
+    console.log(renderedVnode)
     if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了')
     const domNode = renderByLuy(renderedVnode, parentDomNode)
     instance.Vnode = renderedVnode
     instance.dom = domNode
     instance.Vnode._hostNode = domNode//用于在更新时期oldVnode的时候获取_hostNode
+    instance.Vnode._mountIndex = mountIndexAdd()
 
     return domNode
 }
@@ -150,17 +189,19 @@ function renderComponent(Vnode, parentDomNode: Element) {
 function mountNativeElement(Vnode, parentDomNode: Element) {
     const domNode = renderByLuy(Vnode, parentDomNode)
     Vnode._hostNode = domNode
+    Vnode._mountIndex = mountIndexAdd()
     return domNode
 }
 function mountTextComponent(Vnode, domNode: Element) {
     let textDomNode = document.createTextNode(Vnode.props)
     domNode.appendChild(textDomNode)
     Vnode._hostNode = textDomNode
+    Vnode._mountIndex = mountIndexAdd()
     return textDomNode
 }
 
 function mountChild(childrenVnode, parentDomNode: Element) {
-   
+
     let childType = typeNumber(childrenVnode)
     let flattenChildList = childrenVnode;
     if (childType === 8) { //Vnode
@@ -221,6 +262,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
     if (isUpdate) {
         return domNode
     } else {
+        Vnode._mountIndex = mountIndexAdd()
         container.appendChild(domNode)
     }
     return domNode
