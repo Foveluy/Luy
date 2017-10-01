@@ -20,7 +20,7 @@ class App extends React.Component {
     }
     setInterval(() => {
       this.setState({ counter: this.state.counter + 1 })
-    },1500)
+    }, 1500)
     // 
   }
   render() {
@@ -28,9 +28,10 @@ class App extends React.Component {
     return (
       <div key={1} style={{ background: `rgb(99,99,${this.state.counter + 1})` }}>
         <div>
-          {this.state.counter%2 ===0?1:[1,2,34,5].map((el,index)=>{
-            if(index === 1)return <div>{this.state.counter}</div>
-            return <div>{index}</div>
+          {[1, 2, 3, 4, 4, 5].map((el, index) => {
+            return (
+              <div>{this.state.counter}</div>
+            )
           })}
         </div>
       </div>
