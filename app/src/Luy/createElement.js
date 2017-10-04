@@ -35,8 +35,8 @@ function createElement(type: string | Function, config, ...children: array) {
         key = config.key === undefined ? null : '' + config.key
         ref = config.ref === undefined ? null : config.ref
 
+        /**这一步讲外部的prop属性放进prop里 */
         for (let propName in config) {
-
             // 除去一些不需要的属性,key,ref等
             if (RESERVED_PROPS.hasOwnProperty(propName)) continue
             //保证所有的属性都不是undefined
@@ -45,9 +45,9 @@ function createElement(type: string | Function, config, ...children: array) {
             }
         }
     }
+
     if (childLength === 1) {
         props.children = typeNumber(children[0]) > 2 ? children[0] : []
-
     } else if (childLength > 1) {
         props.children = children
     }
@@ -64,8 +64,12 @@ function createElement(type: string | Function, config, ...children: array) {
     return new Vnode(type, props, key, ref);
 }
 
+/**
+ * 实际上这里做的事情就是将文字节点全部转换成Vnode
+ * @param {*} children 
+ */
 export function flattenChildren(children: Array) {
-    
+
     if(children === undefined || children === null)return new Vnode('#text', "", null, null)
 
     let length = children.length
