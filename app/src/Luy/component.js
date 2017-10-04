@@ -25,13 +25,21 @@ class ReactClass {
 
     
     this.Vnode = update(oldVnode, newVnode, this.dom)//这个函数返回一个新的Vnode
-
- 
   }
   setState(partialNewState, callback) {
     this.nextState = Object.assign({}, this.state, partialNewState)
     this.updateComponent()
   }
+
+  shouldComponentUpdate(){}
+  componentWillReceiveProps(){}
+  componentWillUpdate(){}
+  componentDidUpdate(){}
+  componentWillMount(){}
+  componentDidMount(){}
+  componentWillUnmount(){}
+  componentDidUnmount(){}
+
 
   render() { }
 }
