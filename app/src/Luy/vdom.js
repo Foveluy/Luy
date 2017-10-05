@@ -34,7 +34,7 @@ function mapKeyToIndex(old) {
 
 function updateChild(oldChild, newChild, parentDomNode: Element) {
     newChild = flattenChildren(newChild)
-   
+
     if (!Array.isArray(oldChild)) oldChild = [oldChild]
     if (!Array.isArray(newChild)) newChild = [newChild]
     let oldLength = oldChild.length,
@@ -103,24 +103,24 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
             }
         }
         if (oldStartIndex > oldEndIndex) {
-            
-            for (; newStartIndex-1 < newEndIndex; newStartIndex++) {
-                
-                if(newChild[newStartIndex]){
-                    renderByLuy(newChild[newStartIndex],parentDomNode)
+
+            for (; newStartIndex - 1 < newEndIndex; newStartIndex++) {
+
+                if (newChild[newStartIndex]) {
+                    renderByLuy(newChild[newStartIndex], parentDomNode)
                 }
             }
-            
-        }else if (newStartIndex > newEndIndex){
-            
-            for (; oldStartIndex -1 < oldEndIndex; oldStartIndex++) {
-                if(oldChild[oldStartIndex]){
+
+        } else if (newStartIndex > newEndIndex) {
+
+            for (; oldStartIndex - 1 < oldEndIndex; oldStartIndex++) {
+                if (oldChild[oldStartIndex]) {
                     parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
                 }
             }
         }
     }
-    
+
     return newChild
 }
 
@@ -131,12 +131,12 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
     //     return newVnode
     // }
 
-    
+
     if (oldVnode.type === newVnode.type) {
         if (oldVnode.type === "#text") {
             newVnode._hostNode = oldVnode._hostNode //更新一个dom节点
             updateText(oldVnode, newVnode)
-            
+
             return newVnode
         }
         if (typeof oldVnode.type === 'string') {//原生html
@@ -175,7 +175,6 @@ function renderComponent(Vnode, parentDomNode: Element) {
     const instance = new Component(props)
 
     const renderedVnode = instance.render()
-    console.log(renderedVnode)
     if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了')
     const domNode = renderByLuy(renderedVnode, parentDomNode)
     instance.Vnode = renderedVnode
@@ -222,6 +221,16 @@ function mountChild(childrenVnode, parentDomNode: Element) {
 }
 
 
+export function findDOMNode(ref) {
+    if (ref == null) {
+        return null;
+    }
+    if (ref.nodeType === 1) {
+        return ref;
+    }
+    return ref.__dom || null;
+}
+
 
 /**
  * ReactDOM.render()函数入口
@@ -263,7 +272,8 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
         return domNode
     } else {
         Vnode._mountIndex = mountIndexAdd()
-        container.appendChild(domNode)
+        if (container)
+            container.appendChild(domNode)
     }
     return domNode
 }

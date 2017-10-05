@@ -11,29 +11,22 @@ class C extends React.Component {
   }
 }
 
-class App extends React.Component {
+export default class App extends React.Component {
   constructor(props) {
     super(props)
 
     this.state = {
       counter: 2
     }
-    setInterval(() => {
-      this.setState({ counter: this.state.counter + 1 })
-    }, 1500)
+    // setInterval(() => {
+    //   this.setState({ counter: this.state.counter + 1 })
+    // }, 1500)
     // 
   }
   render() {
-
     return (
       <div key={1} style={{ background: `rgb(99,99,${this.state.counter + 1})` }}>
-        <div>
-          {[1, 2, 3, 4, 4, 5].map((el, index) => {
-            return (
-              <div>{this.state.counter}</div>
-            )
-          })}
-        </div>
+        <h1>fuck</div>
       </div>
     )
   }
