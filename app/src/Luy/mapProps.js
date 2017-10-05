@@ -1,4 +1,4 @@
-import { typeNumber, isEventName } from "./utils";
+import { typeNumber, isEventName, isEventNameLowerCase } from "./utils";
 
 var mappingStrategy = {
     style: function (domNode, style) {
@@ -8,9 +8,11 @@ var mappingStrategy = {
             })
         }
     },
-    event: function (domNode, event, eventName) {
-        console.log(eventName)
-        document.addEventListener(eventName, dispatchEvent, false)
+    event: function (domNode, eventCb, eventName) {
+        let events = domNode.__events || {}
+        events[eventName] = eventCb
+        domNode.__events = events
+        addEvent(document, dispatchEvent, eventName)
     },
     className: function (domNode, className) {
         if (className !== undefined) {
@@ -19,9 +21,69 @@ var mappingStrategy = {
     }
 }
 
-function dispatchEvent(event,eventName,something){
-    console.log(event,eventName,something)
+function addEvent(domNode, fn, eventName) {
+    if (domNode.addEventListener) {
+        domNode.addEventListener(
+            eventName,
+            fn,
+            false
+        );
+    } else if (domNode.attachEvent) {
+        domNode.attachEvent("on" + eventName, fn);
+    }
 }
+
+function dispatchEvent(event, eventName, end) {
+    const path = getEventPath(event, end)
+    triggerEventByPath(event,path)
+}
+
+/**
+ * 触发event默认以冒泡形式
+ * 冒泡：从里到外
+ * 捕获：从外到里
+ * @param {array} path 
+ */
+function triggerEventByPath(e, path: Array) {
+    /**事件合成，暂时这么写 */
+    let E = {}
+    for (var i in e) {
+        E[i] = e[i];
+    }
+    for (let i = 0; i < path.length; i++) {
+        const events = path[i].__events
+        for (let eventName in events) {
+            let fn = events[eventName]
+            E.currentTarget = path[i]
+            if (typeof fn === 'function') {
+                fn.call(path[i], E)
+            }
+        }
+    }
+}
+
+/**
+ * 当触发event的时候，我们利用这个函数
+ * 去寻找触发路径上有函数回调的路径
+ * @param {event} event 
+ */
+function getEventPath(event, end) {
+    let path = []
+    let pathEnd = end || document
+    let begin: Element = event.target
+
+    while (1) {
+        if (begin.__events) {
+            path.push(begin)
+        }
+        begin = begin.parentNode//迭代
+        if (!begin) {
+            break
+        }
+    }
+    return path
+}
+
 
 
 export function mapProp(domNode, props) {

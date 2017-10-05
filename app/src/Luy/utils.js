@@ -64,3 +64,7 @@ export function mapKeyToIndex(old) {
 export function isEventName(name) {
     return /^on[A-Z]/.test(name);
 }
+
+export function isEventNameLowerCase(name) {
+    return /^on[a-z]/.test(name);
+}
