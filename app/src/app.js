@@ -23,16 +23,20 @@ export default class App extends React.Component {
     // }, 1500)
     // 
   }
+  componentDidMount(){
+    console.log('组件挂载')
+  }
+
   render() {
     return (
-      <div key={1} style={{ background: `rgb(99,99,${this.state.counter + 1})` }}>
-        <h1>fuck</div>
+      <div key={1} onClick={()=>{console.log('123')}} style={{ background: `rgb(99,99,${this.state.counter + 1})` }}>
+        <h1>fuck</h1>
       </div>
     )
   }
 }
 
 ReactDOM.render(
-  <App />,
+  <App shit={'shit'}/>,
   document.getElementById('root')
 );

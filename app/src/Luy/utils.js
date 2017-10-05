@@ -27,3 +27,40 @@ export function typeNumber(data) {
     var a = numberMap[__type.call(data)];
     return a || 8;
 }
+
+/**
+ * 对比新旧Vnode是否一样
+ * @param {Vnode} pre 
+ * @param {Vnode} next 
+ */
+export function isSameVnode(pre, next) {
+    if (pre.type === next.type && pre.key === next.key) {
+        return true
+    }
+    return false
+}
+
+/**
+ * 将节点的key放入map中
+ * 
+ * @param {Vnode} old 
+ */
+export function mapKeyToIndex(old) {
+    let hascode = {}
+    old.forEach((el, index) => {
+        if (el.key) {
+            hascode[el.key] = index
+        }
+    })
+    return hascode
+}
+
+/**
+ * 判定否为与事件相关
+ *
+ * @param {any} name
+ * @returns
+ */
+export function isEventName(name) {
+    return /^on[A-Z]/.test(name);
+}

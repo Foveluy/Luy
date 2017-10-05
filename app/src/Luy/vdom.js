@@ -1,6 +1,8 @@
 //@flow
-import { typeNumber } from "./utils";
+import { typeNumber, isSameVnode, mapKeyToIndex, isEventName } from "./utils";
 import { flattenChildren } from './createElement'
+import { mapProp } from './mapProps'
+
 
 let mountIndex = 0 //全局变量
 function mountIndexAdd() {
@@ -14,22 +16,6 @@ function updateText(oldTextVnode, newTextVnode, parentDomNode: Element) {
 
         dom.nodeValue = newTextVnode.props
     }
-}
-function isSameVnode(pre, next) {
-    if (pre.type === next.type && pre.key === next.key) {
-        return true
-    }
-    return false
-}
-
-function mapKeyToIndex(old) {
-    let hascode = {}
-    old.forEach((el, index) => {
-        if (el.key) {
-            hascode[el.key] = index
-        }
-    })
-    return hascode
 }
 
 function updateChild(oldChild, newChild, parentDomNode: Element) {
@@ -152,7 +138,6 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
 
         }
     } else {
-
         let dom = renderByLuy(newVnode, parentDomNode, true)
         if (newVnode._hostNode) {
             parentDomNode.insertBefore(dom, newVnode._hostNode)
@@ -168,7 +153,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
  * @param {*} Vnode 
  * @param {Element} parentDomNode 
  */
-function renderComponent(Vnode, parentDomNode: Element) {
+function mountComponent(Vnode, parentDomNode: Element) {
     const { type, props } = Vnode
 
     const Component = type
@@ -177,6 +162,12 @@ function renderComponent(Vnode, parentDomNode: Element) {
     const renderedVnode = instance.render()
     if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了')
     const domNode = renderByLuy(renderedVnode, parentDomNode)
+
+    if (instance.componentDidMount) {
+        instance.componentDidMount()
+        instance.componentDidMount = null//暂时不知道为什么要设置为空
+    }
+
     instance.Vnode = renderedVnode
     instance.dom = domNode
     instance.Vnode._hostNode = domNode//用于在更新时期oldVnode的时候获取_hostNode
@@ -231,7 +222,6 @@ export function findDOMNode(ref) {
     return ref.__dom || null;
 }
 
-
 /**
  * ReactDOM.render()函数入口
  * 渲染组件，组件的子组件，都在这里
@@ -242,10 +232,10 @@ export function findDOMNode(ref) {
 let depth = 0
 function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
     const { type, props } = Vnode
-    const { className, style, children } = props
+    const { children } = props
     let domNode
     if (typeof type === 'function') {
-        domNode = renderComponent(Vnode, container)
+        domNode = mountComponent(Vnode, container)
     } else if (typeof type === 'string' && type === '#text') {
         domNode = mountTextComponent(Vnode, container)
     } else {
@@ -256,17 +246,9 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
         props.children = mountChild(children, domNode)//flatten之后的child 要保存下来
     }
 
-    if (className !== undefined) {
-        domNode.className = className
-    }
+    mapProp(domNode, props) //为元素添加props
 
-    if (style !== undefined) {
-        Object.keys(style).forEach((styleName) => {
-            domNode.style[styleName] = style[styleName]
-        })
-    }
-
-    Vnode._hostNode = domNode
+    Vnode._hostNode = domNode //缓存真实节点
 
     if (isUpdate) {
         return domNode
