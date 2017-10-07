@@ -26,17 +26,21 @@ export default class App extends React.Component {
   componentDidMount() {
     console.log('组件挂载')
   }
-  click(e) {
-    console.log(e.target)
-    console.log(e.currentTarget)
+  componentWillMount(){
+    console.log('将要挂载')
     this.setState({
       counter: this.state.counter + 100
     })
   }
+  click(e) {
+    console.log(e.target)
+    console.log(e.currentTarget)
+
+  }
   render() {
     return (
-      <div key={1} onClick={this.click.bind(this)} style={{ background: `rgb(99,99,${this.state.counter + 1})` }}>
-        <h1 >fuck</h1>
+      <div key={1}  style={{ background: `rgb(99,99,${this.state.counter + 1})` }}>
+        <button onClick={this.click.bind(this)}>点我</button>
       </div>
     )
   }

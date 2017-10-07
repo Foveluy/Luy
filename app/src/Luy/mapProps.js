@@ -1,4 +1,5 @@
 import { typeNumber, isEventName, isEventNameLowerCase } from "./utils";
+import { SyntheticEvent } from './event'
 
 var mappingStrategy = {
     style: function (domNode, style) {
@@ -35,7 +36,10 @@ function addEvent(domNode, fn, eventName) {
 
 function dispatchEvent(event, eventName, end) {
     const path = getEventPath(event, end)
-    triggerEventByPath(event,path)
+    let E = new SyntheticEvent(event)
+
+    triggerEventByPath(E, path)//触发event默认以冒泡形式
+    
 }
 
 /**
@@ -45,18 +49,14 @@ function dispatchEvent(event, eventName, end) {
  * @param {array} path 
  */
 function triggerEventByPath(e, path: Array) {
-    /**事件合成，暂时这么写 */
-    let E = {}
-    for (var i in e) {
-        E[i] = e[i];
-    }
+
     for (let i = 0; i < path.length; i++) {
         const events = path[i].__events
         for (let eventName in events) {
             let fn = events[eventName]
-            E.currentTarget = path[i]
+            e.currentTarget = path[i]
             if (typeof fn === 'function') {
-                fn.call(path[i], E)
+                fn.call(path[i], e)//触发回调函数默认以冒泡形式
             }
         }
     }

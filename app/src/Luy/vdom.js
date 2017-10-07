@@ -2,6 +2,7 @@
 import { typeNumber, isSameVnode, mapKeyToIndex, isEventName } from "./utils";
 import { flattenChildren } from './createElement'
 import { mapProp } from './mapProps'
+import { Com } from './component'
 
 
 let mountIndex = 0 //全局变量
@@ -112,11 +113,6 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
 
 export function update(oldVnode, newVnode, parentDomNode: Element) {
     newVnode._hostNode = oldVnode._hostNode
-    // if (!oldVnode && newVnode) {
-    //     renderByLuy(newVnode, parentDomNode)
-    //     return newVnode
-    // }
-
 
     if (oldVnode.type === newVnode.type) {
         if (oldVnode.type === "#text") {
@@ -159,17 +155,23 @@ function mountComponent(Vnode, parentDomNode: Element) {
     const Component = type
     const instance = new Component(props)
 
+    if (instance.componentWillMount) {//生命周期函数
+        instance.componentWillMount()
+    }
+
     const renderedVnode = instance.render()
     if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了')
+
+
     const domNode = renderByLuy(renderedVnode, parentDomNode)
 
     if (instance.componentDidMount) {
         instance.componentDidMount()
         instance.componentDidMount = null//暂时不知道为什么要设置为空
+        instance.lifeCycle = Com.MOUNT
     }
 
     instance.Vnode = renderedVnode
-    instance.dom = domNode
     instance.Vnode._hostNode = domNode//用于在更新时期oldVnode的时候获取_hostNode
     instance.Vnode._mountIndex = mountIndexAdd()
 
