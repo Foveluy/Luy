@@ -11,11 +11,12 @@ class C extends React.Component {
     this.state = {
       c: 2
     }
-    setTimeout(() => {
-      this.setState({ c: this.state.c + 1 })
-    }, 1500)
-
   }
+  componentWillReceiveProps(nextProps, nextContext) {
+    console.log('目前的props:',this.props)
+    console.log('下一个props:',nextProps)
+  }
+
   click(e) {
 
     this.setState({
@@ -63,6 +64,7 @@ export default class App extends React.Component {
       <div key={1} style={{ background: `rgb(99,99,${this.state.counter + 1})` }}>
         <button onClick={this.click.bind(this)}>点我</button>
         <C name={this.state.counter} />
+       
       </div>
     )
   }

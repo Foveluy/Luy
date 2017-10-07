@@ -122,27 +122,30 @@ function updateComponent(oldComponentVnode, newComponentVnode) {
     const newContext = newComponentVnode.context
     const newInstance = new newComponentVnode.type(newProps)
 
+    if (oldComponentVnode._instance.componentWillReceiveProps) {
+        oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext)
+    }
+
     newInstance.state = oldState
     newInstance.context = newContext
-
     const newVnode = newInstance.render()
 
-    newInstance.Vnode = newVnode
-    newInstance._hostNode = oldComponentVnode._hostNode
 
     //更新原来组件的信息
     oldComponentVnode._instance.props = newProps
     oldComponentVnode._instance.context = newContext
 
     //更新父组件的信息
-    newComponentVnode._instance = newInstance
+    newComponentVnode._instance = oldComponentVnode._instance
+
+    //更新真实dom
     update(oldVnode, newVnode, oldComponentVnode._hostNode)
 }
 
 
 export function update(oldVnode, newVnode, parentDomNode: Element) {
     newVnode._hostNode = oldVnode._hostNode
-    
+
     if (oldVnode.type === newVnode.type) {
         if (oldVnode.type === "#text") {
             newVnode._hostNode = oldVnode._hostNode //更新一个dom节点
@@ -266,7 +269,9 @@ export function findDOMNode(ref) {
  */
 let depth = 0
 function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
+    console.log(Vnode)
     const { type, props } = Vnode
+    
     const { children } = props
     let domNode
     if (typeof type === 'function') {

@@ -31,7 +31,7 @@ class ReactClass {
 
     this.nextState = null
     const newVnode = this.render()
-    console.log(this.props)
+    
     this.Vnode = update(oldVnode, newVnode, this.dom)//这个函数返回一个新的Vnode
     
   }
