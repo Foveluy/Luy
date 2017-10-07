@@ -166,6 +166,7 @@ function mountComponent(Vnode, parentDomNode: Element) {
     const domNode = renderByLuy(renderedVnode, parentDomNode)
 
     if (instance.componentDidMount) {
+        instance.lifeCycle = Com.MOUNTTING
         instance.componentDidMount()
         instance.componentDidMount = null//暂时不知道为什么要设置为空
         instance.lifeCycle = Com.MOUNT
@@ -174,6 +175,7 @@ function mountComponent(Vnode, parentDomNode: Element) {
     instance.Vnode = renderedVnode
     instance.Vnode._hostNode = domNode//用于在更新时期oldVnode的时候获取_hostNode
     instance.Vnode._mountIndex = mountIndexAdd()
+
 
     return domNode
 }

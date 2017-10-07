@@ -2,10 +2,11 @@
 import { update } from './vdom'
 
 export const Com = {
-  CREATE: 0,
-  MOUNT: 1,
-  UPDATING: 2,
-  UPDATED: 3
+  CREATE: 0,//创造节点
+  MOUNT: 1,//节点已经挂载
+  UPDATING: 2,//节点正在更新
+  UPDATED: 3,//节点已经更新
+  MOUNTTING: 4//节点正在挂载
 }
 
 // 用户用来继承的 Component 类
@@ -33,18 +34,23 @@ class ReactClass {
 
     this.Vnode = update(oldVnode, newVnode, this.dom)//这个函数返回一个新的Vnode
   }
+  /**
+   * 事件触发的时候setState只会触发最后一个
+   * 在componentdidmount的时候会全部合成
+   * @param {*} partialNewState 
+   * @param {*} callback 
+   */
   setState(partialNewState, callback) {
-    
+
     if (this.lifeCycle === Com.CREATE) {
       //组件挂载期
 
-    } else { 
+    } else {
       //组件更新期
 
-    this.nextState = Object.assign({}, this.state, partialNewState)
-    this.updateComponent()
+      this.nextState = Object.assign({}, this.state, partialNewState)
+      this.updateComponent()
     }
-
   }
 
   shouldComponentUpdate() { }

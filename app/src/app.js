@@ -6,7 +6,7 @@ let a = [1, 2, 3, 4, 5]
 
 class C extends React.Component {
   render() {
-    return (<div>asd</div>)
+    return (<div>我是组件C</div>)
 
   }
 }
@@ -28,19 +28,20 @@ export default class App extends React.Component {
   }
   componentWillMount(){
     console.log('将要挂载')
-    this.setState({
-      counter: this.state.counter + 100
-    })
+   
   }
   click(e) {
     console.log(e.target)
     console.log(e.currentTarget)
-
+    this.setState({
+      counter: this.state.counter + 100
+    })
   }
   render() {
     return (
       <div key={1}  style={{ background: `rgb(99,99,${this.state.counter + 1})` }}>
         <button onClick={this.click.bind(this)}>点我</button>
+        <C/>
       </div>
     )
   }
