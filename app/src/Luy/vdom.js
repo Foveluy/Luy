@@ -111,9 +111,38 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
     return newChild
 }
 
+function updateComponent(oldComponentVnode, newComponentVnode) {
+    console.log(oldComponentVnode)
+    const oldState = oldComponentVnode._instance.state
+    const oldProps = oldComponentVnode._instance.props
+    const oldContext = oldComponentVnode._instance.context
+    const oldVnode = oldComponentVnode._instance.Vnode
+
+    const newProps = newComponentVnode.props
+    const newContext = newComponentVnode.context
+    const newInstance = new newComponentVnode.type(newProps)
+
+    newInstance.state = oldState
+    newInstance.context = newContext
+
+    const newVnode = newInstance.render()
+
+    newInstance.Vnode = newVnode
+    newInstance._hostNode = oldComponentVnode._hostNode
+
+    //更新原来组件的信息
+    oldComponentVnode._instance.props = newProps
+    oldComponentVnode._instance.context = newContext
+
+    //更新父组件的信息
+    newComponentVnode._instance = newInstance
+    update(oldVnode, newVnode, oldComponentVnode._hostNode)
+}
+
+
 export function update(oldVnode, newVnode, parentDomNode: Element) {
     newVnode._hostNode = oldVnode._hostNode
-
+    
     if (oldVnode.type === newVnode.type) {
         if (oldVnode.type === "#text") {
             newVnode._hostNode = oldVnode._hostNode //更新一个dom节点
@@ -131,7 +160,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
             }
         }
         if (typeof oldVnode.type === 'function') {//非原生
-
+            updateComponent(oldVnode, newVnode)
         }
     } else {
         let dom = renderByLuy(newVnode, parentDomNode, true)
@@ -175,6 +204,8 @@ function mountComponent(Vnode, parentDomNode: Element) {
     instance.Vnode = renderedVnode
     instance.Vnode._hostNode = domNode//用于在更新时期oldVnode的时候获取_hostNode
     instance.Vnode._mountIndex = mountIndexAdd()
+
+    Vnode._instance = instance // 在父节点上的child元素会保存一个自己
 
 
     return domNode

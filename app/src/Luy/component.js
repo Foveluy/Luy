@@ -31,9 +31,11 @@ class ReactClass {
 
     this.nextState = null
     const newVnode = this.render()
-
+    console.log(this.props)
     this.Vnode = update(oldVnode, newVnode, this.dom)//这个函数返回一个新的Vnode
+    
   }
+
   /**
    * 事件触发的时候setState只会触发最后一个
    * 在componentdidmount的时候会全部合成

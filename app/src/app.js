@@ -5,8 +5,29 @@ import Component from './Luy'
 let a = [1, 2, 3, 4, 5]
 
 class C extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      c: 2
+    }
+    setTimeout(() => {
+      this.setState({ c: this.state.c + 1 })
+    }, 1500)
+
+  }
+  click(e) {
+
+    this.setState({
+      c: this.state.c + 1
+    })
+  }
   render() {
-    return (<div>外部属性:{this.props.name}</div>)
+    return (
+      <div>
+        外部属性:{this.props.name}->>>>{this.state.c}
+        <button onClick={this.click.bind(this)}>点我C</button>
+      </div>)
 
   }
 }
@@ -26,9 +47,9 @@ export default class App extends React.Component {
   componentDidMount() {
     console.log('组件挂载')
   }
-  componentWillMount(){
+  componentWillMount() {
     console.log('将要挂载')
-   
+
   }
   click(e) {
     console.log(e.target)
@@ -39,9 +60,9 @@ export default class App extends React.Component {
   }
   render() {
     return (
-      <div key={1}  style={{ background: `rgb(99,99,${this.state.counter + 1})` }}>
+      <div key={1} style={{ background: `rgb(99,99,${this.state.counter + 1})` }}>
         <button onClick={this.click.bind(this)}>点我</button>
-        <C name={this.state.counter}/>
+        <C name={this.state.counter} />
       </div>
     )
   }
