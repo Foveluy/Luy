@@ -69,9 +69,9 @@ function createElement(type: string | Function, config, ...children: array) {
  * @param {*} children 
  */
 export function flattenChildren(children: Array) {
-
-    if(children === undefined || children === null)return new Vnode('#text', "", null, null)
-
+    
+    if (children === undefined) return new Vnode('#text', "", null, null)
+    
     let length = children.length
     let ary = [],
         isLastSimple = false, //判断上一个元素是否是string 或者 number
@@ -82,14 +82,14 @@ export function flattenChildren(children: Array) {
         return new Vnode('#text', children, null, null)
     }
 
-    if(childType !== 7)return children
+    if (childType !== 7) return children
 
     children.forEach((item, index) => {
-        if(typeNumber(item) === 7){
-            if(isLastSimple){
+        if (typeNumber(item) === 7) {
+            if (isLastSimple) {
                 ary.push(lastString)
             }
-            item.forEach((item)=>{
+            item.forEach((item) => {
                 ary.push(item)
             })
             lastString = ''
@@ -105,13 +105,13 @@ export function flattenChildren(children: Array) {
                 ary.push(item)
                 lastString = ''
                 isLastSimple = false
-            }else{
+            } else {
                 ary.push(item)
             }
-            
+
         }
         if (length - 1 === index) {
-            if(lastString)ary.push(lastString)
+            if (lastString) ary.push(lastString)
         }
     })
     ary = ary.map((item) => {
@@ -120,6 +120,7 @@ export function flattenChildren(children: Array) {
         }
         return item
     })
+    
     return ary
 }
 

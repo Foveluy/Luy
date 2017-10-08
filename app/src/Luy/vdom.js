@@ -92,9 +92,10 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
         if (oldStartIndex > oldEndIndex) {
 
             for (; newStartIndex - 1 < newEndIndex; newStartIndex++) {
-
                 if (newChild[newStartIndex]) {
-                    renderByLuy(newChild[newStartIndex], parentDomNode)
+                    let newDomNode = renderByLuy(newChild[newStartIndex], parentDomNode, true)
+                    parentDomNode.insertBefore(newDomNode, oldChild[oldChild.length - 1]._hostNode)
+                    newChild[newStartIndex]._hostNode = newDomNode
                 }
             }
 
@@ -126,10 +127,28 @@ function updateComponent(oldComponentVnode, newComponentVnode) {
         oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext)
     }
 
+    if (oldComponentVnode._instance.shouldComponentUpdate) {
+        let shouldUpdate = oldComponentVnode._instance.shouldComponentUpdate(newProps, oldState, newContext)
+        if (!shouldUpdate) {
+            //无论shouldComponentUpdate结果是如何，数据都会给用户设置上去
+            //但是不一定会刷新
+            newInstance.state = oldState
+            newInstance.context = newContext
+
+            oldComponentVnode._instance.props = newProps
+            oldComponentVnode._instance.context = newContext
+            newComponentVnode._instance = oldComponentVnode._instance
+            return
+        }
+    }
+
+    if (oldComponentVnode._instance.componentWillUpdate) {
+        oldComponentVnode._instance.componentWillUpdate(newProps, oldState, newContext)
+    }
+
     newInstance.state = oldState
     newInstance.context = newContext
     const newVnode = newInstance.render()
-
 
     //更新原来组件的信息
     oldComponentVnode._instance.props = newProps
@@ -140,6 +159,10 @@ function updateComponent(oldComponentVnode, newComponentVnode) {
 
     //更新真实dom
     update(oldVnode, newVnode, oldComponentVnode._hostNode)
+
+    if (oldComponentVnode._instance.componentDidUpdate) {
+        oldComponentVnode._instance.componentDidUpdate(oldProps, oldState, oldContext)
+    }
 }
 
 
@@ -194,7 +217,7 @@ function mountComponent(Vnode, parentDomNode: Element) {
     const renderedVnode = instance.render()
     if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了')
 
-
+    console.log('挂载前', renderedVnode)
     const domNode = renderByLuy(renderedVnode, parentDomNode)
 
     if (instance.componentDidMount) {
@@ -232,12 +255,18 @@ function mountChild(childrenVnode, parentDomNode: Element) {
 
     let childType = typeNumber(childrenVnode)
     let flattenChildList = childrenVnode;
-    if (childType === 8) { //Vnode
+    if (childrenVnode === undefined) {
+        flattenChildList = flattenChildren(childrenVnode)
+    }
+
+    if (childType === 8 && childrenVnode !== undefined) { //Vnode
         flattenChildList._hostNode = mountNativeElement(flattenChildList, parentDomNode)
     }
     if (childType === 7) {//list
         flattenChildList = flattenChildren(childrenVnode)
+
         flattenChildList.forEach((item) => {
+
             renderByLuy(item, parentDomNode)
         })
     }
@@ -245,7 +274,6 @@ function mountChild(childrenVnode, parentDomNode: Element) {
         flattenChildList = flattenChildren(childrenVnode)
         mountTextComponent(flattenChildList, parentDomNode)
     }
-
     return flattenChildList
 }
 
@@ -269,9 +297,8 @@ export function findDOMNode(ref) {
  */
 let depth = 0
 function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
-    console.log(Vnode)
+
     const { type, props } = Vnode
-    
     const { children } = props
     let domNode
     if (typeof type === 'function') {
@@ -282,8 +309,12 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean) {
         domNode = document.createElement(type)
     }
 
-    if (children) {
-        props.children = mountChild(children, domNode)//flatten之后的child 要保存下来
+    /**
+     * 特殊处理，当children=0数字的时候也能渲染了
+     */
+    if (typeNumber(children) > 2 && children !== undefined) {
+        const NewChild = mountChild(children, domNode)//flatten之后的child 要保存下来
+        props.children = NewChild
     }
 
     mapProp(domNode, props) //为元素添加props

@@ -29,11 +29,18 @@ class ReactClass {
       this.state = this.nextState;
     }
 
+    if (this.componentWillUpdate) {
+      this.componentWillUpdate(this.props, this.nextState, this.context)
+    }
+
     this.nextState = null
     const newVnode = this.render()
-    
+
     this.Vnode = update(oldVnode, newVnode, this.dom)//这个函数返回一个新的Vnode
-    
+
+    if (this.componentDidUpdate) {
+      this.componentDidUpdate(this.props, prevState, this.context)
+    }
   }
 
   /**
@@ -43,6 +50,14 @@ class ReactClass {
    * @param {*} callback 
    */
   setState(partialNewState, callback) {
+    this.nextState = Object.assign({}, this.state, partialNewState)
+
+    if (this.shouldComponentUpdate) {
+      let shouldUpdate = this.shouldComponentUpdate(this.props, this.nextState, this.context)
+      if (!shouldUpdate) {
+        return
+      }
+    }
 
     if (this.lifeCycle === Com.CREATE) {
       //组件挂载期
@@ -50,15 +65,15 @@ class ReactClass {
     } else {
       //组件更新期
 
-      this.nextState = Object.assign({}, this.state, partialNewState)
+
       this.updateComponent()
     }
   }
 
-  shouldComponentUpdate() { }
+  // shouldComponentUpdate() { }
   componentWillReceiveProps() { }
-  componentWillUpdate() { }
-  componentDidUpdate() { }
+  // componentWillUpdate() { }
+  // componentDidUpdate() { }
   componentWillMount() { }
   componentDidMount() { }
   componentWillUnmount() { }

@@ -13,8 +13,8 @@ class C extends React.Component {
     }
   }
   componentWillReceiveProps(nextProps, nextContext) {
-    console.log('目前的props:',this.props)
-    console.log('下一个props:',nextProps)
+    console.log('目前的props:', this.props)
+    console.log('下一个props:', nextProps)
   }
 
   click(e) {
@@ -38,7 +38,7 @@ export default class App extends React.Component {
     super(props)
 
     this.state = {
-      counter: 2
+      counter: 1
     }
     // setInterval(() => {
     //   this.setState({ counter: this.state.counter + 1 })
@@ -53,18 +53,16 @@ export default class App extends React.Component {
 
   }
   click(e) {
-    console.log(e.target)
-    console.log(e.currentTarget)
-    this.setState({
-      counter: this.state.counter + 3
-    })
+    this.setState(
+      { counter: this.state.counter + 1 }
+    )
+
   }
   render() {
     return (
-      <div key={1} style={{ background: `rgb(99,99,${this.state.counter + 1})` }}>
+      <div key={1} style={{ background: `rgb(99,99,99)` }}>
+        <C name={this.state.counter}/>
         <button onClick={this.click.bind(this)}>点我</button>
-        <C name={this.state.counter} />
-       
       </div>
     )
   }

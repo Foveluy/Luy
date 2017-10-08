@@ -21,7 +21,7 @@ export function typeNumber(data) {
     if (data === null) {
         return 1;
     }
-    if (data === 'undefined') {
+    if (data === undefined) {
         return 0;
     }
     var a = numberMap[__type.call(data)];
