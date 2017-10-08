@@ -103,6 +103,12 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
 
             for (; oldStartIndex - 1 < oldEndIndex; oldStartIndex++) {
                 if (oldChild[oldStartIndex]) {
+                    let removeNode = oldChild[oldStartIndex]
+                    if (typeof oldChild[oldStartIndex].type === 'function') {
+                        if(removeNode._instance.componentWillUnMount){
+                            removeNode._instance.componentWillUnMount()
+                        }
+                    }
                     parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
                 }
             }
@@ -192,6 +198,9 @@ export function update(oldVnode, newVnode, parentDomNode: Element) {
         let dom = renderByLuy(newVnode, parentDomNode, true)
         if (newVnode._hostNode) {
             parentDomNode.insertBefore(dom, newVnode._hostNode)
+            if (typeof newVnode.type === 'function') {
+                console.log('等待实现')
+            }
             parentDomNode.removeChild(newVnode._hostNode)
         } else {
             parentDomNode.appendChild(dom)
