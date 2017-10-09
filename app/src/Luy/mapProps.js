@@ -44,10 +44,8 @@ function dispatchEvent(event, eventName, end) {
 
     options.async = false
 
-    let dirty = options.dirtyComponent.shift()
-    while (dirty) {
-        dirty.updateComponent()
-        dirty = options.dirtyComponent.shift()
+    for(let dirty in options.dirtyComponent){
+        options.dirtyComponent[dirty].updateComponent()
     }
 
 }

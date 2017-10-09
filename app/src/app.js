@@ -15,8 +15,11 @@ class C extends React.Component {
   componentWillReceiveProps(nextProps, nextContext) {
 
   }
+  shouldComponentUpdate(nextProps) {
+    return this.props.name !== nextProps.name
+  }
   componentDidUpdate() {
-    console.log('更新结束：',this.state.c)
+    console.log('更新结束：', this.state.c)
   }
   componentWillUnMount() {
     console.log('组件准备删除')
@@ -25,7 +28,7 @@ class C extends React.Component {
     this.setState({
       c: this.state.c + 1
     })
-    console.log('点击触发中：',this.state.c)
+    console.log('点击触发中：', this.state.c)
   }
   render() {
     return (
@@ -54,18 +57,22 @@ export default class App extends React.Component {
   }
   componentWillMount() {
     console.log('将要挂载')
-
+  }
+  componentDidUpdate() {
+    console.log('更新完毕')
   }
   click(e) {
     this.setState(
       { counter: this.state.counter + 1 }
     )
-
+    this.setState(
+      { counter: this.state.counter + 2 }
+    )
   }
   render() {
     return (
-      <div key={1} style={{ background: `rgb(99,99,99)` }}>
-        <C name={this.state.counter} />
+      <div key={1} style={{ background: `rgb(99,99,${this.state.counter})` }}>
+        {<C name={1} />}
         <button onClick={this.click.bind(this)}>点我</button>
       </div>
     )

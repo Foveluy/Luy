@@ -4,7 +4,7 @@ let __type = Object.prototype.toString;
 
 export var options = {
     async: false,
-    dirtyComponent: []
+    dirtyComponent: {}
 }
 
 var numberMap = {

@@ -168,6 +168,7 @@ function updateComponent(oldComponentVnode, newComponentVnode) {
     update(oldVnode, newVnode, oldComponentVnode._hostNode)
 
     if (oldComponentVnode._instance.componentDidUpdate) {
+        
         oldComponentVnode._instance.componentDidUpdate(oldProps, oldState, oldContext)
     }
 }

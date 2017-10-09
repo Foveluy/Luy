@@ -23,6 +23,7 @@ class ReactClass {
   }
 
   updateComponent() {
+
     const prevState = this.state
     const oldVnode = this.Vnode
 
@@ -68,8 +69,10 @@ class ReactClass {
       //组件更新期
 
       if (options.async === true) {
-        console.log('触发setState在事件中')
-        options.dirtyComponent.push(this)
+        let dirty = options.dirtyComponent[this]
+        if(!dirty){
+          options.dirtyComponent[this] = this
+        }
         return
       }
 
