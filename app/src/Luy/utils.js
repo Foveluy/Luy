@@ -2,6 +2,11 @@
 
 let __type = Object.prototype.toString;
 
+export var options = {
+    async: false,
+    dirtyComponent: []
+}
+
 var numberMap = {
     //null undefined IE6-8这里会返回[object Object]
     "[object Boolean]": 2,

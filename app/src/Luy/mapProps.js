@@ -1,4 +1,4 @@
-import { typeNumber, isEventName, isEventNameLowerCase } from "./utils";
+import { typeNumber, isEventName, isEventNameLowerCase, options } from "./utils";
 import { SyntheticEvent } from './event'
 
 var mappingStrategy = {
@@ -38,8 +38,18 @@ function dispatchEvent(event, eventName, end) {
     const path = getEventPath(event, end)
     let E = new SyntheticEvent(event)
 
+    options.async = true
+
     triggerEventByPath(E, path)//触发event默认以冒泡形式
-    
+
+    options.async = false
+
+    let dirty = options.dirtyComponent.shift()
+    while (dirty) {
+        dirty.updateComponent()
+        dirty = options.dirtyComponent.shift()
+    }
+
 }
 
 /**

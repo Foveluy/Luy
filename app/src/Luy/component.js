@@ -1,5 +1,6 @@
 // @flow
 import { update } from './vdom'
+import { options } from './utils'
 
 export const Com = {
   CREATE: 0,//创造节点
@@ -59,12 +60,18 @@ class ReactClass {
       }
     }
 
+
     if (this.lifeCycle === Com.CREATE) {
       //组件挂载期
 
     } else {
       //组件更新期
 
+      if (options.async === true) {
+        console.log('触发setState在事件中')
+        options.dirtyComponent.push(this)
+        return
+      }
 
       this.updateComponent()
     }

@@ -6,6 +6,8 @@ import { Com } from './component'
 
 
 let mountIndex = 0 //全局变量
+
+
 function mountIndexAdd() {
     return mountIndex++
 }
@@ -105,7 +107,7 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
                 if (oldChild[oldStartIndex]) {
                     let removeNode = oldChild[oldStartIndex]
                     if (typeof oldChild[oldStartIndex].type === 'function') {
-                        if(removeNode._instance.componentWillUnMount){
+                        if (removeNode._instance.componentWillUnMount) {
                             removeNode._instance.componentWillUnMount()
                         }
                     }
@@ -119,7 +121,6 @@ function updateChild(oldChild, newChild, parentDomNode: Element) {
 }
 
 function updateComponent(oldComponentVnode, newComponentVnode) {
-    console.log(oldComponentVnode)
     const oldState = oldComponentVnode._instance.state
     const oldProps = oldComponentVnode._instance.props
     const oldContext = oldComponentVnode._instance.context
@@ -226,7 +227,6 @@ function mountComponent(Vnode, parentDomNode: Element) {
     const renderedVnode = instance.render()
     if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了')
 
-    console.log('挂载前', renderedVnode)
     const domNode = renderByLuy(renderedVnode, parentDomNode)
 
     if (instance.componentDidMount) {

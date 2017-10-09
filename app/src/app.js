@@ -13,19 +13,19 @@ class C extends React.Component {
     }
   }
   componentWillReceiveProps(nextProps, nextContext) {
-    console.log('目前的props:', this.props)
-    console.log('下一个props:', nextProps)
+
   }
   componentDidUpdate() {
-    console.log('更新结束')
+    console.log('更新结束：',this.state.c)
   }
-  componentWillUnMount(){
+  componentWillUnMount() {
     console.log('组件准备删除')
   }
   click(e) {
     this.setState({
       c: this.state.c + 1
     })
+    console.log('点击触发中：',this.state.c)
   }
   render() {
     return (
@@ -65,14 +65,7 @@ export default class App extends React.Component {
   render() {
     return (
       <div key={1} style={{ background: `rgb(99,99,99)` }}>
-        {this.state.counter % 2 === 1 ? <div>
-          <C name={this.state.counter} />
-          <C name={this.state.counter} />
-          <C name={this.state.counter} />
-          <C name={this.state.counter} />
-          <C name={this.state.counter} />
-          <C name={this.state.counter} />
-        </div> : 1}
+        <C name={this.state.counter} />
         <button onClick={this.click.bind(this)}>点我</button>
       </div>
     )
