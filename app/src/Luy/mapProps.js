@@ -47,7 +47,7 @@ function dispatchEvent(event, eventName, end) {
     for(let dirty in options.dirtyComponent){
         options.dirtyComponent[dirty].updateComponent()
     }
-
+    options.dirtyComponent = {}//清空
 }
 
 /**

@@ -242,7 +242,8 @@ function mountComponent(Vnode, parentDomNode: Element) {
     instance.Vnode._mountIndex = mountIndexAdd()
 
     Vnode._instance = instance // 在父节点上的child元素会保存一个自己
-
+    
+    instance._updateInLifeCycle() // componentDidMount之后一次性更新
 
     return domNode
 }

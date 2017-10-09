@@ -15,9 +15,9 @@ class C extends React.Component {
   componentWillReceiveProps(nextProps, nextContext) {
 
   }
-  shouldComponentUpdate(nextProps) {
-    return this.props.name !== nextProps.name
-  }
+  // shouldComponentUpdate(nextProps) {
+  //   return this.props.name !== nextProps.name
+  // }
   componentDidUpdate() {
     console.log('更新结束：', this.state.c)
   }
@@ -54,6 +54,15 @@ export default class App extends React.Component {
   }
   componentDidMount() {
     console.log('组件挂载')
+    this.setState(
+      { counter: this.state.counter + 2 }
+    )
+    this.setState(
+      { counter: this.state.counter + 2 }
+    )
+    this.setState(
+      { counter: this.state.counter + 2 }
+    )
   }
   componentWillMount() {
     console.log('将要挂载')
@@ -72,7 +81,7 @@ export default class App extends React.Component {
   render() {
     return (
       <div key={1} style={{ background: `rgb(99,99,${this.state.counter})` }}>
-        {<C name={1} />}
+        {<C name={this.state.counter } />}
         <button onClick={this.click.bind(this)}>点我</button>
       </div>
     )

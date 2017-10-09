@@ -20,6 +20,7 @@ class ReactClass {
     this.nextState = null
     this._renderCallbacks = []
     this.lifeCycle = Com.CREATE
+    this.stateMergeQueue = []
   }
 
   updateComponent() {
@@ -45,6 +46,14 @@ class ReactClass {
     }
   }
 
+  _updateInLifeCycle() {
+    if (this.stateMergeQueue.length > 0) {
+      this.nextState = { ...this.state }
+      this.stateMergeQueue = []
+      this.updateComponent()
+    }
+  }
+
   /**
    * 事件触发的时候setState只会触发最后一个
    * 在componentdidmount的时候会全部合成
@@ -67,15 +76,23 @@ class ReactClass {
 
     } else {
       //组件更新期
+      if (this.lifeCycle === Com.MOUNTTING) {
+        //componentDidMount的时候调用setState
+        this.state = Object.assign({}, this.state, partialNewState)
+        this.stateMergeQueue.push(1)
+        return
+      }
 
       if (options.async === true) {
+        //事件中调用
         let dirty = options.dirtyComponent[this]
-        if(!dirty){
+        if (!dirty) {
           options.dirtyComponent[this] = this
         }
         return
       }
 
+      //不在生命周期中调用，有可能是异步调用
       this.updateComponent()
     }
   }
