@@ -19,10 +19,14 @@ class C extends React.Component {
   //   return this.props.name !== nextProps.name
   // }
   componentDidUpdate() {
-    console.log('更新结束：', this.state.c)
+
+    console.log('更新结束:context测试', this.context.fuck)
   }
   componentWillUnMount() {
     console.log('组件准备删除')
+  }
+  componentDidMount() {
+    console.log('context测试', this.context.fuck)
   }
   click(e) {
     this.setState({
@@ -34,6 +38,8 @@ class C extends React.Component {
     return (
       <div>
         外部属性:{this.props.name}->>>>{this.state.c}
+        <div>context fuck:{this.context.fuck}</div>
+        <div>context shit:{this.context.shit}</div>
         <button onClick={this.click.bind(this)}>点我C</button>
       </div>)
 
@@ -52,17 +58,16 @@ export default class App extends React.Component {
     // }, 1500)
     // 
   }
+
+  getChildContext() {
+    return {
+      fuck: this.state.counter + 1,
+      shit: 1
+    }
+  }
+
   componentDidMount() {
     console.log('组件挂载')
-    this.setState(
-      { counter: this.state.counter + 2 }
-    )
-    this.setState(
-      { counter: this.state.counter + 2 }
-    )
-    this.setState(
-      { counter: this.state.counter + 2 }
-    )
   }
   componentWillMount() {
     console.log('将要挂载')
@@ -81,7 +86,7 @@ export default class App extends React.Component {
   render() {
     return (
       <div key={1} style={{ background: `rgb(99,99,${this.state.counter})` }}>
-        {<C name={this.state.counter } />}
+        {<C name={this.state.counter} />}
         <button onClick={this.click.bind(this)}>点我</button>
       </div>
     )
@@ -89,6 +94,9 @@ export default class App extends React.Component {
 }
 
 ReactDOM.render(
-  <App shit={'shit'} />,
+  <div>
+    <App shit={'shit'} />
+    <App shit={'shit'} />  
+  </div>,
   document.getElementById('root')
 );

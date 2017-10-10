@@ -73,3 +73,14 @@ export function isEventName(name) {
 export function isEventNameLowerCase(name) {
     return /^on[a-z]/.test(name);
 }
+
+/**
+ * 展开对象
+ * @param {*} obj 
+ * @param {*} props 
+ */
+
+export function extend(obj, props) {
+	for (let i in props) obj[i] = props[i];
+	return obj;
+}

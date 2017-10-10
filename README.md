@@ -13,7 +13,7 @@ todolist
 - [ ] 事件捕获系统
 - [ ] 受控组件
 - [ ] 纯组件
-- [ ] 组件的context
+- [x] 组件的context
 - [ ] setState回调
 - [ ] 发布第一版本
 - [ ] 支持react生态计划....

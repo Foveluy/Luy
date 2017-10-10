@@ -1,6 +1,6 @@
 // @flow
 import { update } from './vdom'
-import { options } from './utils'
+import { options, extend } from './utils'
 
 export const Com = {
   CREATE: 0,//创造节点
@@ -27,9 +27,13 @@ class ReactClass {
 
     const prevState = this.state
     const oldVnode = this.Vnode
+    const oldContext = this.context
 
     if (this.nextState !== prevState) {
       this.state = this.nextState;
+    }
+    if (this.getChildContext) {
+      this.context = extend(extend({}, this.context), this.getChildContext());
     }
 
     if (this.componentWillUpdate) {
@@ -39,10 +43,10 @@ class ReactClass {
     this.nextState = null
     const newVnode = this.render()
 
-    this.Vnode = update(oldVnode, newVnode, this.dom)//这个函数返回一个新的Vnode
+    this.Vnode = update(oldVnode, newVnode, this.dom, this.context)//这个函数返回一个新的Vnode
 
     if (this.componentDidUpdate) {
-      this.componentDidUpdate(this.props, prevState, this.context)
+      this.componentDidUpdate(this.props, prevState, oldContext)
     }
   }
 
