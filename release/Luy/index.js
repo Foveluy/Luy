@@ -11,6 +11,7 @@ var _vdom = require('./vdom');
 var _component = require('./component');
 
 var React = {
+    findDOMNode: _vdom.findDOMNode,
     createElement: _createElement.createElement, /** babel的默认设置是调用createElement这个函数 */
     render: _vdom.render,
     Component: _component.ReactClass

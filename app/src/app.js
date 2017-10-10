@@ -77,7 +77,7 @@ export default class App extends React.Component {
   }
   click(e) {
     console.log(this.refs.haha)
-    console.log('函数ref',this.button)
+    console.log('函数ref', this.button)
   }
   render() {
     return (
@@ -90,9 +90,12 @@ export default class App extends React.Component {
   }
 }
 
+
+
 ReactDOM.render(
   <div>
-    <App shit={'shit'} />
+    <SwitcherParent/>
   </div>,
   document.getElementById('root')
 );
+

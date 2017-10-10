@@ -27,7 +27,7 @@ describe('AddTodoView', () => {
         var conflictNode = ReactDOM.findDOMNode(conflictDiv);
         expect(conflictNode.innerHTML).toBe('child');
     })
-    
+
     /**
    * We need to make sure that updates occur to the actual node that's in the
    * DOM, instead of a stale cache.
@@ -72,19 +72,53 @@ describe('AddTodoView', () => {
         expect(dog.className).toBe('bigdog');
     });
 
-    it("should warn when children are mutated during render", () => {
-        function Wrapper(props) {
-            props.children[1] = <p key={1} />; // Mutation is illegal
-            return <div>{props.children}</div>;
+    /**
+ * If a state update triggers rerendering that in turn fires an onDOMReady,
+ * that second onDOMReady should not fail.
+ */
+    it('it should fire onDOMReady when already in onDOMReady', () => {
+        var _testJournal = [];
+
+        class Child extends React.Component {
+            componentDidMount() {
+                _testJournal.push('Child:onDOMReady');
+            }
+
+            render() {
+                return <div />;
+            }
         }
 
-        var instance = ReactTestUtils.renderIntoDocument(
-            <Wrapper>
-                <span key={0} />
-                <span key={1} />
-                <span key={2} />
-            </Wrapper>
-        );
-        expect(ReactTestUtils.scryRenderedDOMComponentsWithTag(instance, "p").length).toBe(1);
+        class SwitcherParent extends React.Component {
+            constructor(props) {
+                super(props);
+                _testJournal.push('SwitcherParent:getInitialState');
+                this.state = { showHasOnDOMReadyComponent: false };
+            }
+
+            componentDidMount() {
+                _testJournal.push('SwitcherParent:onDOMReady');
+                this.switchIt();
+            }
+
+            switchIt = () => {
+                this.setState({ showHasOnDOMReadyComponent: true });
+            };
+
+            render() {
+                return (
+                    <div>
+                        {this.state.showHasOnDOMReadyComponent ? <Child /> : <div />}
+                    </div>
+                );
+            }
+        }
+
+        ReactTestUtils.renderIntoDocument(<SwitcherParent />);
+        expect(_testJournal).toEqual([
+            'SwitcherParent:getInitialState',
+            'SwitcherParent:onDOMReady',
+            'Child:onDOMReady',
+        ]);
     });
 })

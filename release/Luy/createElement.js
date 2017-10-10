@@ -15,6 +15,8 @@ var _utils = require('./utils');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var tmp = [];
+
 var RESERVED_PROPS = {
     ref: true,
     key: true,
@@ -80,6 +82,7 @@ function createElement(type, config) {
             }
         }
     }
+
     return new Vnode(type, props, key, ref);
 }
 
@@ -89,7 +92,7 @@ function createElement(type, config) {
  */
 function flattenChildren(children) {
 
-    if (children === undefined || children === null) return new Vnode('#text', "", null, null);
+    if (children === undefined) return new Vnode('#text', "", null, null);
 
     var length = children.length;
     var ary = [],
@@ -140,6 +143,7 @@ function flattenChildren(children) {
         }
         return item;
     });
+
     return ary;
 }
 
@@ -151,6 +155,8 @@ var _temp = function () {
     if (typeof __REACT_HOT_LOADER__ === 'undefined') {
         return;
     }
+
+    __REACT_HOT_LOADER__.register(tmp, 'tmp', 'app/src/Luy/createElement.js');
 
     __REACT_HOT_LOADER__.register(RESERVED_PROPS, 'RESERVED_PROPS', 'app/src/Luy/createElement.js');
 

@@ -23,7 +23,7 @@ function updateText(oldTextVnode, newTextVnode, parentDomNode: Element) {
 
 function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) {
     newChild = flattenChildren(newChild)
-
+    
     if (!Array.isArray(oldChild)) oldChild = [oldChild]
     if (!Array.isArray(newChild)) newChild = [newChild]
     let oldLength = oldChild.length,
@@ -41,6 +41,7 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
         newChild.forEach((newVnode) => {
             renderByLuy(newVnode, parentDomNode, false, parentContext)
         })
+        
         return newChild
     }
 
@@ -75,6 +76,7 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
             newStartVnode = newChild[++newStartIndex]
         }
         else {
+            console.log('更新')
             if (hascode === undefined) hascode = mapKeyToIndex(oldChild)
 
             let indexInOld = hascode[newStartVnode.key]
@@ -96,7 +98,11 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
             for (; newStartIndex - 1 < newEndIndex; newStartIndex++) {
                 if (newChild[newStartIndex]) {
                     let newDomNode = renderByLuy(newChild[newStartIndex], parentDomNode, true, parentContext)
-                    parentDomNode.insertBefore(newDomNode, oldChild[oldChild.length - 1]._hostNode)
+                    if(oldChild[oldChild.length - 1]){
+                        parentDomNode.insertBefore(newDomNode, oldChild[oldChild.length - 1]._hostNode)
+                    }else{
+                        parentDomNode.appendChild(newDomNode)
+                    }
                     newChild[newStartIndex]._hostNode = newDomNode
                 }
             }
@@ -111,6 +117,7 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
                             removeNode._instance.componentWillUnMount()
                         }
                     }
+
                     parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
                 }
             }
@@ -178,7 +185,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
 export function update(oldVnode, newVnode, parentDomNode: Element, parentContext) {
     newVnode._hostNode = oldVnode._hostNode
-
+    
     if (oldVnode.type === newVnode.type) {
         if (oldVnode.type === "#text") {
             newVnode._hostNode = oldVnode._hostNode //更新一个dom节点
@@ -208,11 +215,13 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
         }
     } else {
         let dom = renderByLuy(newVnode, parentDomNode, true)
+        
         if (newVnode._hostNode) {
             parentDomNode.insertBefore(dom, newVnode._hostNode)
             if (typeof newVnode.type === 'function') {
                 console.log('等待实现')
             }
+            
             parentDomNode.removeChild(newVnode._hostNode)
         } else {
             parentDomNode.appendChild(dom)
@@ -267,7 +276,8 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
 }
 
 function mountNativeElement(Vnode, parentDomNode: Element, instance) {
-    const domNode = renderByLuy(Vnode, parentDomNode, instance)
+    
+    const domNode = renderByLuy(Vnode, parentDomNode,false,instance)
     Vnode._hostNode = domNode
     Vnode._mountIndex = mountIndexAdd()
     return domNode
