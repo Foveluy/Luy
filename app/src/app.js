@@ -86,7 +86,7 @@ export default class App extends React.Component {
   render() {
     return (
       <div key={1} style={{ background: `rgb(99,99,${this.state.counter})` }}>
-        {<C name={this.state.counter} />}
+      <div dangerouslySetInnerHTML={{__html:this.state.counter}}>111</div>
         <button onClick={this.click.bind(this)}>点我</button>
       </div>
     )
@@ -96,7 +96,6 @@ export default class App extends React.Component {
 ReactDOM.render(
   <div>
     <App shit={'shit'} />
-    <App shit={'shit'} />  
   </div>,
   document.getElementById('root')
 );

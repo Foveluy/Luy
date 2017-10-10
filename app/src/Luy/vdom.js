@@ -1,7 +1,7 @@
 //@flow
 import { typeNumber, isSameVnode, mapKeyToIndex, isEventName, extend } from "./utils";
 import { flattenChildren } from './createElement'
-import { mapProp } from './mapProps'
+import { mapProp, mappingStrategy } from './mapProps'
 import { Com } from './component'
 
 
@@ -178,7 +178,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
 export function update(oldVnode, newVnode, parentDomNode: Element, parentContext) {
     newVnode._hostNode = oldVnode._hostNode
-    
+
     if (oldVnode.type === newVnode.type) {
         if (oldVnode.type === "#text") {
             newVnode._hostNode = oldVnode._hostNode //更新一个dom节点
@@ -198,6 +198,9 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
             //更新css
             if (oldVnode.props.style !== nextStyle) {
                 Object.keys(nextStyle).forEach((s) => newVnode._hostNode.style[s] = nextStyle[s])
+            }
+            if(newVnode.props.dangerouslySetInnerHTML){
+                mappingStrategy['dangerouslySetInnerHTML'](newVnode._hostNode, newVnode.props['dangerouslySetInnerHTML'])
             }
         }
         if (typeof oldVnode.type === 'function') {//非原生
@@ -360,7 +363,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
 
 export function render(Vnode, container) {
 
-   
+
     const rootDom = renderByLuy(Vnode, container)
     return rootDom
 }

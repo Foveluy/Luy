@@ -1,7 +1,22 @@
 import { typeNumber, isEventName, isEventNameLowerCase, options } from "./utils";
 import { SyntheticEvent } from './event'
 
-var mappingStrategy = {
+export function mapProp(domNode, props) {
+
+    for (let name in props) {
+        if (name === 'children') continue
+        if (isEventName(name)) {
+            let eventName = name.slice(2).toLowerCase() //
+            mappingStrategy['event'](domNode, props[name], eventName)
+            continue
+        }
+        if (typeof mappingStrategy[name] === 'function') {
+            mappingStrategy[name](domNode, props[name])
+        }
+    }
+}
+
+export const mappingStrategy = {
     style: function (domNode, style) {
         if (style !== undefined) {
             Object.keys(style).forEach((styleName) => {
@@ -18,6 +33,12 @@ var mappingStrategy = {
     className: function (domNode, className) {
         if (className !== undefined) {
             domNode.className = className
+        }
+    },
+    dangerouslySetInnerHTML: function (domNode, html) {
+        let oldhtml = domNode.innerHTML
+        if (html.__html !== oldhtml) {
+            domNode.innerHTML = html.__html
         }
     }
 }
@@ -44,7 +65,7 @@ function dispatchEvent(event, eventName, end) {
 
     options.async = false
 
-    for(let dirty in options.dirtyComponent){
+    for (let dirty in options.dirtyComponent) {
         options.dirtyComponent[dirty].updateComponent()
     }
     options.dirtyComponent = {}//清空
@@ -94,18 +115,4 @@ function getEventPath(event, end) {
 
 
 
-export function mapProp(domNode, props) {
-
-    for (let name in props) {
-        if (name === 'children') continue
-        if (isEventName(name)) {
-            let eventName = name.slice(2).toLowerCase() //
-            mappingStrategy['event'](domNode, props[name], eventName)
-            continue
-        }
-        if (typeof mappingStrategy[name] === 'function') {
-            mappingStrategy[name](domNode, props[name])
-        }
-    }
-}
 
