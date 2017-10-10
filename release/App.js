@@ -190,7 +190,7 @@ exports.default = _default;
 _Luy2.default.render(_Luy2.default.createElement(
   'div',
   null,
-  _Luy2.default.createElement(App, { shit: 'shit' })
+  _Luy2.default.createElement(App, null)
 ), document.getElementById('root'));
 ;
 

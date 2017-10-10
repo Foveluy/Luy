@@ -59,6 +59,7 @@ function updateChild(oldChild, newChild, parentDomNode, parentContext) {
         newChild.forEach(function (newVnode) {
             renderByLuy(newVnode, parentDomNode, false, parentContext);
         });
+
         return newChild;
     }
 
@@ -88,6 +89,7 @@ function updateChild(oldChild, newChild, parentDomNode, parentContext) {
             oldEndVnode = oldChild[--oldEndIndex];
             newStartVnode = newChild[++newStartIndex];
         } else {
+            console.log('更新');
             if (hascode === undefined) hascode = (0, _utils.mapKeyToIndex)(oldChild);
 
             var indexInOld = hascode[newStartVnode.key];
@@ -127,6 +129,7 @@ function updateChild(oldChild, newChild, parentDomNode, parentContext) {
                             removeNode._instance.componentWillUnMount();
                         }
                     }
+
                     parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode);
                 }
             }
@@ -222,11 +225,13 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
         }
     } else {
         var dom = renderByLuy(newVnode, parentDomNode, true);
+
         if (newVnode._hostNode) {
             parentDomNode.insertBefore(dom, newVnode._hostNode);
             if (typeof newVnode.type === 'function') {
                 console.log('等待实现');
             }
+
             parentDomNode.removeChild(newVnode._hostNode);
         } else {
             parentDomNode.appendChild(dom);
@@ -282,7 +287,8 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
 }
 
 function mountNativeElement(Vnode, parentDomNode, instance) {
-    var domNode = renderByLuy(Vnode, parentDomNode, instance);
+
+    var domNode = renderByLuy(Vnode, parentDomNode, false, instance);
     Vnode._hostNode = domNode;
     Vnode._mountIndex = mountIndexAdd();
     return domNode;

@@ -94,7 +94,7 @@ export default class App extends React.Component {
 
 ReactDOM.render(
   <div>
-    <SwitcherParent/>
+    <App/>
   </div>,
   document.getElementById('root')
 );
