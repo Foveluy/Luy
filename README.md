@@ -11,7 +11,7 @@ todolist
 - [x] setState异步机制实现
 - [x] 事件冒泡系统
 - [ ] 事件捕获系统
-- [ ] ref属性
+- [x] ref属性
 - [x] 组件的context
 - [ ] setState回调
 - [ ] 发布第一版本
