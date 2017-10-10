@@ -71,4 +71,20 @@ describe('AddTodoView', () => {
         var dog = root.childNodes[0];
         expect(dog.className).toBe('bigdog');
     });
+
+    it("should warn when children are mutated during render", () => {
+        function Wrapper(props) {
+            props.children[1] = <p key={1} />; // Mutation is illegal
+            return <div>{props.children}</div>;
+        }
+
+        var instance = ReactTestUtils.renderIntoDocument(
+            <Wrapper>
+                <span key={0} />
+                <span key={1} />
+                <span key={2} />
+            </Wrapper>
+        );
+        expect(ReactTestUtils.scryRenderedDOMComponentsWithTag(instance, "p").length).toBe(1);
+    });
 })

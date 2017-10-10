@@ -359,6 +359,8 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
 }
 
 export function render(Vnode, container) {
+
+   
     const rootDom = renderByLuy(Vnode, container)
     return rootDom
 }
