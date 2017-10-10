@@ -1,6 +1,8 @@
 import { typeNumber } from "./utils";
 
 
+var tmp =[]
+
 const RESERVED_PROPS = {
     ref: true,
     key: true,
@@ -61,6 +63,9 @@ function createElement(type: string | Function, config, ...children: array) {
             }
         }
     }
+
+   
+
     return new Vnode(type, props, key, ref);
 }
 

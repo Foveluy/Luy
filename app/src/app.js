@@ -32,13 +32,13 @@ class C extends React.Component {
     this.setState({
       c: this.state.c + 1
     })
-    console.log('点击触发中：', this.state.c)
+    console.log('点击触发中：', this.refs)
   }
   render() {
     return (
       <div>
         外部属性:{this.props.name}->>>>{this.state.c}
-        <div>context fuck:{this.context.fuck}</div>
+        <div ref='fuck' >context fuck:{this.context.fuck}</div>
         <div>context shit:{this.context.shit}</div>
         <button onClick={this.click.bind(this)}>点我C</button>
       </div>)
@@ -76,18 +76,14 @@ export default class App extends React.Component {
     console.log('更新完毕')
   }
   click(e) {
-    this.setState(
-      { counter: this.state.counter + 1 }
-    )
-    this.setState(
-      { counter: this.state.counter + 2 }
-    )
+    console.log(this.refs.fuck)
   }
   render() {
     return (
       <div key={1} style={{ background: `rgb(99,99,${this.state.counter})` }}>
-      <div dangerouslySetInnerHTML={{__html:this.state.counter}}>111</div>
-        <button onClick={this.click.bind(this)}>点我</button>
+        <div dangerouslySetInnerHTML={{ __html: this.state.counter }}>111</div>
+        <C name={1} />
+        <button ref='fuck' onClick={this.click.bind(this)}>点我</button>
       </div>
     )
   }

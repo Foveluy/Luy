@@ -6,7 +6,7 @@ import { Com } from './component'
 
 
 let mountIndex = 0 //全局变量
-
+var Owner = [] //用于记录component实例
 
 function mountIndexAdd() {
     return mountIndex++
@@ -199,7 +199,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
             if (oldVnode.props.style !== nextStyle) {
                 Object.keys(nextStyle).forEach((s) => newVnode._hostNode.style[s] = nextStyle[s])
             }
-            if(newVnode.props.dangerouslySetInnerHTML){
+            if (newVnode.props.dangerouslySetInnerHTML) {
                 mappingStrategy['dangerouslySetInnerHTML'](newVnode._hostNode, newVnode.props['dangerouslySetInnerHTML'])
             }
         }
@@ -245,7 +245,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了')
 
 
-    const domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context)
+    const domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance)
 
     if (instance.componentDidMount) {
         instance.lifeCycle = Com.MOUNTTING
@@ -253,6 +253,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
         instance.componentDidMount = null//暂时不知道为什么要设置为空
         instance.lifeCycle = Com.MOUNT
     }
+
 
     instance.Vnode = renderedVnode
     instance.Vnode._hostNode = domNode//用于在更新时期oldVnode的时候获取_hostNode
@@ -265,8 +266,8 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     return domNode
 }
 
-function mountNativeElement(Vnode, parentDomNode: Element) {
-    const domNode = renderByLuy(Vnode, parentDomNode)
+function mountNativeElement(Vnode, parentDomNode: Element, instance) {
+    const domNode = renderByLuy(Vnode, parentDomNode,instance)
     Vnode._hostNode = domNode
     Vnode._mountIndex = mountIndexAdd()
     return domNode
@@ -279,7 +280,7 @@ function mountTextComponent(Vnode, domNode: Element) {
     return textDomNode
 }
 
-function mountChild(childrenVnode, parentDomNode: Element, parentContext) {
+function mountChild(childrenVnode, parentDomNode: Element, parentContext, instance) {
 
     let childType = typeNumber(childrenVnode)
     let flattenChildList = childrenVnode;
@@ -288,14 +289,14 @@ function mountChild(childrenVnode, parentDomNode: Element, parentContext) {
     }
 
     if (childType === 8 && childrenVnode !== undefined) { //Vnode
-        flattenChildList._hostNode = mountNativeElement(flattenChildList, parentDomNode)
+        flattenChildList._hostNode = mountNativeElement(flattenChildList, parentDomNode, instance)
     }
     if (childType === 7) {//list
         flattenChildList = flattenChildren(childrenVnode)
 
         flattenChildList.forEach((item) => {
 
-            renderByLuy(item, parentDomNode, false, parentContext)
+            renderByLuy(item, parentDomNode, false, parentContext, instance)
         })
     }
     if (childType === 4 || childType === 3) {//string or number
@@ -324,14 +325,13 @@ export function findDOMNode(ref) {
  * @param {boolean} isUpdate 
  */
 let depth = 0
-function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext) {
+function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext, instance) {
 
     const { type, props } = Vnode
     const { children } = props
     let domNode
     if (typeof type === 'function') {
-        let fixContext = parentContext || {}
-
+        const fixContext = parentContext || {}
         domNode = mountComponent(Vnode, container, fixContext)
     } else if (typeof type === 'string' && type === '#text') {
         domNode = mountTextComponent(Vnode, container)
@@ -343,9 +343,16 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
      * 特殊处理，当children=0数字的时候也能渲染了
      */
     if (typeNumber(children) > 2 && children !== undefined) {
-        const NewChild = mountChild(children, domNode, parentContext)//flatten之后的child 要保存下来
+        const NewChild = mountChild(children, domNode, parentContext, instance)//flatten之后的child 要保存下来
         props.children = NewChild
     }
+
+    if(instance){
+        if(Vnode.ref){
+            instance.refs[Vnode.ref] = domNode
+        }
+    }
+   
 
     mapProp(domNode, props) //为元素添加props
 
@@ -362,8 +369,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
 }
 
 export function render(Vnode, container) {
-
-
     const rootDom = renderByLuy(Vnode, container)
+
     return rootDom
 }

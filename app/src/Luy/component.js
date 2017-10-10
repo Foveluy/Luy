@@ -21,6 +21,7 @@ class ReactClass {
     this._renderCallbacks = []
     this.lifeCycle = Com.CREATE
     this.stateMergeQueue = []
+    this.refs = {}
   }
 
   updateComponent() {
