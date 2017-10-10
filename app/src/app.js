@@ -76,14 +76,15 @@ export default class App extends React.Component {
     console.log('更新完毕')
   }
   click(e) {
-    console.log(this.refs.fuck)
+    console.log(this.refs.haha)
+    console.log('函数ref',this.button)
   }
   render() {
     return (
-      <div key={1} style={{ background: `rgb(99,99,${this.state.counter})` }}>
+      <div key={1} ref='haha' style={{ background: `rgb(99,99,${this.state.counter})` }}>
         <div dangerouslySetInnerHTML={{ __html: this.state.counter }}>111</div>
         <C name={1} />
-        <button ref='fuck' onClick={this.click.bind(this)}>点我</button>
+        <button ref={(node) => { this.button = node }} onClick={this.click.bind(this)}>点我</button>
       </div>
     )
   }

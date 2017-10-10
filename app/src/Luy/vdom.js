@@ -267,7 +267,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
 }
 
 function mountNativeElement(Vnode, parentDomNode: Element, instance) {
-    const domNode = renderByLuy(Vnode, parentDomNode,instance)
+    const domNode = renderByLuy(Vnode, parentDomNode, instance)
     Vnode._hostNode = domNode
     Vnode._mountIndex = mountIndexAdd()
     return domNode
@@ -347,12 +347,15 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
         props.children = NewChild
     }
 
-    if(instance){
-        if(Vnode.ref){
+    if (instance) {
+        if (typeNumber(Vnode.ref) === 3 || typeNumber(Vnode.ref) === 4){
             instance.refs[Vnode.ref] = domNode
         }
+        if (typeNumber(Vnode.ref) === 5) {
+            Vnode.ref(domNode)
+        }
     }
-   
+
 
     mapProp(domNode, props) //为元素添加props
 
