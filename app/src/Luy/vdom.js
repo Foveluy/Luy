@@ -1,8 +1,23 @@
 //@flow
 import { typeNumber, isSameVnode, mapKeyToIndex, isEventName, extend } from "./utils";
-import { flattenChildren } from './createElement'
+import { flattenChildren, Vnode } from './createElement'
 import { mapProp, mappingStrategy } from './mapProps'
 import { Com } from './component'
+
+
+
+//Top Api
+export function createPortal(children, container) {
+    console.log(children)
+    if (container) {
+        if(Array.isArray(children)){
+            mountChild(children, container)
+        }else{
+            renderByLuy(children, container)
+        }
+    }
+    return new Vnode('#text', "", null, null)
+}
 
 
 let mountIndex = 0 //全局变量
@@ -23,7 +38,7 @@ function updateText(oldTextVnode, newTextVnode, parentDomNode: Element) {
 
 function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) {
     newChild = flattenChildren(newChild)
-    
+    console.log(oldChild,newChild)
     if (!Array.isArray(oldChild)) oldChild = [oldChild]
     if (!Array.isArray(newChild)) newChild = [newChild]
     let oldLength = oldChild.length,
@@ -41,7 +56,7 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
         newChild.forEach((newVnode) => {
             renderByLuy(newVnode, parentDomNode, false, parentContext)
         })
-        
+
         return newChild
     }
 
@@ -98,9 +113,9 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
             for (; newStartIndex - 1 < newEndIndex; newStartIndex++) {
                 if (newChild[newStartIndex]) {
                     let newDomNode = renderByLuy(newChild[newStartIndex], parentDomNode, true, parentContext)
-                    if(oldChild[oldChild.length - 1]){
+                    if (oldChild[oldChild.length - 1]) {
                         parentDomNode.insertBefore(newDomNode, oldChild[oldChild.length - 1]._hostNode)
-                    }else{
+                    } else {
                         parentDomNode.appendChild(newDomNode)
                     }
                     newChild[newStartIndex]._hostNode = newDomNode
@@ -185,7 +200,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
 export function update(oldVnode, newVnode, parentDomNode: Element, parentContext) {
     newVnode._hostNode = oldVnode._hostNode
-    
+
     if (oldVnode.type === newVnode.type) {
         if (oldVnode.type === "#text") {
             newVnode._hostNode = oldVnode._hostNode //更新一个dom节点
@@ -215,13 +230,13 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
         }
     } else {
         let dom = renderByLuy(newVnode, parentDomNode, true)
-        
+
         if (newVnode._hostNode) {
             parentDomNode.insertBefore(dom, newVnode._hostNode)
             if (typeof newVnode.type === 'function') {
                 console.log('等待实现')
             }
-            
+
             parentDomNode.removeChild(newVnode._hostNode)
         } else {
             parentDomNode.appendChild(dom)
@@ -241,7 +256,6 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     const instance = new Component(props)
 
     if (instance.getChildContext) {
-
         instance.context = extend(extend({}, instance.context), instance.getChildContext());
     } else {
         instance.context = parentContext
@@ -250,9 +264,22 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     if (instance.componentWillMount) {//生命周期函数
         instance.componentWillMount()
     }
-    const renderedVnode = instance.render()
-    if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了')
 
+    let renderedVnode;
+    if (instance.render) {
+        //组件
+        renderedVnode = instance.render()
+        console.log(renderedVnode)
+    } else {
+        //纯组件
+        
+        renderedVnode = instance
+    }
+    
+    if (!renderedVnode) {
+        console.warn('你可能忘记在组件render()方法中返回jsx了')
+        return
+    }
 
     const domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance)
 
@@ -270,14 +297,16 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
 
     Vnode._instance = instance // 在父节点上的child元素会保存一个自己
 
-    instance._updateInLifeCycle() // componentDidMount之后一次性更新
+    if (instance._updateInLifeCycle) {
+        instance._updateInLifeCycle() // componentDidMount之后一次性更新
+    }
 
     return domNode
 }
 
 function mountNativeElement(Vnode, parentDomNode: Element, instance) {
-    
-    const domNode = renderByLuy(Vnode, parentDomNode,false,instance)
+
+    const domNode = renderByLuy(Vnode, parentDomNode, false, instance)
     Vnode._hostNode = domNode
     Vnode._mountIndex = mountIndexAdd()
     return domNode
@@ -294,6 +323,7 @@ function mountChild(childrenVnode, parentDomNode: Element, parentContext, instan
 
     let childType = typeNumber(childrenVnode)
     let flattenChildList = childrenVnode;
+
     if (childrenVnode === undefined) {
         flattenChildList = flattenChildren(childrenVnode)
     }
@@ -344,28 +374,31 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
         const fixContext = parentContext || {}
         domNode = mountComponent(Vnode, container, fixContext)
     } else if (typeof type === 'string' && type === '#text') {
+        
         domNode = mountTextComponent(Vnode, container)
+
     } else {
         domNode = document.createElement(type)
     }
 
-    /**
-     * 特殊处理，当children=0数字的时候也能渲染了
-     */
-    if (typeNumber(children) > 2 && children !== undefined) {
-        const NewChild = mountChild(children, domNode, parentContext, instance)//flatten之后的child 要保存下来
-        props.children = NewChild
+    //如果是组件先不渲染子嗣
+    if(typeof type !== 'function'){
+        //特殊处理，当children=0数字的时候也能渲染了
+        if (typeNumber(children) > 2 && children !== undefined) {
+            const NewChild = mountChild(children, domNode, parentContext, instance)//flatten之后的child 要保存下来
+            props.children = NewChild
+        }
     }
 
+
     if (instance) {
-        if (typeNumber(Vnode.ref) === 3 || typeNumber(Vnode.ref) === 4){
+        if (typeNumber(Vnode.ref) === 3 || typeNumber(Vnode.ref) === 4) {
             instance.refs[Vnode.ref] = domNode
         }
         if (typeNumber(Vnode.ref) === 5) {
             Vnode.ref(domNode)
         }
     }
-
 
     mapProp(domNode, props) //为元素添加props
 
@@ -375,8 +408,9 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
         return domNode
     } else {
         Vnode._mountIndex = mountIndexAdd()
-        if (container)
+        if (container && domNode && container.nodeName !== '#text')
             container.appendChild(domNode)
+
     }
     return domNode
 }

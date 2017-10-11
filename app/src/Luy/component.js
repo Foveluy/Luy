@@ -43,7 +43,7 @@ class ReactClass {
 
     this.nextState = null
     const newVnode = this.render()
-    console.log(oldVnode,newVnode)
+    
     this.Vnode = update(oldVnode, newVnode, this.dom, this.context)//这个函数返回一个新的Vnode
 
     if (this.componentDidUpdate) {

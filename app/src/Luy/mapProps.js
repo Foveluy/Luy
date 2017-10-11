@@ -78,7 +78,7 @@ function dispatchEvent(event, eventName, end) {
  * @param {array} path 
  */
 function triggerEventByPath(e, path: Array) {
-
+    
     for (let i = 0; i < path.length; i++) {
         const events = path[i].__events
         for (let eventName in events) {
@@ -102,6 +102,7 @@ function getEventPath(event, end) {
     let begin: Element = event.target
 
     while (1) {
+        
         if (begin.__events) {
             path.push(begin)
         }
@@ -110,6 +111,7 @@ function getEventPath(event, end) {
             break
         }
     }
+    console.log(path)
     return path
 }
 
