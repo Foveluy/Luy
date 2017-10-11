@@ -30,11 +30,22 @@ function initiateComponent(componentInstance) {
     if (componentInstance.render) {
         //组件
         const rendered = componentInstance.render()
-        
+
         return rendered
     } else {
+        
         //纯组件
         return componentInstance
+    }
+}
+
+function instanceProps(componentVnode) {
+    console.log(componentVnode)
+    return {
+        oldState: componentVnode._instance.state,
+        oldProps: componentVnode._instance.props,
+        oldContext: componentVnode._instance.context,
+        oldVnode: componentVnode._instance.Vnode
     }
 }
 
@@ -55,6 +66,7 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
     newChild = flattenChildren(newChild)
     if (!Array.isArray(oldChild)) oldChild = [oldChild]
     if (!Array.isArray(newChild)) newChild = [newChild]
+
     let oldLength = oldChild.length,
         newLength = newChild.length,
         oldStartIndex = 0, newStartIndex = 0,
@@ -70,7 +82,6 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
         newChild.forEach((newVnode) => {
             renderByLuy(newVnode, parentDomNode, false, parentContext)
         })
-
         return newChild
     }
 
@@ -129,6 +140,7 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
                     if (oldChild[oldChild.length - 1]) {
                         parentDomNode.insertBefore(newDomNode, oldChild[oldChild.length - 1]._hostNode)
                     } else {
+
                         parentDomNode.appendChild(newDomNode)
                     }
                     newChild[newStartIndex]._hostNode = newDomNode
@@ -140,16 +152,18 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
             for (; oldStartIndex - 1 < oldEndIndex; oldStartIndex++) {
                 if (oldChild[oldStartIndex]) {
                     let removeNode = oldChild[oldStartIndex]
-                    if (typeof oldChild[oldStartIndex].type === 'function') {
+                    if (typeof oldChild[oldStartIndex].type === 'function') {//不完整的实现，如果孩子是component无法调用到
                         if (removeNode._instance.componentWillUnMount) {
                             removeNode._instance.componentWillUnMount()
                         }
                     }
-                    if(removeNode._PortalHostNode){
+                    if (removeNode._PortalHostNode) {
                         const parent = removeNode._PortalHostNode.parentNode
                         parent.removeChild(removeNode._PortalHostNode)
-                    }else{
-                        parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
+                    } else {
+                        if(oldChild[oldStartIndex]._hostNode){//有可能会出现undefind的情况
+                            parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
+                        }
                     }
                 }
             }
@@ -159,58 +173,64 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
 }
 
 function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
-
-    const oldState = oldComponentVnode._instance.state
-    const oldProps = oldComponentVnode._instance.props
-    const oldContext = oldComponentVnode._instance.context
-    const oldVnode = oldComponentVnode._instance.Vnode
-
-
+    const {
+        oldState,
+        oldProps,
+        oldContext,
+        oldVnode
+    } = instanceProps(oldComponentVnode)
+    
     const newProps = newComponentVnode.props
     const newContext = parentContext
     const newInstance = new newComponentVnode.type(newProps)
 
-    if (oldComponentVnode._instance.componentWillReceiveProps) {
-        oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext)
-    }
+    if (oldComponentVnode._instance) {
+        if (oldComponentVnode._instance.componentWillReceiveProps) {
+            oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext)
+        }
 
-    if (oldComponentVnode._instance.shouldComponentUpdate) {
-        let shouldUpdate = oldComponentVnode._instance.shouldComponentUpdate(newProps, oldState, newContext)
-        if (!shouldUpdate) {
-            //无论shouldComponentUpdate结果是如何，数据都会给用户设置上去
-            //但是不一定会刷新
-            newInstance.state = oldState
-            newInstance.context = newContext
+        if (oldComponentVnode._instance.shouldComponentUpdate) {
+            let shouldUpdate = oldComponentVnode._instance.shouldComponentUpdate(newProps, oldState, newContext)
+            if (!shouldUpdate) {
+                //无论shouldComponentUpdate结果是如何，数据都会给用户设置上去
+                //但是不一定会刷新
+                newInstance.state = oldState
+                newInstance.context = newContext
 
-            oldComponentVnode._instance.props = newProps
-            oldComponentVnode._instance.context = newContext
-            newComponentVnode._instance = oldComponentVnode._instance
-            return
+                oldComponentVnode._instance.props = newProps
+                oldComponentVnode._instance.context = newContext
+                newComponentVnode._instance = oldComponentVnode._instance
+                return
+            }
+        }
+
+        if (oldComponentVnode._instance.componentWillUpdate) {
+            oldComponentVnode._instance.componentWillUpdate(newProps, oldState, newContext)
         }
     }
 
-    if (oldComponentVnode._instance.componentWillUpdate) {
-        oldComponentVnode._instance.componentWillUpdate(newProps, oldState, newContext)
-    }
 
     newInstance.state = oldState
     newInstance.context = newContext
-    const newVnode = newInstance.render()
+
+    const newVnode = initiateComponent(newInstance)
 
     //更新原来组件的信息
     oldComponentVnode._instance.props = newProps
     oldComponentVnode._instance.context = newContext
-    console.log(newComponentVnode)
+
     //更新父组件的信息
     newComponentVnode._instance = oldComponentVnode._instance
 
     //更新真实dom
     update(oldVnode, newVnode, oldComponentVnode._hostNode)
 
-    if (oldComponentVnode._instance.componentDidUpdate) {
-
-        oldComponentVnode._instance.componentDidUpdate(oldProps, oldState, oldContext)
+    if (oldComponentVnode._instance) {
+        if (oldComponentVnode._instance.componentDidUpdate) {
+            oldComponentVnode._instance.componentDidUpdate(oldProps, oldState, oldContext)
+        }
     }
+
 }
 
 
@@ -248,12 +268,13 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
         let dom = renderByLuy(newVnode, parentDomNode, true)
 
         if (newVnode._hostNode) {
-            parentDomNode.insertBefore(dom, newVnode._hostNode)
             if (typeof newVnode.type === 'function') {
                 console.log('等待实现')
             }
 
-            parentDomNode.removeChild(newVnode._hostNode)
+            parentDomNode.insertBefore(dom, oldVnode._hostNode)
+
+            parentDomNode.removeChild(oldVnode._hostNode)
         } else {
             parentDomNode.appendChild(dom)
         }
@@ -300,10 +321,10 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     instance.Vnode = renderedVnode
     instance.Vnode._hostNode = domNode//用于在更新时期oldVnode的时候获取_hostNode
     instance.Vnode._mountIndex = mountIndexAdd()
-    console.log(instance.Vnode)
+
     Vnode._instance = instance // 在父节点上的child元素会保存一个自己
-    
-    if(renderedVnode._PortalHostNode){//支持react createPortal
+
+    if (renderedVnode._PortalHostNode) {//支持react createPortal
         Vnode._PortalHostNode = renderedVnode._PortalHostNode
     }
 
@@ -324,6 +345,9 @@ function mountNativeElement(Vnode, parentDomNode: Element, instance) {
 function mountTextComponent(Vnode, domNode: Element) {
     let fixText = Vnode.props === 'createPortal' ? '' : Vnode.props
     let textDomNode = document.createTextNode(fixText)
+    if(domNode.firstChild){
+        domNode.removeChild(domNode.firstChild)
+    }
     domNode.appendChild(textDomNode)
     Vnode._hostNode = textDomNode
     Vnode._mountIndex = mountIndexAdd()
@@ -374,6 +398,7 @@ export function findDOMNode(ref) {
  * @param {*} Vnode 
  * @param {Element} container 
  * @param {boolean} isUpdate 
+ * @param {boolean} instance 用于实现refs机制 
  */
 let depth = 0
 function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext, instance) {
@@ -381,17 +406,16 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     const { type, props } = Vnode
     const { children } = props
     let domNode
+    
     if (typeof type === 'function') {
         const fixContext = parentContext || {}
         domNode = mountComponent(Vnode, container, fixContext)
     } else if (typeof type === 'string' && type === '#text') {
-
         domNode = mountTextComponent(Vnode, container)
-
-    } else {
+    } else{
         domNode = document.createElement(type)
     }
-
+    
     //如果是组件先不渲染子嗣
     if (typeof type !== 'function') {
         //特殊处理，当children=0数字的时候也能渲染了
@@ -415,10 +439,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
 
     Vnode._hostNode = domNode //缓存真实节点
 
-    if (Vnode._PortalHostNode) {
-        // console.log(domNode)
-        // Vnode._hostNode = Vnode._PortalHostNode
-    }
+
     if (isUpdate) {
         return domNode
     } else {

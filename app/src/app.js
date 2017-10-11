@@ -46,6 +46,20 @@ class C extends React.Component {
   }
 }
 
+const Pure = ({ shit }) => {
+  return (
+    <h3>
+      <p key='1'>{shit}</p>
+      <p key='2'>{shit}</p>
+      <p key='2'>{shit}</p>
+      <p key='2'>{shit}</p>
+      <p key='2'>{shit}</p>
+      <p key='2'>{shit}</p>
+      <p key='2'>{shit}</p>
+    </h3>
+  )
+}
+
 export default class App extends React.Component {
   constructor(props) {
     super(props)
@@ -76,14 +90,15 @@ export default class App extends React.Component {
     console.log('更新完毕')
   }
   click(e) {
-    console.log(this.refs.haha)
-    console.log('函数ref', this.button)
+    this.setState({
+      counter: this.state.counter + 1
+    })
   }
   render() {
     return (
       <div key={1} ref='haha' style={{ background: `rgb(99,99,${this.state.counter})` }}>
         <div dangerouslySetInnerHTML={{ __html: this.state.counter }}>111</div>
-        <C name={1} />
+        <C name={this.state.counter + 1} />
         <button ref={(node) => { this.button = node }} onClick={this.click.bind(this)}>点我</button>
       </div>
     )
@@ -94,7 +109,7 @@ export default class App extends React.Component {
 
 ReactDOM.render(
   <div>
-    <App/>
+    <App />
   </div>,
   document.getElementById('root')
 );
@@ -190,7 +205,7 @@ ReactDOM.render(
 //     // Remove the element from the DOM when we unmount
 //     modalRoot.removeChild(this.el);
 //   }
-  
+
 //   render() {
 //     // Use a portal to render the children into the element
 //     return ReactDOM.createPortal(
@@ -208,14 +223,14 @@ ReactDOM.render(
 //   constructor(props) {
 //     super(props);
 //     this.state = {showModal: false};
-    
+
 //     this.handleShow = this.handleShow.bind(this);
 //     this.handleHide = this.handleHide.bind(this);
 //   }
 //   handleShow() {
 //     this.setState({showModal: true});
 //   }
-  
+
 //   handleHide() {
 //     this.setState({showModal: false});
 //   }

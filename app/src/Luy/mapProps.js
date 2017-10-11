@@ -102,7 +102,6 @@ function getEventPath(event, end) {
     let begin: Element = event.target
 
     while (1) {
-        
         if (begin.__events) {
             path.push(begin)
         }
