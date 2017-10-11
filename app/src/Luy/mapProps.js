@@ -111,7 +111,6 @@ function getEventPath(event, end) {
             break
         }
     }
-    console.log(path)
     return path
 }
 

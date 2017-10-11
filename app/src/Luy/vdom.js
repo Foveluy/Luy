@@ -10,18 +10,33 @@ import { Com } from './component'
 export function createPortal(children, container) {
     console.log(children)
     if (container) {
-        if(Array.isArray(children)){
+        if (Array.isArray(children)) {
             mountChild(children, container)
-        }else{
+        } else {
             renderByLuy(children, container)
         }
     }
-    return new Vnode('#text', "", null, null)
+    //用于记录Portal的事物
+    const CreatePortalVnode = new Vnode('#text', "createPortal", null, null)
+    CreatePortalVnode._PortalHostNode = container
+    return CreatePortalVnode
 }
 
 
 let mountIndex = 0 //全局变量
 var Owner = [] //用于记录component实例
+
+function initiateComponent(componentInstance) {
+    if (componentInstance.render) {
+        //组件
+        const rendered = componentInstance.render()
+        
+        return rendered
+    } else {
+        //纯组件
+        return componentInstance
+    }
+}
 
 function mountIndexAdd() {
     return mountIndex++
@@ -38,7 +53,6 @@ function updateText(oldTextVnode, newTextVnode, parentDomNode: Element) {
 
 function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) {
     newChild = flattenChildren(newChild)
-    console.log(oldChild,newChild)
     if (!Array.isArray(oldChild)) oldChild = [oldChild]
     if (!Array.isArray(newChild)) newChild = [newChild]
     let oldLength = oldChild.length,
@@ -91,7 +105,6 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
             newStartVnode = newChild[++newStartIndex]
         }
         else {
-            console.log('更新')
             if (hascode === undefined) hascode = mapKeyToIndex(oldChild)
 
             let indexInOld = hascode[newStartVnode.key]
@@ -132,13 +145,16 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
                             removeNode._instance.componentWillUnMount()
                         }
                     }
-
-                    parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
+                    if(removeNode._PortalHostNode){
+                        const parent = removeNode._PortalHostNode.parentNode
+                        parent.removeChild(removeNode._PortalHostNode)
+                    }else{
+                        parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
+                    }
                 }
             }
         }
     }
-
     return newChild
 }
 
@@ -255,7 +271,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     const Component = type
     const instance = new Component(props)
 
-    if (instance.getChildContext) {
+    if (instance.getChildContext) {//如果用户定义getChildContext，那么用它生成子context
         instance.context = extend(extend({}, instance.context), instance.getChildContext());
     } else {
         instance.context = parentContext
@@ -265,17 +281,8 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
         instance.componentWillMount()
     }
 
-    let renderedVnode;
-    if (instance.render) {
-        //组件
-        renderedVnode = instance.render()
-        console.log(renderedVnode)
-    } else {
-        //纯组件
-        
-        renderedVnode = instance
-    }
-    
+    const renderedVnode = initiateComponent(instance);
+
     if (!renderedVnode) {
         console.warn('你可能忘记在组件render()方法中返回jsx了')
         return
@@ -290,12 +297,15 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
         instance.lifeCycle = Com.MOUNT
     }
 
-
     instance.Vnode = renderedVnode
     instance.Vnode._hostNode = domNode//用于在更新时期oldVnode的时候获取_hostNode
     instance.Vnode._mountIndex = mountIndexAdd()
-
+    console.log(instance.Vnode)
     Vnode._instance = instance // 在父节点上的child元素会保存一个自己
+    
+    if(renderedVnode._PortalHostNode){//支持react createPortal
+        Vnode._PortalHostNode = renderedVnode._PortalHostNode
+    }
 
     if (instance._updateInLifeCycle) {
         instance._updateInLifeCycle() // componentDidMount之后一次性更新
@@ -312,7 +322,8 @@ function mountNativeElement(Vnode, parentDomNode: Element, instance) {
     return domNode
 }
 function mountTextComponent(Vnode, domNode: Element) {
-    let textDomNode = document.createTextNode(Vnode.props)
+    let fixText = Vnode.props === 'createPortal' ? '' : Vnode.props
+    let textDomNode = document.createTextNode(fixText)
     domNode.appendChild(textDomNode)
     Vnode._hostNode = textDomNode
     Vnode._mountIndex = mountIndexAdd()
@@ -374,7 +385,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
         const fixContext = parentContext || {}
         domNode = mountComponent(Vnode, container, fixContext)
     } else if (typeof type === 'string' && type === '#text') {
-        
+
         domNode = mountTextComponent(Vnode, container)
 
     } else {
@@ -382,7 +393,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     }
 
     //如果是组件先不渲染子嗣
-    if(typeof type !== 'function'){
+    if (typeof type !== 'function') {
         //特殊处理，当children=0数字的时候也能渲染了
         if (typeNumber(children) > 2 && children !== undefined) {
             const NewChild = mountChild(children, domNode, parentContext, instance)//flatten之后的child 要保存下来
@@ -404,6 +415,10 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
 
     Vnode._hostNode = domNode //缓存真实节点
 
+    if (Vnode._PortalHostNode) {
+        // console.log(domNode)
+        // Vnode._hostNode = Vnode._PortalHostNode
+    }
     if (isUpdate) {
         return domNode
     } else {
