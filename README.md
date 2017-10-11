@@ -13,7 +13,9 @@ todolist
 - [ ] 事件捕获系统
 - [x] ref属性
 - [x] 组件的context
-- [ ] createProtal
+- [x] createProtal Api
+- [ ] setState函数式参数
 - [ ] setState回调
 - [ ] 发布第一版本
 - [ ] 支持react生态计划....
+- [ ] createProtal 冒泡

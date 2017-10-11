@@ -329,9 +329,6 @@ function mountNativeElement(Vnode, parentDomNode: Element, instance) {
 function mountTextComponent(Vnode, domNode: Element) {
     let fixText = Vnode.props === 'createPortal' ? '' : Vnode.props
     let textDomNode = document.createTextNode(fixText)
-    if(domNode.firstChild){
-        domNode.removeChild(domNode.firstChild)
-    }
     domNode.appendChild(textDomNode)
     Vnode._hostNode = textDomNode
     Vnode._mountIndex = mountIndexAdd()

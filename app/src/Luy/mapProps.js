@@ -62,7 +62,7 @@ function dispatchEvent(event, eventName, end) {
     options.async = true
 
     triggerEventByPath(E, path)//触发event默认以冒泡形式
-
+    console.log(E.type)
     options.async = false
 
     for (let dirty in options.dirtyComponent) {
