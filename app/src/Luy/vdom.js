@@ -8,7 +8,6 @@ import { Com } from './component'
 
 //Top Api
 export function createPortal(children, container) {
-    console.log(children)
     if (container) {
         if (Array.isArray(children)) {
             mountChild(children, container)
@@ -24,23 +23,8 @@ export function createPortal(children, container) {
 
 
 let mountIndex = 0 //全局变量
-var Owner = [] //用于记录component实例
-
-function initiateComponent(componentInstance) {
-    if (componentInstance.render) {
-        //组件
-        const rendered = componentInstance.render()
-
-        return rendered
-    } else {
-        
-        //纯组件
-        return componentInstance
-    }
-}
 
 function instanceProps(componentVnode) {
-    console.log(componentVnode)
     return {
         oldState: componentVnode._instance.state,
         oldProps: componentVnode._instance.props,
@@ -213,7 +197,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
     newInstance.state = oldState
     newInstance.context = newContext
 
-    const newVnode = initiateComponent(newInstance)
+    const newVnode = newInstance.render()
 
     //更新原来组件的信息
     oldComponentVnode._instance.props = newProps
@@ -302,7 +286,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
         instance.componentWillMount()
     }
 
-    const renderedVnode = initiateComponent(instance);
+    const renderedVnode = instance.render()
 
     if (!renderedVnode) {
         console.warn('你可能忘记在组件render()方法中返回jsx了')
