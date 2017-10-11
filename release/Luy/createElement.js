@@ -83,6 +83,10 @@ function createElement(type, config) {
         }
     }
 
+    if (typeof type === 'function' && type.__proto__.name !== 'ReactClass') {
+        return new type(props);
+    }
+
     return new Vnode(type, props, key, ref);
 }
 

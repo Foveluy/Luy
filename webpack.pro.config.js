@@ -11,7 +11,7 @@ module.exports = {
         path: resolve(__dirname, 'build'),//打包后的文件存放的地方
         filename: "bundle.js",//打包后输出文件的文件名
         publicPath: "/",
-        libraryTarget: 'umd'
+        // libraryTarget: 'umd'
     },
     devServer: {
         contentBase: resolve(__dirname, 'build'),

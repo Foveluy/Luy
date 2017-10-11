@@ -8,6 +8,7 @@ var _keys = require('babel-runtime/core-js/object/keys');
 
 var _keys2 = _interopRequireDefault(_keys);
 
+exports.createPortal = createPortal;
 exports.update = update;
 exports.findDOMNode = findDOMNode;
 exports.render = render;
@@ -22,8 +23,31 @@ var _component = require('./component');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+//Top Api
+function createPortal(children, container) {
+    if (container) {
+        if (Array.isArray(children)) {
+            mountChild(children, container);
+        } else {
+            renderByLuy(children, container);
+        }
+    }
+    //用于记录Portal的事物
+    var CreatePortalVnode = new _createElement.Vnode('#text', "createPortal", null, null);
+    CreatePortalVnode._PortalHostNode = container;
+    return CreatePortalVnode;
+}
+
 var mountIndex = 0; //全局变量
-var Owner = []; //用于记录component实例
+
+function instanceProps(componentVnode) {
+    return {
+        oldState: componentVnode._instance.state,
+        oldProps: componentVnode._instance.props,
+        oldContext: componentVnode._instance.context,
+        oldVnode: componentVnode._instance.Vnode
+    };
+}
 
 function mountIndexAdd() {
     return mountIndex++;
@@ -40,9 +64,9 @@ function updateText(oldTextVnode, newTextVnode, parentDomNode) {
 
 function updateChild(oldChild, newChild, parentDomNode, parentContext) {
     newChild = (0, _createElement.flattenChildren)(newChild);
-
     if (!Array.isArray(oldChild)) oldChild = [oldChild];
     if (!Array.isArray(newChild)) newChild = [newChild];
+
     var oldLength = oldChild.length,
         newLength = newChild.length,
         oldStartIndex = 0,
@@ -59,7 +83,6 @@ function updateChild(oldChild, newChild, parentDomNode, parentContext) {
         newChild.forEach(function (newVnode) {
             renderByLuy(newVnode, parentDomNode, false, parentContext);
         });
-
         return newChild;
     }
 
@@ -89,7 +112,6 @@ function updateChild(oldChild, newChild, parentDomNode, parentContext) {
             oldEndVnode = oldChild[--oldEndIndex];
             newStartVnode = newChild[++newStartIndex];
         } else {
-            console.log('更新');
             if (hascode === undefined) hascode = (0, _utils.mapKeyToIndex)(oldChild);
 
             var indexInOld = hascode[newStartVnode.key];
@@ -114,6 +136,7 @@ function updateChild(oldChild, newChild, parentDomNode, parentContext) {
                     if (oldChild[oldChild.length - 1]) {
                         parentDomNode.insertBefore(newDomNode, oldChild[oldChild.length - 1]._hostNode);
                     } else {
+
                         parentDomNode.appendChild(newDomNode);
                     }
                     newChild[newStartIndex]._hostNode = newDomNode;
@@ -125,71 +148,82 @@ function updateChild(oldChild, newChild, parentDomNode, parentContext) {
                 if (oldChild[oldStartIndex]) {
                     var removeNode = oldChild[oldStartIndex];
                     if (typeof oldChild[oldStartIndex].type === 'function') {
+                        //不完整的实现，如果孩子是component无法调用到
                         if (removeNode._instance.componentWillUnMount) {
                             removeNode._instance.componentWillUnMount();
                         }
                     }
-
-                    parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode);
+                    if (removeNode._PortalHostNode) {
+                        var parent = removeNode._PortalHostNode.parentNode;
+                        parent.removeChild(removeNode._PortalHostNode);
+                    } else {
+                        if (oldChild[oldStartIndex]._hostNode) {
+                            //有可能会出现undefind的情况
+                            parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode);
+                        }
+                    }
                 }
             }
         }
     }
-
     return newChild;
 }
 
 function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
-
-    var oldState = oldComponentVnode._instance.state;
-    var oldProps = oldComponentVnode._instance.props;
-    var oldContext = oldComponentVnode._instance.context;
-    var oldVnode = oldComponentVnode._instance.Vnode;
+    var _instanceProps = instanceProps(oldComponentVnode),
+        oldState = _instanceProps.oldState,
+        oldProps = _instanceProps.oldProps,
+        oldContext = _instanceProps.oldContext,
+        oldVnode = _instanceProps.oldVnode;
 
     var newProps = newComponentVnode.props;
     var newContext = parentContext;
     var newInstance = new newComponentVnode.type(newProps);
 
-    if (oldComponentVnode._instance.componentWillReceiveProps) {
-        oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext);
-    }
-
-    if (oldComponentVnode._instance.shouldComponentUpdate) {
-        var shouldUpdate = oldComponentVnode._instance.shouldComponentUpdate(newProps, oldState, newContext);
-        if (!shouldUpdate) {
-            //无论shouldComponentUpdate结果是如何，数据都会给用户设置上去
-            //但是不一定会刷新
-            newInstance.state = oldState;
-            newInstance.context = newContext;
-
-            oldComponentVnode._instance.props = newProps;
-            oldComponentVnode._instance.context = newContext;
-            newComponentVnode._instance = oldComponentVnode._instance;
-            return;
+    if (oldComponentVnode._instance) {
+        if (oldComponentVnode._instance.componentWillReceiveProps) {
+            oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext);
         }
-    }
 
-    if (oldComponentVnode._instance.componentWillUpdate) {
-        oldComponentVnode._instance.componentWillUpdate(newProps, oldState, newContext);
+        if (oldComponentVnode._instance.shouldComponentUpdate) {
+            var shouldUpdate = oldComponentVnode._instance.shouldComponentUpdate(newProps, oldState, newContext);
+            if (!shouldUpdate) {
+                //无论shouldComponentUpdate结果是如何，数据都会给用户设置上去
+                //但是不一定会刷新
+                newInstance.state = oldState;
+                newInstance.context = newContext;
+
+                oldComponentVnode._instance.props = newProps;
+                oldComponentVnode._instance.context = newContext;
+                newComponentVnode._instance = oldComponentVnode._instance;
+                return;
+            }
+        }
+
+        if (oldComponentVnode._instance.componentWillUpdate) {
+            oldComponentVnode._instance.componentWillUpdate(newProps, oldState, newContext);
+        }
     }
 
     newInstance.state = oldState;
     newInstance.context = newContext;
+
     var newVnode = newInstance.render();
 
     //更新原来组件的信息
     oldComponentVnode._instance.props = newProps;
     oldComponentVnode._instance.context = newContext;
-    console.log(newComponentVnode);
+
     //更新父组件的信息
     newComponentVnode._instance = oldComponentVnode._instance;
 
     //更新真实dom
     update(oldVnode, newVnode, oldComponentVnode._hostNode);
 
-    if (oldComponentVnode._instance.componentDidUpdate) {
-
-        oldComponentVnode._instance.componentDidUpdate(oldProps, oldState, oldContext);
+    if (oldComponentVnode._instance) {
+        if (oldComponentVnode._instance.componentDidUpdate) {
+            oldComponentVnode._instance.componentDidUpdate(oldProps, oldState, oldContext);
+        }
     }
 }
 
@@ -227,12 +261,13 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
         var dom = renderByLuy(newVnode, parentDomNode, true);
 
         if (newVnode._hostNode) {
-            parentDomNode.insertBefore(dom, newVnode._hostNode);
             if (typeof newVnode.type === 'function') {
                 console.log('等待实现');
             }
 
-            parentDomNode.removeChild(newVnode._hostNode);
+            parentDomNode.insertBefore(dom, oldVnode._hostNode);
+
+            parentDomNode.removeChild(oldVnode._hostNode);
         } else {
             parentDomNode.appendChild(dom);
         }
@@ -253,7 +288,7 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
     var instance = new Component(props);
 
     if (instance.getChildContext) {
-
+        //如果用户定义getChildContext，那么用它生成子context
         instance.context = (0, _utils.extend)((0, _utils.extend)({}, instance.context), instance.getChildContext());
     } else {
         instance.context = parentContext;
@@ -263,8 +298,13 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
         //生命周期函数
         instance.componentWillMount();
     }
+
     var renderedVnode = instance.render();
-    if (!renderedVnode) console.warn('你可能忘记在组件render()方法中返回jsx了');
+
+    if (!renderedVnode) {
+        console.warn('你可能忘记在组件render()方法中返回jsx了');
+        return;
+    }
 
     var domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance);
 
@@ -281,7 +321,14 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
 
     Vnode._instance = instance; // 在父节点上的child元素会保存一个自己
 
-    instance._updateInLifeCycle(); // componentDidMount之后一次性更新
+    if (renderedVnode._PortalHostNode) {
+        //支持react createPortal
+        Vnode._PortalHostNode = renderedVnode._PortalHostNode;
+    }
+
+    if (instance._updateInLifeCycle) {
+        instance._updateInLifeCycle(); // componentDidMount之后一次性更新
+    }
 
     return domNode;
 }
@@ -294,7 +341,8 @@ function mountNativeElement(Vnode, parentDomNode, instance) {
     return domNode;
 }
 function mountTextComponent(Vnode, domNode) {
-    var textDomNode = document.createTextNode(Vnode.props);
+    var fixText = Vnode.props === 'createPortal' ? '' : Vnode.props;
+    var textDomNode = document.createTextNode(fixText);
     domNode.appendChild(textDomNode);
     Vnode._hostNode = textDomNode;
     Vnode._mountIndex = mountIndexAdd();
@@ -305,6 +353,7 @@ function mountChild(childrenVnode, parentDomNode, parentContext, instance) {
 
     var childType = (0, _utils.typeNumber)(childrenVnode);
     var flattenChildList = childrenVnode;
+
     if (childrenVnode === undefined) {
         flattenChildList = (0, _createElement.flattenChildren)(childrenVnode);
     }
@@ -346,6 +395,7 @@ function findDOMNode(ref) {
  * @param {*} Vnode 
  * @param {Element} container 
  * @param {boolean} isUpdate 
+ * @param {boolean} instance 用于实现refs机制 
  */
 var depth = 0;
 function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
@@ -354,6 +404,7 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
     var children = props.children;
 
     var domNode = void 0;
+
     if (typeof type === 'function') {
         var fixContext = parentContext || {};
         domNode = mountComponent(Vnode, container, fixContext);
@@ -363,12 +414,13 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
         domNode = document.createElement(type);
     }
 
-    /**
-     * 特殊处理，当children=0数字的时候也能渲染了
-     */
-    if ((0, _utils.typeNumber)(children) > 2 && children !== undefined) {
-        var NewChild = mountChild(children, domNode, parentContext, instance); //flatten之后的child 要保存下来
-        props.children = NewChild;
+    //如果是组件先不渲染子嗣
+    if (typeof type !== 'function') {
+        //特殊处理，当children=0数字的时候也能渲染了
+        if ((0, _utils.typeNumber)(children) > 2 && children !== undefined) {
+            var NewChild = mountChild(children, domNode, parentContext, instance); //flatten之后的child 要保存下来
+            props.children = NewChild;
+        }
     }
 
     if (instance) {
@@ -384,11 +436,12 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
 
     Vnode._hostNode = domNode; //缓存真实节点
 
+
     if (isUpdate) {
         return domNode;
     } else {
         Vnode._mountIndex = mountIndexAdd();
-        if (container) container.appendChild(domNode);
+        if (container && domNode && container.nodeName !== '#text') container.appendChild(domNode);
     }
     return domNode;
 }
@@ -405,9 +458,11 @@ var _temp = function () {
         return;
     }
 
+    __REACT_HOT_LOADER__.register(createPortal, 'createPortal', 'app/src/Luy/vdom.js');
+
     __REACT_HOT_LOADER__.register(mountIndex, 'mountIndex', 'app/src/Luy/vdom.js');
 
-    __REACT_HOT_LOADER__.register(Owner, 'Owner', 'app/src/Luy/vdom.js');
+    __REACT_HOT_LOADER__.register(instanceProps, 'instanceProps', 'app/src/Luy/vdom.js');
 
     __REACT_HOT_LOADER__.register(mountIndexAdd, 'mountIndexAdd', 'app/src/Luy/vdom.js');
 

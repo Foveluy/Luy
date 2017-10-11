@@ -74,7 +74,7 @@ function dispatchEvent(event, eventName, end) {
     _utils.options.async = true;
 
     triggerEventByPath(E, path); //触发event默认以冒泡形式
-
+    console.log(E.type);
     _utils.options.async = false;
 
     for (var dirty in _utils.options.dirtyComponent) {

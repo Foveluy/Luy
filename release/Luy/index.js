@@ -14,8 +14,13 @@ var React = {
     findDOMNode: _vdom.findDOMNode,
     createElement: _createElement.createElement, /** babel的默认设置是调用createElement这个函数 */
     render: _vdom.render,
+    createPortal: _vdom.createPortal,
     Component: _component.ReactClass
 };
+
+
+window.React = window.ReactDOM = React;
+
 var _default = React;
 exports.default = _default;
 ;

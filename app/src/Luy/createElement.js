@@ -64,9 +64,9 @@ function createElement(type: string | Function, config, ...children: array) {
         }
     }
 
-    if(typeof type === 'function' && type.__proto__.name !== 'ReactClass'){
-        return new type(props)
-    }
+    // if(typeof type === 'function' && type.__proto__.name !== 'ReactClass'){
+    //     return new type(props)
+    // }
 
     return new Vnode(type, props, key, ref);
 }
