@@ -3,8 +3,7 @@
 todolist
 -------
 
-- [第一版性能测试](http://htmlpreview.github.io/?https://github.com/215566435/Luy/blob/master/benchmarks/Luy.html)
-- [anu测试](http://htmlpreview.github.io/?https://github.com/RubyLouvre/anu/blob/master/benchmarks/anu.html)
+- [Luy第一版性能测试](http://htmlpreview.github.io/?https://github.com/215566435/Luy/blob/master/benchmarks/Luy.html)
 - [preact](http://htmlpreview.github.io/?https://github.com/RubyLouvre/anu/blob/master/benchmarks/preact.html)
 - [react](http://htmlpreview.github.io/?https://github.com/RubyLouvre/anu/blob/master/benchmarks/react.html)
 
