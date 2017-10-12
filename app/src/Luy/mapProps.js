@@ -13,6 +13,11 @@ export function mapProp(domNode, props) {
         if (typeof mappingStrategy[name] === 'function') {
             mappingStrategy[name](domNode, props[name])
         }
+        if (mappingStrategy[name] === undefined) {
+            mappingStrategy['otherProps'](domNode, props[name], name)
+            
+        }
+        
     }
 }
 
@@ -39,6 +44,11 @@ export const mappingStrategy = {
         let oldhtml = domNode.innerHTML
         if (html.__html !== oldhtml) {
             domNode.innerHTML = html.__html
+        }
+    },
+    otherProps: function (domNode, prop, propName) {
+        if (prop && propName ) {
+            domNode[propName] = prop
         }
     }
 }
@@ -78,7 +88,7 @@ function dispatchEvent(event, eventName, end) {
  * @param {array} path 
  */
 function triggerEventByPath(e, path: Array) {
-    
+
     for (let i = 0; i < path.length; i++) {
         const events = path[i].__events
         for (let eventName in events) {

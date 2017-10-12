@@ -163,16 +163,3 @@ var ReactClass = function () {
 }();
 
 exports.ReactClass = ReactClass;
-;
-
-var _temp = function () {
-  if (typeof __REACT_HOT_LOADER__ === 'undefined') {
-    return;
-  }
-
-  __REACT_HOT_LOADER__.register(Com, 'Com', 'app/src/Luy/component.js');
-
-  __REACT_HOT_LOADER__.register(ReactClass, 'ReactClass', 'app/src/Luy/component.js');
-}();
-
-;

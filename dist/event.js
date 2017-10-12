@@ -49,16 +49,3 @@ var eventProto = SyntheticEvent.prototype = {
         return "[object Event]";
     }
 };
-;
-
-var _temp = function () {
-    if (typeof __REACT_HOT_LOADER__ === 'undefined') {
-        return;
-    }
-
-    __REACT_HOT_LOADER__.register(SyntheticEvent, "SyntheticEvent", "app/src/Luy/event.js");
-
-    __REACT_HOT_LOADER__.register(eventProto, "eventProto", "app/src/Luy/event.js");
-}();
-
-;

@@ -95,30 +95,3 @@ function extend(obj, props) {
         obj[i] = props[i];
     }return obj;
 }
-;
-
-var _temp = function () {
-    if (typeof __REACT_HOT_LOADER__ === 'undefined') {
-        return;
-    }
-
-    __REACT_HOT_LOADER__.register(__type, "__type", "app/src/Luy/utils.js");
-
-    __REACT_HOT_LOADER__.register(options, "options", "app/src/Luy/utils.js");
-
-    __REACT_HOT_LOADER__.register(numberMap, "numberMap", "app/src/Luy/utils.js");
-
-    __REACT_HOT_LOADER__.register(typeNumber, "typeNumber", "app/src/Luy/utils.js");
-
-    __REACT_HOT_LOADER__.register(isSameVnode, "isSameVnode", "app/src/Luy/utils.js");
-
-    __REACT_HOT_LOADER__.register(mapKeyToIndex, "mapKeyToIndex", "app/src/Luy/utils.js");
-
-    __REACT_HOT_LOADER__.register(isEventName, "isEventName", "app/src/Luy/utils.js");
-
-    __REACT_HOT_LOADER__.register(isEventNameLowerCase, "isEventNameLowerCase", "app/src/Luy/utils.js");
-
-    __REACT_HOT_LOADER__.register(extend, "extend", "app/src/Luy/utils.js");
-}();
-
-;

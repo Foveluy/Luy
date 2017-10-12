@@ -1,6 +1,9 @@
 import React from './Luy'
 import ReactDOM from './Luy'
 import Component from './Luy'
+// import React from '../../index'
+// import ReactDOM from '../../index'
+// import Component from '../../index'
 
 let a = [1, 2, 3, 4, 5]
 
@@ -41,7 +44,6 @@ class C extends React.Component {
         <div ref='fuck' >context fuck:{this.context.fuck}</div>
         <div>context shit:{this.context.shit}</div>
         <button onClick={this.click.bind(this)}>点我C</button>
-        {React.Children.only(this.props.children)}
       </div>
     )
   }
@@ -94,13 +96,8 @@ export default class App extends React.Component {
     return (
       <div key={1} ref='haha' style={{ background: `rgb(99,99,${this.state.counter})` }}>
         <div dangerouslySetInnerHTML={{ __html: this.state.counter }}>111</div>
-        <C name={1} >
-          <h1>2</h1>
-          <h1>2</h1>
-          <h1>2</h1>
-          <h1>2</h1>
-        </C>
         <button ref={(node) => { this.button = node }} onClick={this.click.bind(this)}>点我</button>
+        <a href='http://www.baidu.com'>fz</a>
       </div>
     )
   }

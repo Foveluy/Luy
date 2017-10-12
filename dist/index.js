@@ -6,6 +6,10 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createElement = require('./createElement');
 
+var _cloneElement = require('./cloneElement');
+
+var _Children = require('./Children');
+
 var _vdom = require('./vdom');
 
 var _component = require('./component');
@@ -14,25 +18,8 @@ var React = {
     findDOMNode: _vdom.findDOMNode,
     createElement: _createElement.createElement, /** babel的默认设置是调用createElement这个函数 */
     render: _vdom.render,
-    createPortal: _vdom.createPortal,
+    cloneElement: _cloneElement.cloneElement,
+    Children: _Children.Children,
     Component: _component.ReactClass
 };
-
-
-window.React = window.ReactDOM = React;
-
-var _default = React;
-exports.default = _default;
-;
-
-var _temp = function () {
-    if (typeof __REACT_HOT_LOADER__ === 'undefined') {
-        return;
-    }
-
-    __REACT_HOT_LOADER__.register(React, 'React', 'app/src/Luy/index.js');
-
-    __REACT_HOT_LOADER__.register(_default, 'default', 'app/src/Luy/index.js');
-}();
-
-;
+exports.default = React;

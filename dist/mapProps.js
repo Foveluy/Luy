@@ -29,6 +29,9 @@ function mapProp(domNode, props) {
         if (typeof mappingStrategy[name] === 'function') {
             mappingStrategy[name](domNode, props[name]);
         }
+        if (mappingStrategy[name] === undefined) {
+            mappingStrategy['otherProps'](domNode, props[name], name);
+        }
     }
 }
 
@@ -55,6 +58,11 @@ var mappingStrategy = exports.mappingStrategy = {
         var oldhtml = domNode.innerHTML;
         if (html.__html !== oldhtml) {
             domNode.innerHTML = html.__html;
+        }
+    },
+    otherProps: function otherProps(domNode, prop, propName) {
+        if (prop && propName) {
+            domNode[propName] = prop;
         }
     }
 };
@@ -124,24 +132,3 @@ function getEventPath(event, end) {
     }
     return path;
 }
-;
-
-var _temp = function () {
-    if (typeof __REACT_HOT_LOADER__ === 'undefined') {
-        return;
-    }
-
-    __REACT_HOT_LOADER__.register(mapProp, 'mapProp', 'app/src/Luy/mapProps.js');
-
-    __REACT_HOT_LOADER__.register(mappingStrategy, 'mappingStrategy', 'app/src/Luy/mapProps.js');
-
-    __REACT_HOT_LOADER__.register(addEvent, 'addEvent', 'app/src/Luy/mapProps.js');
-
-    __REACT_HOT_LOADER__.register(dispatchEvent, 'dispatchEvent', 'app/src/Luy/mapProps.js');
-
-    __REACT_HOT_LOADER__.register(triggerEventByPath, 'triggerEventByPath', 'app/src/Luy/mapProps.js');
-
-    __REACT_HOT_LOADER__.register(getEventPath, 'getEventPath', 'app/src/Luy/mapProps.js');
-}();
-
-;

@@ -425,9 +425,10 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
 
     if (instance) {
         if ((0, _utils.typeNumber)(Vnode.ref) === 3 || (0, _utils.typeNumber)(Vnode.ref) === 4) {
+            //字符串ref
             instance.refs[Vnode.ref] = domNode;
-        }
-        if ((0, _utils.typeNumber)(Vnode.ref) === 5) {
+        } else if ((0, _utils.typeNumber)(Vnode.ref) === 5) {
+            //函数ref
             Vnode.ref(domNode);
         }
     }
@@ -451,44 +452,3 @@ function render(Vnode, container) {
 
     return rootDom;
 }
-;
-
-var _temp = function () {
-    if (typeof __REACT_HOT_LOADER__ === 'undefined') {
-        return;
-    }
-
-    __REACT_HOT_LOADER__.register(createPortal, 'createPortal', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(mountIndex, 'mountIndex', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(instanceProps, 'instanceProps', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(mountIndexAdd, 'mountIndexAdd', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(updateText, 'updateText', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(updateChild, 'updateChild', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(updateComponent, 'updateComponent', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(update, 'update', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(mountComponent, 'mountComponent', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(mountNativeElement, 'mountNativeElement', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(mountTextComponent, 'mountTextComponent', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(mountChild, 'mountChild', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(findDOMNode, 'findDOMNode', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(depth, 'depth', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(renderByLuy, 'renderByLuy', 'app/src/Luy/vdom.js');
-
-    __REACT_HOT_LOADER__.register(render, 'render', 'app/src/Luy/vdom.js');
-}();
-
-;

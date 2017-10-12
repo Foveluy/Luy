@@ -1,14 +1,20 @@
 {
   "name": "luy",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "jest --watch",
     "temp": "NODE_ENV=production webpack -p --config webpack.pro.config.js ",
-    "build": "./node_modules/.bin/babel --out-dir ./release ./app/src/",
+    "build": "./node_modules/.bin/babel --out-dir ./dist ./app/src/Luy",
     "dev": "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback"
   },
+  "keywords": [
+    "react-like",
+    "react",
+    "react-compat",
+    "performance"
+  ],
   "author": "Fangzheng",
   "license": "MIT",
   "devDependencies": {

@@ -12,7 +12,7 @@
   ],
   "plugins": [
     "transform-runtime",
-    "react-hot-loader/babel",
+    // "react-hot-loader/babel",
     "transform-object-rest-spread",
     ["transform-react-jsx", {
       "pragma": "React.createElement" // 默认 pragma 为 React.createElement

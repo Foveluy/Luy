@@ -83,8 +83,11 @@ function createElement(type, config) {
         }
     }
 
-    if (typeof type === 'function' && type.__proto__.name !== 'ReactClass') {
-        return new type(props);
+    if (typeof type === 'function') {
+        var newComponent = new type(props);
+        if (!newComponent.render) {
+            return newComponent;
+        }
     }
 
     return new Vnode(type, props, key, ref);
@@ -153,22 +156,3 @@ function flattenChildren(children) {
 
 exports.createElement = createElement;
 exports.Vnode = Vnode;
-;
-
-var _temp = function () {
-    if (typeof __REACT_HOT_LOADER__ === 'undefined') {
-        return;
-    }
-
-    __REACT_HOT_LOADER__.register(tmp, 'tmp', 'app/src/Luy/createElement.js');
-
-    __REACT_HOT_LOADER__.register(RESERVED_PROPS, 'RESERVED_PROPS', 'app/src/Luy/createElement.js');
-
-    __REACT_HOT_LOADER__.register(Vnode, 'Vnode', 'app/src/Luy/createElement.js');
-
-    __REACT_HOT_LOADER__.register(createElement, 'createElement', 'app/src/Luy/createElement.js');
-
-    __REACT_HOT_LOADER__.register(flattenChildren, 'flattenChildren', 'app/src/Luy/createElement.js');
-}();
-
-;
