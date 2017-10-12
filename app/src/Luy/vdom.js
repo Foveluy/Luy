@@ -145,7 +145,7 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
                         const parent = removeNode._PortalHostNode.parentNode
                         parent.removeChild(removeNode._PortalHostNode)
                     } else {
-                        if(oldChild[oldStartIndex]._hostNode){//有可能会出现undefind的情况
+                        if (oldChild[oldStartIndex]._hostNode) {//有可能会出现undefind的情况
                             parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
                         }
                     }
@@ -163,7 +163,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
         oldContext,
         oldVnode
     } = instanceProps(oldComponentVnode)
-    
+
     const newProps = newComponentVnode.props
     const newContext = parentContext
     const newInstance = new newComponentVnode.type(newProps)
@@ -387,16 +387,16 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     const { type, props } = Vnode
     const { children } = props
     let domNode
-    
+
     if (typeof type === 'function') {
         const fixContext = parentContext || {}
         domNode = mountComponent(Vnode, container, fixContext)
     } else if (typeof type === 'string' && type === '#text') {
         domNode = mountTextComponent(Vnode, container)
-    } else{
+    } else {
         domNode = document.createElement(type)
     }
-    
+
     //如果是组件先不渲染子嗣
     if (typeof type !== 'function') {
         //特殊处理，当children=0数字的时候也能渲染了
@@ -412,7 +412,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
             //字符串ref
             instance.refs[Vnode.ref] = domNode
         }
-        if (typeNumber(Vnode.ref) === 5) {
+        else if (typeNumber(Vnode.ref) === 5) {
             //函数ref
             Vnode.ref(domNode)
         }
