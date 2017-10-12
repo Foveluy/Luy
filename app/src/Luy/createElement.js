@@ -58,7 +58,7 @@ function createElement(type: string | Function, config, ...children: array) {
     let defaultProps = type.defaultProps;
     if (defaultProps) {
         for (let propName in defaultProps) {
-            if (props[propName] === 'undefined') {
+            if (props[propName] === undefined) {
                 props[propName] = defaultProps[propName];
             }
         }
