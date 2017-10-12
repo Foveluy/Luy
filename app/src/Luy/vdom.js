@@ -409,9 +409,11 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
 
     if (instance) {
         if (typeNumber(Vnode.ref) === 3 || typeNumber(Vnode.ref) === 4) {
+            //字符串ref
             instance.refs[Vnode.ref] = domNode
         }
         if (typeNumber(Vnode.ref) === 5) {
+            //函数ref
             Vnode.ref(domNode)
         }
     }
