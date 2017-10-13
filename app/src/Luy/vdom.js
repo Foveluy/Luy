@@ -2,6 +2,7 @@
 import { typeNumber, isSameVnode, mapKeyToIndex, isEventName, extend } from "./utils";
 import { flattenChildren, Vnode } from './createElement'
 import { mapProp, mappingStrategy } from './mapProps'
+import { setRef } from './Refs'
 import { Com } from './component'
 
 
@@ -406,30 +407,18 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
         }
     }
 
-
-    if (instance) {
-        if (typeNumber(Vnode.ref) === 3 || typeNumber(Vnode.ref) === 4) {
-            //字符串ref
-            instance.refs[Vnode.ref] = domNode
-        }
-        else if (typeNumber(Vnode.ref) === 5) {
-            //函数ref
-            Vnode.ref(domNode)
-        }
-    }
-
+    setRef(Vnode, instance, domNode)
     mapProp(domNode, props) //为元素添加props
 
     Vnode._hostNode = domNode //缓存真实节点
-
 
     if (isUpdate) {
         return domNode
     } else {
         Vnode._mountIndex = mountIndexAdd()
-        if (container && domNode && container.nodeName !== '#text')
+        if (container && domNode && container.nodeName !== '#text'){
             container.appendChild(domNode)
-
+        }
     }
     return domNode
 }

@@ -88,9 +88,7 @@ export default class App extends React.Component {
     console.log('更新完毕')
   }
   click(e) {
-    this.setState({
-      counter: this.state.counter + 1
-    })
+    console.log(this.button)
   }
   render() {
     return (
