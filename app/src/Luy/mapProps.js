@@ -2,7 +2,6 @@ import { typeNumber, isEventName, isEventNameLowerCase, options } from "./utils"
 import { SyntheticEvent } from './event'
 
 export function mapProp(domNode, props) {
-
     for (let name in props) {
         if (name === 'children') continue
         if (isEventName(name)) {
@@ -17,6 +16,25 @@ export function mapProp(domNode, props) {
             mappingStrategy['otherProps'](domNode, props[name], name)
         }
     }
+}
+
+export function updateProps(oldProps, newProps, hostNode) {
+    for (let name in oldProps) {//修改原来有的属性
+        if (name === 'children') continue
+        
+        if(oldProps[name] !== newProps[name]){
+            mapProp(hostNode,newProps)
+        }
+    }
+    
+    let restProps = {}
+    for(let newName in newProps){//新增原来没有的属性
+        if(!oldProps[newName]){
+            restProps[newName] = newProps[newName]
+        }
+    }
+    mapProp(hostNode,restProps)
+
 }
 
 export const mappingStrategy = {
@@ -45,11 +63,12 @@ export const mappingStrategy = {
         }
     },
     otherProps: function (domNode, prop, propName) {
-        if (prop && propName ) {
+        if (prop && propName) {
             domNode[propName] = prop
         }
     }
 }
+
 
 function addEvent(domNode, fn, eventName) {
     if (domNode.addEventListener) {

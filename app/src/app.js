@@ -63,7 +63,8 @@ export default class App extends React.Component {
     super(props)
 
     this.state = {
-      counter: 1
+      counter: 1,
+      fn: (node) => { this.node = node }
     }
     // setInterval(() => {
     //   this.setState({ counter: this.state.counter + 1 })
@@ -88,14 +89,14 @@ export default class App extends React.Component {
     console.log('更新完毕')
   }
   click(e) {
-    console.log(this.button)
+
   }
   render() {
     return (
       <div key={1} ref='haha' style={{ background: `rgb(99,99,${this.state.counter})` }}>
         <div dangerouslySetInnerHTML={{ __html: this.state.counter }}>111</div>
-        <button ref={(node) => { this.button = node }} onClick={this.click.bind(this)}>点我</button>
-        <a href='http://www.baidu.com'>fz</a>
+        <button ref={this.state.fn} onClick={this.click.bind(this)}>点我</button>
+        <a href='http://www.baidu.com' >fz</a>
       </div>
     )
   }

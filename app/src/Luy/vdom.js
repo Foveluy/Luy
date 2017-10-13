@@ -1,7 +1,7 @@
 //@flow
 import { typeNumber, isSameVnode, mapKeyToIndex, isEventName, extend } from "./utils";
 import { flattenChildren, Vnode } from './createElement'
-import { mapProp, mappingStrategy } from './mapProps'
+import { mapProp, mappingStrategy, updateProps } from './mapProps'
 import { setRef } from './Refs'
 import { Com } from './component'
 
@@ -221,7 +221,6 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
 export function update(oldVnode, newVnode, parentDomNode: Element, parentContext) {
     newVnode._hostNode = oldVnode._hostNode
-
     if (oldVnode.type === newVnode.type) {
         if (oldVnode.type === "#text") {
             newVnode._hostNode = oldVnode._hostNode //更新一个dom节点
@@ -230,21 +229,22 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
             return newVnode
         }
         if (typeof oldVnode.type === 'string') {//原生html
+            updateProps(oldVnode.props, newVnode.props, newVnode._hostNode)
+
+            if (oldVnode.ref !== newVnode.ref) {
+                if (typeNumber(oldVnode.ref) === 5) {
+                    oldVnode.ref(null)
+                }
+                setRef(newVnode, oldVnode.owner, newVnode._hostNode)
+            }
+
+
             //更新后的child，返回给组件
             newVnode.props.children = updateChild(
                 oldVnode.props.children,
                 newVnode.props.children,
                 oldVnode._hostNode,
                 parentContext)
-
-            const nextStyle = newVnode.props.style;
-            //更新css
-            if (oldVnode.props.style !== nextStyle) {
-                Object.keys(nextStyle).forEach((s) => newVnode._hostNode.style[s] = nextStyle[s])
-            }
-            if (newVnode.props.dangerouslySetInnerHTML) {
-                mappingStrategy['dangerouslySetInnerHTML'](newVnode._hostNode, newVnode.props['dangerouslySetInnerHTML'])
-            }
         }
         if (typeof oldVnode.type === 'function') {//非原生
             updateComponent(oldVnode, newVnode, parentContext)
@@ -416,7 +416,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
         return domNode
     } else {
         Vnode._mountIndex = mountIndexAdd()
-        if (container && domNode && container.nodeName !== '#text'){
+        if (container && domNode && container.nodeName !== '#text') {
             container.appendChild(domNode)
         }
     }
