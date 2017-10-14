@@ -35,6 +35,9 @@ function createPortal(children, container) {
 
 
 var mountIndex = 0; //全局变量
+var Owner = {
+    cur: null
+};
 
 function instanceProps(componentVnode) {
     return {
@@ -272,9 +275,11 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
  * @param {*} Vnode 
  * @param {Element} parentDomNode 
  */
-function mountComponent(Vnode, parentDomNode, parentContext) {
+function mountComponent(Vnode, parentDomNode, parentContext, ownerInstance, userOwner) {
     var type = Vnode.type,
-        props = Vnode.props;
+        props = Vnode.props,
+        key = Vnode.key,
+        ref = Vnode.ref;
 
 
     var Component = type;
@@ -293,16 +298,15 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
     }
 
     var renderedVnode = instance.render();
-    // if(props.children !== renderedVnode.props.children){
-    //     throw new Error('你不能在渲染期间改变props.children')
-    // }
+    renderedVnode.key = key || null;
 
     if (!renderedVnode) {
         console.warn('你可能忘记在组件render()方法中返回jsx了');
         return;
     }
+    var fixInstance = userOwner ? ownerInstance : instance;
 
-    var domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance);
+    var domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, fixInstance);
 
     if (instance.componentDidMount) {
         instance.lifeCycle = _component.Com.MOUNTTING;
@@ -316,6 +320,8 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
     instance.Vnode._mountIndex = mountIndexAdd();
 
     Vnode._instance = instance; // 在父节点上的child元素会保存一个自己
+
+    (0, _Refs.setRef)(Vnode, ownerInstance, domNode);
 
     if (renderedVnode._PortalHostNode) {
         //支持react createPortal
@@ -356,15 +362,24 @@ function mountChild(childrenVnode, parentDomNode, parentContext, instance) {
 
     if (childType === 8 && childrenVnode !== undefined) {
         //Vnode
-        flattenChildList._hostNode = mountNativeElement(flattenChildList, parentDomNode, instance);
+        if ((0, _utils.typeNumber)(childrenVnode.type) === 5) {
+
+            flattenChildList._hostNode = mountComponent(flattenChildList, parentDomNode, parentContext, instance);
+        } else if ((0, _utils.typeNumber)(childrenVnode.type) === 3 || (0, _utils.typeNumber)(childrenVnode.type) === 4) {
+            flattenChildList._hostNode = mountNativeElement(flattenChildList, parentDomNode, instance);
+        }
     }
     if (childType === 7) {
         //list
         flattenChildList = (0, _createElement.flattenChildren)(childrenVnode);
-
         flattenChildList.forEach(function (item) {
+            if (typeof item.type === 'function') {
+                //这里是一个蛋疼的操作，以后需要拿出来重新弄过
 
-            renderByLuy(item, parentDomNode, false, parentContext, instance);
+                mountComponent(item, parentDomNode, parentContext, instance, true);
+            } else {
+                renderByLuy(item, parentDomNode, false, parentContext, instance);
+            }
         });
     }
     if (childType === 4 || childType === 3) {
@@ -403,7 +418,11 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
 
     if (typeof type === 'function') {
         var fixContext = parentContext || {};
-        domNode = mountComponent(Vnode, container, fixContext);
+        var userOwner = false;
+        if (instance) {
+            userOwner = true;
+        }
+        domNode = mountComponent(Vnode, container, fixContext, instance, userOwner);
     } else if (typeof type === 'string' && type === '#text') {
         domNode = mountTextComponent(Vnode, container);
     } else {

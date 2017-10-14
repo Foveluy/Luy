@@ -12,6 +12,7 @@ export function setRef(Vnode, instance, domNode) {
 const refStrategy = {
     3: function (Vnode, instance, domNode) {
         if (Vnode._instance) {
+            
             instance.refs[Vnode.ref] = Vnode._instance
         } else {
             instance.refs[Vnode.ref] = domNode

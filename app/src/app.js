@@ -59,8 +59,11 @@ const Pure = ({ shit }) => {
 }
 
 class B extends React.Component {
+  componentDidMount() {
+    console.log(this.refs)
+  }
   render() {
-    return <div className='bb'>{this.props.children}</div>;
+    return <div className='bb' ref={'iut'}>{this.props.children}</div>;
   }
 }
 
@@ -95,16 +98,13 @@ export default class App extends React.Component {
 
   }
   render() {
-    const cc = <B ref={n => { 
-      console.log('??')
-      this.node = n
-    }} />
+    const cc = <B ref='fuck' />
     const wrap = (
       <B >
         {cc}
       </B>
     )
-
+    
     return (
       <div key={1} ref='haha' style={{ background: `rgb(99,99,${this.state.counter})` }}>
         asd

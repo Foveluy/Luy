@@ -92,6 +92,7 @@ describe("ReactComponent", function() {
       }
 
       componentDidMount() {
+        console.log(this)
         expect(this.refs.inner.getObject()).toEqual(innerObj);
         expect(this.refs.outer.getObject()).toEqual(outerObj);
       }
@@ -146,14 +147,12 @@ describe("ReactComponent", function() {
             {inner}
           </Wrapper>
         );
-        console.log(outer)
         return outer;
       }
 
       componentDidMount() {
-        
-        // expect(this.innerRef.getObject()).toEqual(innerObj);
-        // expect(this.outerRef.getObject()).toEqual(outerObj);
+        expect(this.innerRef.getObject()).toEqual(innerObj);
+        expect(this.outerRef.getObject()).toEqual(outerObj);
         mounted = true;
       }
     }
