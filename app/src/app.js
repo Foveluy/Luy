@@ -58,6 +58,12 @@ const Pure = ({ shit }) => {
   )
 }
 
+class B extends React.Component {
+  render() {
+    return <div className='bb'>{this.props.children}</div>;
+  }
+}
+
 export default class App extends React.Component {
   constructor(props) {
     super(props)
@@ -66,10 +72,7 @@ export default class App extends React.Component {
       counter: 1,
       fn: (node) => { this.node = node }
     }
-    // setInterval(() => {
-    //   this.setState({ counter: this.state.counter + 1 })
-    // }, 1500)
-    // 
+
   }
 
   getChildContext() {
@@ -80,7 +83,7 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    console.log('组件挂载')
+    console.log(this)
   }
   componentWillMount() {
     console.log('将要挂载')
@@ -92,11 +95,20 @@ export default class App extends React.Component {
 
   }
   render() {
+    const cc = <B ref={n => { 
+      console.log('??')
+      this.node = n
+    }} />
+    const wrap = (
+      <B >
+        {cc}
+      </B>
+    )
+
     return (
       <div key={1} ref='haha' style={{ background: `rgb(99,99,${this.state.counter})` }}>
-        <div dangerouslySetInnerHTML={{ __html: this.state.counter }}>111</div>
-        <button ref={this.state.fn} onClick={this.click.bind(this)}>点我</button>
-        <a href='http://www.baidu.com' >fz</a>
+        asd
+        {wrap}
       </div>
     )
   }

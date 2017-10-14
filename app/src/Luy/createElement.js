@@ -70,7 +70,7 @@ function createElement(type: string | Function, config, ...children: array) {
             return newComponent
         }
     }
-
+    
     return new Vnode(type, props, key, ref);
 }
 

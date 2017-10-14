@@ -3,11 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-
-var _keys = require('babel-runtime/core-js/object/keys');
-
-var _keys2 = _interopRequireDefault(_keys);
-
 exports.createPortal = createPortal;
 exports.update = update;
 exports.findDOMNode = findDOMNode;
@@ -19,9 +14,9 @@ var _createElement = require('./createElement');
 
 var _mapProps = require('./mapProps');
 
-var _component = require('./component');
+var _Refs = require('./Refs');
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _component = require('./component');
 
 //Top Api
 function createPortal(children, container) {
@@ -37,6 +32,7 @@ function createPortal(children, container) {
     CreatePortalVnode._PortalHostNode = container;
     return CreatePortalVnode;
 }
+
 
 var mountIndex = 0; //全局变量
 
@@ -229,7 +225,6 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
 function update(oldVnode, newVnode, parentDomNode, parentContext) {
     newVnode._hostNode = oldVnode._hostNode;
-
     if (oldVnode.type === newVnode.type) {
         if (oldVnode.type === "#text") {
             newVnode._hostNode = oldVnode._hostNode; //更新一个dom节点
@@ -239,19 +234,17 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
         }
         if (typeof oldVnode.type === 'string') {
             //原生html
+            (0, _mapProps.updateProps)(oldVnode.props, newVnode.props, newVnode._hostNode);
+
+            if (oldVnode.ref !== newVnode.ref) {
+                if ((0, _utils.typeNumber)(oldVnode.ref) === 5) {
+                    oldVnode.ref(null);
+                }
+                (0, _Refs.setRef)(newVnode, oldVnode.owner, newVnode._hostNode);
+            }
+
             //更新后的child，返回给组件
             newVnode.props.children = updateChild(oldVnode.props.children, newVnode.props.children, oldVnode._hostNode, parentContext);
-
-            var nextStyle = newVnode.props.style;
-            //更新css
-            if (oldVnode.props.style !== nextStyle) {
-                (0, _keys2.default)(nextStyle).forEach(function (s) {
-                    return newVnode._hostNode.style[s] = nextStyle[s];
-                });
-            }
-            if (newVnode.props.dangerouslySetInnerHTML) {
-                _mapProps.mappingStrategy['dangerouslySetInnerHTML'](newVnode._hostNode, newVnode.props['dangerouslySetInnerHTML']);
-            }
         }
         if (typeof oldVnode.type === 'function') {
             //非原生
@@ -300,6 +293,9 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
     }
 
     var renderedVnode = instance.render();
+    // if(props.children !== renderedVnode.props.children){
+    //     throw new Error('你不能在渲染期间改变props.children')
+    // }
 
     if (!renderedVnode) {
         console.warn('你可能忘记在组件render()方法中返回jsx了');
@@ -423,26 +419,18 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
         }
     }
 
-    if (instance) {
-        if ((0, _utils.typeNumber)(Vnode.ref) === 3 || (0, _utils.typeNumber)(Vnode.ref) === 4) {
-            //字符串ref
-            instance.refs[Vnode.ref] = domNode;
-        } else if ((0, _utils.typeNumber)(Vnode.ref) === 5) {
-            //函数ref
-            Vnode.ref(domNode);
-        }
-    }
-
+    (0, _Refs.setRef)(Vnode, instance, domNode);
     (0, _mapProps.mapProp)(domNode, props); //为元素添加props
 
     Vnode._hostNode = domNode; //缓存真实节点
-
 
     if (isUpdate) {
         return domNode;
     } else {
         Vnode._mountIndex = mountIndexAdd();
-        if (container && domNode && container.nodeName !== '#text') container.appendChild(domNode);
+        if (container && domNode && container.nodeName !== '#text') {
+            container.appendChild(domNode);
+        }
     }
     return domNode;
 }

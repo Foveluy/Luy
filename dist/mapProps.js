@@ -10,6 +10,7 @@ var _keys = require('babel-runtime/core-js/object/keys');
 var _keys2 = _interopRequireDefault(_keys);
 
 exports.mapProp = mapProp;
+exports.updateProps = updateProps;
 
 var _utils = require('./utils');
 
@@ -18,7 +19,6 @@ var _event = require('./event');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function mapProp(domNode, props) {
-
     for (var name in props) {
         if (name === 'children') continue;
         if ((0, _utils.isEventName)(name)) {
@@ -33,6 +33,26 @@ function mapProp(domNode, props) {
             mappingStrategy['otherProps'](domNode, props[name], name);
         }
     }
+}
+
+function updateProps(oldProps, newProps, hostNode) {
+    for (var name in oldProps) {
+        //修改原来有的属性
+        if (name === 'children') continue;
+
+        if (oldProps[name] !== newProps[name]) {
+            mapProp(hostNode, newProps);
+        }
+    }
+
+    var restProps = {};
+    for (var newName in newProps) {
+        //新增原来没有的属性
+        if (!oldProps[newName]) {
+            restProps[newName] = newProps[newName];
+        }
+    }
+    mapProp(hostNode, restProps);
 }
 
 var mappingStrategy = exports.mappingStrategy = {
@@ -82,9 +102,7 @@ function dispatchEvent(event, eventName, end) {
     _utils.options.async = true;
 
     triggerEventByPath(E, path); //触发event默认以冒泡形式
-    console.log(E.type);
     _utils.options.async = false;
-
     for (var dirty in _utils.options.dirtyComponent) {
         _utils.options.dirtyComponent[dirty].updateComponent();
     }

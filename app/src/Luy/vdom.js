@@ -272,7 +272,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
  * @param {Element} parentDomNode 
  */
 function mountComponent(Vnode, parentDomNode: Element, parentContext) {
-    const { type, props } = Vnode
+    const { type, props, key, ref } = Vnode
 
     const Component = type
     const instance = new Component(props)
@@ -288,6 +288,11 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     }
 
     const renderedVnode = instance.render()
+    renderedVnode.key = key || null
+    renderedVnode.ref = ref || null
+    // if(props.children !== renderedVnode.props.children){
+    //     throw new Error('你不能在渲染期间改变props.children')
+    // }
 
     if (!renderedVnode) {
         console.warn('你可能忘记在组件render()方法中返回jsx了')
@@ -346,7 +351,11 @@ function mountChild(childrenVnode, parentDomNode: Element, parentContext, instan
     }
 
     if (childType === 8 && childrenVnode !== undefined) { //Vnode
-        flattenChildList._hostNode = mountNativeElement(flattenChildList, parentDomNode, instance)
+        if (typeNumber(childrenVnode.type) === 5) {
+            flattenChildList._hostNode = mountComponent(flattenChildList, parentDomNode, parentContext)
+        } else if (typeNumber(childrenVnode.type) === 3 || typeNumber(childrenVnode.type) === 4) {
+            flattenChildList._hostNode = mountNativeElement(flattenChildList, parentDomNode, instance)
+        }
     }
     if (childType === 7) {//list
         flattenChildList = flattenChildren(childrenVnode)
@@ -384,7 +393,6 @@ export function findDOMNode(ref) {
  */
 let depth = 0
 function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext, instance) {
-
     const { type, props } = Vnode
     const { children } = props
     let domNode
