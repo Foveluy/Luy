@@ -25,6 +25,9 @@ export function createPortal(children, container) {
 
 let mountIndex = 0 //全局变量
 const Owner = []
+export var currentOwner = {
+    cur: null
+};
 
 function instanceProps(componentVnode) {
     return {
@@ -199,6 +202,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
     newInstance.state = oldState
     newInstance.context = newContext
 
+
     const newVnode = newInstance.render()
 
     //更新原来组件的信息
@@ -271,7 +275,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
  * @param {*} Vnode 
  * @param {Element} parentDomNode 
  */
-function mountComponent(Vnode, parentDomNode: Element, parentContext, ownerInstance, userOwner) {
+function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     const { type, props, key, ref } = Vnode
 
     const Component = type
@@ -286,19 +290,18 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext, ownerInsta
     if (instance.componentWillMount) {//生命周期函数
         instance.componentWillMount()
     }
-
+    let lastOwner = currentOwner.cur
+    currentOwner.cur = instance
     const renderedVnode = instance.render()
+    currentOwner.cur = lastOwner
+
     renderedVnode.key = key || null
 
     if (!renderedVnode) {
         console.warn('你可能忘记在组件render()方法中返回jsx了')
         return
     }
-    const fixInstance = userOwner ? ownerInstance : instance
-    if (!userOwner) {
-        console.log(fixInstance)
-    }
-    const domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, fixInstance)
+    const domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance)
 
     if (instance.componentDidMount) {
         instance.lifeCycle = Com.MOUNTTING
@@ -313,7 +316,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext, ownerInsta
 
     Vnode._instance = instance // 在父节点上的child元素会保存一个自己
 
-    setRef(Vnode, fixInstance, domNode)
+    setRef(Vnode, instance, domNode)
 
     if (renderedVnode._PortalHostNode) {//支持react createPortal
         Vnode._PortalHostNode = renderedVnode._PortalHostNode
@@ -362,7 +365,7 @@ function mountChild(childrenVnode, parentDomNode: Element, parentContext, instan
         flattenChildList = flattenChildren(childrenVnode)
         flattenChildList.forEach((item) => {
             if (typeof item.type === 'function') { //如果是组件先不渲染子嗣
-                mountComponent(item, parentDomNode, parentContext, instance, false)
+                mountComponent(item, parentDomNode, parentContext)
             } else {
                 renderByLuy(item, parentDomNode, false, parentContext, instance)
             }
@@ -399,28 +402,28 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     const { type, props } = Vnode
     const { children } = props
     let domNode
-    
+
     if (typeof type === 'function') {
         const fixContext = parentContext || {}
         let userOwner = false
         if (instance) {
             userOwner = true
         }
-        domNode = mountComponent(Vnode, container, fixContext, instance,userOwner)
+        domNode = mountComponent(Vnode, container, fixContext, instance, userOwner)
     } else if (typeof type === 'string' && type === '#text') {
         domNode = mountTextComponent(Vnode, container)
     } else {
         domNode = document.createElement(type)
     }
-    
+
     if (typeNumber(children) > 2 && children !== undefined) {
         const NewChild = mountChild(children, domNode, parentContext, instance)//flatten之后的child 要保存下来
         props.children = NewChild
     }
-    
+
     setRef(Vnode, instance, domNode)
     mapProp(domNode, props) //为元素添加props
-    Owner.push([Vnode.ref,Vnode.owner, '-->', type])
+    Owner.push([domNode, Vnode.ref, '-->', type])
     Vnode._hostNode = domNode //缓存真实节点
 
     if (isUpdate) {

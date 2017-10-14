@@ -1,5 +1,5 @@
 import { typeNumber } from "./utils";
-
+import {currentOwner} from './vdom'
 
 var tmp =[]
 
@@ -13,6 +13,7 @@ const RESERVED_PROPS = {
 
 class Vnode {
     constructor(type, props, key, ref) {
+        console.log([currentOwner.cur,ref])
         this.type = type
         this.props = props
         this.key = key
