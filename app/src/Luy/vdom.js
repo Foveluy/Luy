@@ -423,7 +423,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
 
     setRef(Vnode, instance, domNode)
     mapProp(domNode, props) //为元素添加props
-    Owner.push([domNode, Vnode.ref, '-->', type])
+    
     Vnode._hostNode = domNode //缓存真实节点
 
     if (isUpdate) {
@@ -439,6 +439,6 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
 
 export function render(Vnode, container) {
     const rootDom = renderByLuy(Vnode, container)
-    console.log(Owner)
+    
     return rootDom
 }

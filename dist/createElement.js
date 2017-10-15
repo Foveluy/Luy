@@ -13,6 +13,8 @@ exports.flattenChildren = flattenChildren;
 
 var _utils = require('./utils');
 
+var _vdom = require('./vdom');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var tmp = [];
@@ -27,6 +29,8 @@ var RESERVED_PROPS = {
 var Vnode = function Vnode(type, props, key, ref) {
     (0, _classCallCheck3.default)(this, Vnode);
 
+    // console.log([currentOwner.cur,ref])
+    this.owner = _vdom.currentOwner.cur;
     this.type = type;
     this.props = props;
     this.key = key;

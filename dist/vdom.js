@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.currentOwner = undefined;
 exports.createPortal = createPortal;
 exports.update = update;
 exports.findDOMNode = findDOMNode;
@@ -35,7 +36,8 @@ function createPortal(children, container) {
 
 
 var mountIndex = 0; //全局变量
-var Owner = {
+var Owner = [];
+var currentOwner = exports.currentOwner = {
     cur: null
 };
 
@@ -275,7 +277,7 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
  * @param {*} Vnode 
  * @param {Element} parentDomNode 
  */
-function mountComponent(Vnode, parentDomNode, parentContext, ownerInstance, userOwner) {
+function mountComponent(Vnode, parentDomNode, parentContext) {
     var type = Vnode.type,
         props = Vnode.props,
         key = Vnode.key,
@@ -296,17 +298,18 @@ function mountComponent(Vnode, parentDomNode, parentContext, ownerInstance, user
         //生命周期函数
         instance.componentWillMount();
     }
-
+    var lastOwner = currentOwner.cur;
+    currentOwner.cur = instance;
     var renderedVnode = instance.render();
+    currentOwner.cur = lastOwner;
+
     renderedVnode.key = key || null;
 
     if (!renderedVnode) {
         console.warn('你可能忘记在组件render()方法中返回jsx了');
         return;
     }
-    var fixInstance = userOwner ? ownerInstance : instance;
-
-    var domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, fixInstance);
+    var domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance);
 
     if (instance.componentDidMount) {
         instance.lifeCycle = _component.Com.MOUNTTING;
@@ -321,7 +324,7 @@ function mountComponent(Vnode, parentDomNode, parentContext, ownerInstance, user
 
     Vnode._instance = instance; // 在父节点上的child元素会保存一个自己
 
-    (0, _Refs.setRef)(Vnode, ownerInstance, domNode);
+    (0, _Refs.setRef)(Vnode, instance, domNode);
 
     if (renderedVnode._PortalHostNode) {
         //支持react createPortal
@@ -363,8 +366,7 @@ function mountChild(childrenVnode, parentDomNode, parentContext, instance) {
     if (childType === 8 && childrenVnode !== undefined) {
         //Vnode
         if ((0, _utils.typeNumber)(childrenVnode.type) === 5) {
-
-            flattenChildList._hostNode = mountComponent(flattenChildList, parentDomNode, parentContext, instance);
+            flattenChildList._hostNode = renderByLuy(flattenChildList, parentDomNode, false, parentContext, instance);
         } else if ((0, _utils.typeNumber)(childrenVnode.type) === 3 || (0, _utils.typeNumber)(childrenVnode.type) === 4) {
             flattenChildList._hostNode = mountNativeElement(flattenChildList, parentDomNode, instance);
         }
@@ -374,9 +376,8 @@ function mountChild(childrenVnode, parentDomNode, parentContext, instance) {
         flattenChildList = (0, _createElement.flattenChildren)(childrenVnode);
         flattenChildList.forEach(function (item) {
             if (typeof item.type === 'function') {
-                //这里是一个蛋疼的操作，以后需要拿出来重新弄过
-
-                mountComponent(item, parentDomNode, parentContext, instance, true);
+                //如果是组件先不渲染子嗣
+                mountComponent(item, parentDomNode, parentContext);
             } else {
                 renderByLuy(item, parentDomNode, false, parentContext, instance);
             }
@@ -429,13 +430,9 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
         domNode = document.createElement(type);
     }
 
-    //如果是组件先不渲染子嗣
-    if (typeof type !== 'function') {
-        //特殊处理，当children=0数字的时候也能渲染了
-        if ((0, _utils.typeNumber)(children) > 2 && children !== undefined) {
-            var NewChild = mountChild(children, domNode, parentContext, instance); //flatten之后的child 要保存下来
-            props.children = NewChild;
-        }
+    if ((0, _utils.typeNumber)(children) > 2 && children !== undefined) {
+        var NewChild = mountChild(children, domNode, parentContext, instance); //flatten之后的child 要保存下来
+        props.children = NewChild;
     }
 
     (0, _Refs.setRef)(Vnode, instance, domNode);
