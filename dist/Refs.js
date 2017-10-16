@@ -9,7 +9,6 @@ var _utils = require('./utils');
 
 function setRef(Vnode, instance, domNode) {
     if (instance) {
-        // console.log(Vnode.owner)
         var refType = (0, _utils.typeNumber)(Vnode.ref);
         if (refStrategy[refType]) {
             refStrategy[refType](Vnode, Vnode.owner, domNode);

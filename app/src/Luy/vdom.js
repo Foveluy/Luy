@@ -270,6 +270,8 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
     }
     return newVnode
 }
+
+
 /**
  * 渲染自定义组件
  * @param {*} Vnode 
@@ -402,7 +404,6 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     const { type, props } = Vnode
     const { children } = props
     let domNode
-
     if (typeof type === 'function') {
         const fixContext = parentContext || {}
         let userOwner = false
@@ -438,6 +439,9 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
 }
 
 export function render(Vnode, container) {
+    if(typeNumber(container) !== 8){
+        throw new Error('Target container is not a DOM element.')
+    }
     const rootDom = renderByLuy(Vnode, container)
     
     return rootDom

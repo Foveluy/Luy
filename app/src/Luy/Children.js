@@ -34,7 +34,13 @@ export const Children = {
         return flattenChildren(childVnode).length
     },
     forEach(childVnode, callback, context) {
-        flattenChildren(childVnode).forEach(callback, context);
+        let flatten = flattenChildren(childVnode)
+        console.log(flatten)
+        if(typeNumber(flatten) === 7){
+            flattenChildren(childVnode).forEach(callback, context);
+        }else{
+            callback.call(context,childVnode)
+        }
     },
 
     toArray: function (childVnode) {

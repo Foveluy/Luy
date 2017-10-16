@@ -272,6 +272,7 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
     }
     return newVnode;
 }
+
 /**
  * 渲染自定义组件
  * @param {*} Vnode 
@@ -416,7 +417,6 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
     var children = props.children;
 
     var domNode = void 0;
-
     if (typeof type === 'function') {
         var fixContext = parentContext || {};
         var userOwner = false;
@@ -452,6 +452,9 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
 }
 
 function render(Vnode, container) {
+    if ((0, _utils.typeNumber)(container) !== 8) {
+        throw new Error('Target container is not a DOM element.');
+    }
     var rootDom = renderByLuy(Vnode, container);
 
     return rootDom;
