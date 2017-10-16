@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "./build.sh",
-    "jest":"jest --watch",
+    "jest": "jest --watch",
     "temp": "NODE_ENV=production webpack -p --config webpack.pro.config.js ",
     "build": "./node_modules/.bin/babel --out-dir ./dist ./app/src/Luy",
     "dev": "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback"

@@ -141,24 +141,52 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
             for (; oldStartIndex - 1 < oldEndIndex; oldStartIndex++) {
                 if (oldChild[oldStartIndex]) {
                     let removeNode = oldChild[oldStartIndex]
-                    if (typeof oldChild[oldStartIndex].type === 'function') {//不完整的实现，如果孩子是component无法调用到
-                        if (removeNode._instance.componentWillUnMount) {
-                            removeNode._instance.componentWillUnMount()
-                        }
-                    }
-                    if (removeNode._PortalHostNode) {
-                        const parent = removeNode._PortalHostNode.parentNode
-                        parent.removeChild(removeNode._PortalHostNode)
-                    } else {
-                        if (oldChild[oldStartIndex]._hostNode) {//有可能会出现undefind的情况
-                            parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
-                        }
-                    }
+                    // if (typeof oldChild[oldStartIndex].type === 'function') {//不完整的实现，如果孩子是component无法调用到
+                    //     if (removeNode._instance.componentWillUnMount) {
+                    //         removeNode._instance.componentWillUnMount()
+                    //     }
+                    // }
+                    // if (removeNode._PortalHostNode) {
+                    //     const parent = removeNode._PortalHostNode.parentNode
+                    //     parent.removeChild(removeNode._PortalHostNode)
+                    // } else {
+                    //     if (oldChild[oldStartIndex]._hostNode) {//有可能会出现undefind的情况
+                    //         parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
+                    //     }
+                    // }
+                    disposeVnode(removeNode)
                 }
             }
         }
     }
     return newChild
+}
+
+function disposeVnode(Vnode){//主要用于删除Vnode对应的节点
+    if(typeof Vnode.type === 'function'){
+        if (removeNode._instance.componentWillUnMount) {
+            removeNode._instance.componentWillUnMount()
+        }
+    }
+    if(Vnode.props.children){
+        const children = Vnode.props.children
+        children.forEach((child)=>{
+            if(typeof child.type === 'function'){
+                if (child._instance.componentWillUnMount) {
+                    child._instance.componentWillUnMount()
+                }
+            }
+        })
+    }
+    if (Vnode._PortalHostNode) {
+        const parent = Vnode._PortalHostNode.parentNode
+        parent.removeChild(Vnode._PortalHostNode)
+    } else {
+        if (Vnode._hostNode) {//有可能会出现undefind的情况
+            const parent = Vnode._hostNode.parentNode
+            parent.removeChild(Vnode._hostNode)
+        }
+    }
 }
 
 function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
@@ -424,7 +452,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
 
     setRef(Vnode, instance, domNode)
     mapProp(domNode, props) //为元素添加props
-    
+
     Vnode._hostNode = domNode //缓存真实节点
 
     if (isUpdate) {
@@ -439,10 +467,10 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
 }
 
 export function render(Vnode, container) {
-    if(typeNumber(container) !== 8){
+    if (typeNumber(container) !== 8) {
         throw new Error('Target container is not a DOM element.')
     }
     const rootDom = renderByLuy(Vnode, container)
-    
+
     return rootDom
 }
