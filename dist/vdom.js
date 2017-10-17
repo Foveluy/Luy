@@ -148,26 +148,60 @@ function updateChild(oldChild, newChild, parentDomNode, parentContext) {
             for (; oldStartIndex - 1 < oldEndIndex; oldStartIndex++) {
                 if (oldChild[oldStartIndex]) {
                     var removeNode = oldChild[oldStartIndex];
-                    if (typeof oldChild[oldStartIndex].type === 'function') {
-                        //不完整的实现，如果孩子是component无法调用到
-                        if (removeNode._instance.componentWillUnMount) {
-                            removeNode._instance.componentWillUnMount();
-                        }
-                    }
-                    if (removeNode._PortalHostNode) {
-                        var parent = removeNode._PortalHostNode.parentNode;
-                        parent.removeChild(removeNode._PortalHostNode);
-                    } else {
-                        if (oldChild[oldStartIndex]._hostNode) {
-                            //有可能会出现undefind的情况
-                            parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode);
-                        }
-                    }
+                    // if (typeof oldChild[oldStartIndex].type === 'function') {//不完整的实现，如果孩子是component无法调用到
+                    //     if (removeNode._instance.componentWillUnMount) {
+                    //         removeNode._instance.componentWillUnMount()
+                    //     }
+                    // }
+                    // if (removeNode._PortalHostNode) {
+                    //     const parent = removeNode._PortalHostNode.parentNode
+                    //     parent.removeChild(removeNode._PortalHostNode)
+                    // } else {
+                    //     if (oldChild[oldStartIndex]._hostNode) {//有可能会出现undefind的情况
+                    //         parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
+                    //     }
+                    // }
+                    disposeVnode(removeNode);
                 }
             }
         }
     }
     return newChild;
+}
+
+function disposeVnode(Vnode) {
+    //主要用于删除Vnode对应的节点
+    if (typeof Vnode.type === 'function') {
+        if (Vnode._instance.componentWillUnMount) {
+            Vnode._instance.componentWillUnMount();
+        }
+    }
+    if (Vnode.props.children) {
+        disposeChildVnode(Vnode.props.children);
+    }
+    if (Vnode._PortalHostNode) {
+        var parent = Vnode._PortalHostNode.parentNode;
+        parent.removeChild(Vnode._PortalHostNode);
+    } else {
+        if (Vnode._hostNode) {
+            //有可能会出现undefind的情况
+            var _parent = Vnode._hostNode.parentNode;
+            _parent.removeChild(Vnode._hostNode);
+        }
+    }
+}
+
+function disposeChildVnode(childVnode) {
+    var children = childVnode;
+    if ((0, _utils.typeNumber)(children) !== 7) children = [children];
+    children.forEach(function (child) {
+        if (typeof child.type === 'function') {
+            if (child._instance.componentWillUnMount) {
+                child._instance.componentWillUnMount();
+            }
+        }
+        disposeVnode(child);
+    });
 }
 
 function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {

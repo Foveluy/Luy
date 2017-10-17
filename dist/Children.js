@@ -43,12 +43,11 @@ var Children = exports.Children = {
     },
     forEach: function forEach(childVnode, callback, context) {
         var flatten = (0, _createElement.flattenChildren)(childVnode);
-        
+        console.log(flatten);
         if ((0, _utils.typeNumber)(flatten) === 7) {
             (0, _createElement.flattenChildren)(childVnode).forEach(callback, context);
         } else {
-            callback()
-            callback(childVnode);
+            callback.call(context, childVnode);
         }
     },
 

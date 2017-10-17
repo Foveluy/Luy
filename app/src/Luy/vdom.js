@@ -164,19 +164,12 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
 
 function disposeVnode(Vnode){//主要用于删除Vnode对应的节点
     if(typeof Vnode.type === 'function'){
-        if (removeNode._instance.componentWillUnMount) {
-            removeNode._instance.componentWillUnMount()
+        if (Vnode._instance.componentWillUnMount) {
+            Vnode._instance.componentWillUnMount()
         }
     }
     if(Vnode.props.children){
-        const children = Vnode.props.children
-        children.forEach((child)=>{
-            if(typeof child.type === 'function'){
-                if (child._instance.componentWillUnMount) {
-                    child._instance.componentWillUnMount()
-                }
-            }
-        })
+        disposeChildVnode(Vnode.props.children)
     }
     if (Vnode._PortalHostNode) {
         const parent = Vnode._PortalHostNode.parentNode
@@ -187,6 +180,18 @@ function disposeVnode(Vnode){//主要用于删除Vnode对应的节点
             parent.removeChild(Vnode._hostNode)
         }
     }
+}
+
+function disposeChildVnode(childVnode){
+    let children = childVnode
+    if(typeNumber(children)!==7) children = [children]
+    children.forEach((child)=>{
+        if(typeof child.type === 'function'){
+            if (child._instance.componentWillUnMount) {
+                child._instance.componentWillUnMount()
+            }
+        }
+    })
 }
 
 function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
