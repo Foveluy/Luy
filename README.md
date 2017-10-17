@@ -17,7 +17,7 @@ todolist
 - [x] 组件的context
 - [x] createProtal Api
 - [x] setState函数式参数
-- [ ] setState回调
+- [x] setState回调
 - [x] 发布第一版本
 - [ ] 支持react生态计划....
 - [ ] createProtal 冒泡

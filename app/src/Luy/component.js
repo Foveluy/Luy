@@ -32,16 +32,15 @@ class ReactClass {
     const oldContext = this.context
 
     this.nextState = this.state
-    this._penddingState.forEach((partialNewState) => {
-      if (typeof partialNewState[0] === 'function') {
-        this.nextState = Object.assign({}, this.state, partialNewState[0](this.nextState, this.props))
+    this._penddingState.forEach((item) => {
+      if (typeof item === 'function') {
+        this.nextState = Object.assign({}, this.state, item.partialNewState(this.nextState, this.props))
       } else {
-
-        this.nextState = Object.assign({}, this.state, partialNewState[0])
+        this.nextState = Object.assign({}, this.state, item.partialNewState)
       }
     })
 
-    this._penddingState = []
+
 
     if (this.nextState !== prevState) {
       this.state = this.nextState;
@@ -62,13 +61,21 @@ class ReactClass {
     if (this.componentDidUpdate) {
       this.componentDidUpdate(this.props, prevState, oldContext)
     }
+
+    this._penddingState.forEach((item) => {
+      if (typeof item.callback === 'function') {
+        item.callback(this.state, this.props)
+      }
+    })
+    
+    this._penddingState = []
   }
 
   _updateInLifeCycle() {
     if (this.stateMergeQueue.length > 0) {
       let tempState = this.state
-      this._penddingState.forEach((partialNewState) => {
-        tempState = Object.assign({}, tempState, ...partialNewState[0])
+      this._penddingState.forEach((item) => {
+        tempState = Object.assign({}, tempState, ...item.partialNewState)
       })
       this.nextState = { ...tempState }
       this.stateMergeQueue = []
@@ -83,9 +90,8 @@ class ReactClass {
    * @param {*} callback 
    */
   setState(partialNewState, callback) {
-    
-    // this.nextState = Object.assign({}, this.state, partialNewState)
-    this._penddingState.push([partialNewState, callback])
+
+    this._penddingState.push({ partialNewState, callback })
 
     if (this.shouldComponentUpdate) {
       let shouldUpdate = this.shouldComponentUpdate(this.props, this.nextState, this.context)
@@ -94,7 +100,6 @@ class ReactClass {
       }
     }
 
-   
     if (this.lifeCycle === Com.CREATE) {
       //组件挂载期
 

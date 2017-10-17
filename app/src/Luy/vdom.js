@@ -293,12 +293,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
         let dom = renderByLuy(newVnode, parentDomNode, true)
 
         if (newVnode._hostNode) {
-            if (typeof newVnode.type === 'function') {
-                console.log('等待实现')
-            }
-
             parentDomNode.insertBefore(dom, oldVnode._hostNode)
-
             parentDomNode.removeChild(oldVnode._hostNode)
         } else {
             parentDomNode.appendChild(dom)
