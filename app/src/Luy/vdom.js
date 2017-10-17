@@ -191,6 +191,9 @@ function disposeChildVnode(childVnode){
                 child._instance.componentWillUnMount()
             }
         }
+        if(child.props.children){
+            disposeChildVnode(child.props.children)
+        }
     })
 }
 

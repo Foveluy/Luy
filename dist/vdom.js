@@ -200,7 +200,9 @@ function disposeChildVnode(childVnode) {
                 child._instance.componentWillUnMount();
             }
         }
-        disposeVnode(child);
+        if (child.props.children) {
+            disposeChildVnode(child.props.children);
+        }
     });
 }
 
