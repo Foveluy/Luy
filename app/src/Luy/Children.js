@@ -35,7 +35,6 @@ export const Children = {
     },
     forEach(childVnode, callback, context) {
         let flatten = flattenChildren(childVnode)
-        console.log(flatten)
         if(typeNumber(flatten) === 7){
             flattenChildren(childVnode).forEach(callback, context);
         }else{

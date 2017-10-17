@@ -13,7 +13,6 @@ const RESERVED_PROPS = {
 
 class Vnode {
     constructor(type, props, key, ref) {
-        // console.log([currentOwner.cur,ref])
         this.owner = currentOwner.cur
         this.type = type
         this.props = props

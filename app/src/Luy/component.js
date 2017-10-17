@@ -21,6 +21,7 @@ class ReactClass {
     this._renderCallbacks = []
     this.lifeCycle = Com.CREATE
     this.stateMergeQueue = []
+    this._penddingState = []
     this.refs = {}
   }
 
@@ -29,6 +30,18 @@ class ReactClass {
     const prevState = this.state
     const oldVnode = this.Vnode
     const oldContext = this.context
+
+    this.nextState = this.state
+    this._penddingState.forEach((partialNewState) => {
+      if (typeof partialNewState[0] === 'function') {
+        this.nextState = Object.assign({}, this.state, partialNewState[0](this.nextState, this.props))
+      } else {
+
+        this.nextState = Object.assign({}, this.state, partialNewState[0])
+      }
+    })
+
+    this._penddingState = []
 
     if (this.nextState !== prevState) {
       this.state = this.nextState;
@@ -43,7 +56,7 @@ class ReactClass {
 
     this.nextState = null
     const newVnode = this.render()
-    
+
     this.Vnode = update(oldVnode, newVnode, this.dom, this.context)//这个函数返回一个更新后的Vnode
 
     if (this.componentDidUpdate) {
@@ -53,7 +66,11 @@ class ReactClass {
 
   _updateInLifeCycle() {
     if (this.stateMergeQueue.length > 0) {
-      this.nextState = { ...this.state }
+      let tempState = this.state
+      this._penddingState.forEach((partialNewState) => {
+        tempState = Object.assign({}, tempState, ...partialNewState[0])
+      })
+      this.nextState = { ...tempState }
       this.stateMergeQueue = []
       this.updateComponent()
     }
@@ -66,7 +83,9 @@ class ReactClass {
    * @param {*} callback 
    */
   setState(partialNewState, callback) {
-    this.nextState = Object.assign({}, this.state, partialNewState)
+    
+    // this.nextState = Object.assign({}, this.state, partialNewState)
+    this._penddingState.push([partialNewState, callback])
 
     if (this.shouldComponentUpdate) {
       let shouldUpdate = this.shouldComponentUpdate(this.props, this.nextState, this.context)
@@ -75,7 +94,7 @@ class ReactClass {
       }
     }
 
-
+   
     if (this.lifeCycle === Com.CREATE) {
       //组件挂载期
 
@@ -83,7 +102,6 @@ class ReactClass {
       //组件更新期
       if (this.lifeCycle === Com.MOUNTTING) {
         //componentDidMount的时候调用setState
-        this.state = Object.assign({}, this.state, partialNewState)
         this.stateMergeQueue.push(1)
         return
       }

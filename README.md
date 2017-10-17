@@ -16,7 +16,7 @@ todolist
 - [x] ref属性
 - [x] 组件的context
 - [x] createProtal Api
-- [ ] setState函数式参数
+- [x] setState函数式参数
 - [ ] setState回调
 - [x] 发布第一版本
 - [ ] 支持react生态计划....

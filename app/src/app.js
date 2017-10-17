@@ -95,6 +95,10 @@ export default class App extends React.Component {
     console.log('更新完毕')
   }
   click(e) {
+    this.setState({
+      counter: this.state.counter + 1
+    })
+    
 
   }
   render() {
@@ -104,11 +108,11 @@ export default class App extends React.Component {
         {cc}
       </B>
     )
-    
+
     return (
       <div key={1} ref='haha' style={{ background: `rgb(99,99,${this.state.counter})` }}>
         asd
-        {wrap}
+        <button onClick={this.click.bind(this)}>{this.state.counter}</button>
       </div>
     )
   }
