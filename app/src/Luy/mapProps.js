@@ -1,8 +1,8 @@
 import { typeNumber, isEventName, isEventNameLowerCase, options } from "./utils";
 import { SyntheticEvent } from './event'
 
-export function mapProp(domNode, props,Vnode) {
-    if(typeof Vnode.type === 'function'){
+export function mapProp(domNode, props, Vnode) {
+    if (Vnode&& typeof Vnode.type === 'function') {
         //如果是组件，则不要map他的props进来
         return
     }
@@ -25,19 +25,19 @@ export function mapProp(domNode, props,Vnode) {
 export function updateProps(oldProps, newProps, hostNode) {
     for (let name in oldProps) {//修改原来有的属性
         if (name === 'children') continue
-        
-        if(oldProps[name] !== newProps[name]){
-            mapProp(hostNode,newProps)
+
+        if (oldProps[name] !== newProps[name]) {
+            mapProp(hostNode, newProps)
         }
     }
-    
+
     let restProps = {}
-    for(let newName in newProps){//新增原来没有的属性
-        if(!oldProps[newName]){
+    for (let newName in newProps) {//新增原来没有的属性
+        if (!oldProps[newName]) {
             restProps[newName] = newProps[newName]
         }
     }
-    mapProp(hostNode,restProps)
+    mapProp(hostNode, restProps)
 
 }
 
@@ -53,12 +53,12 @@ export const mappingStrategy = {
     event: function (domNode, eventCb, eventName) {
         let events = domNode.__events || {}
         events[eventName] = eventCb
-        
+
         domNode.__events = events//用于triggerEventByPath中获取event
-        if(!registerdEvent[eventName]){//所有事件只注册一次
+        if (!registerdEvent[eventName]) {//所有事件只注册一次
             registerdEvent[eventName] = 1
             addEvent(document, dispatchEvent, eventName)
-            
+
         }
     },
     className: function (domNode, className) {
@@ -95,7 +95,7 @@ function addEvent(domNode, fn, eventName) {
 function dispatchEvent(event, eventName, end) {
     const path = getEventPath(event, end)
     let E = new SyntheticEvent(event)
-    
+
     options.async = true
 
     triggerEventByPath(E, path)//触发event默认以冒泡形式
@@ -113,15 +113,15 @@ function dispatchEvent(event, eventName, end) {
  * @param {array} path 
  */
 function triggerEventByPath(e, path: Array) {
-    
+
     for (let i = 0; i < path.length; i++) {
         const events = path[i].__events
-        
+
         for (let eventName in events) {
             let fn = events[eventName]
             e.currentTarget = path[i]
             if (typeof fn === 'function') {
-                
+
                 fn.call(path[i], e)//触发回调函数默认以冒泡形式
             }
         }

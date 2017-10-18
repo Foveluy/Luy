@@ -24,10 +24,11 @@ export function createPortal(children, container) {
 
 
 let mountIndex = 0 //全局变量
-const Owner = []
+var rootVnode = null
 export var currentOwner = {
     cur: null
 };
+
 
 function instanceProps(componentVnode) {
     return {
@@ -149,13 +150,13 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
     return newChild
 }
 
-function disposeVnode(Vnode){//主要用于删除Vnode对应的节点
-    if(typeof Vnode.type === 'function'){
+function disposeVnode(Vnode) {//主要用于删除Vnode对应的节点
+    if (typeof Vnode.type === 'function') {
         if (Vnode._instance.componentWillUnMount) {
             Vnode._instance.componentWillUnMount()
         }
     }
-    if(Vnode.props.children){
+    if (Vnode.props.children) {
         disposeChildVnode(Vnode.props.children)
     }
     if (Vnode._PortalHostNode) {
@@ -170,18 +171,18 @@ function disposeVnode(Vnode){//主要用于删除Vnode对应的节点
     Vnode._hostNode = null
 }
 
-function disposeChildVnode(childVnode){
+function disposeChildVnode(childVnode) {
     let children = childVnode
-    if(typeNumber(children)!==7) children = [children]
-    children.forEach((child)=>{
-        if(typeof child.type === 'function'){
+    if (typeNumber(children) !== 7) children = [children]
+    children.forEach((child) => {
+        if (typeof child.type === 'function') {
             if (child._instance.componentWillUnMount) {
                 child._instance.componentWillUnMount()
             }
         }
         child._hostNode = null
         child._instance = null
-        if(child.props.children){
+        if (child.props.children) {
             disposeChildVnode(child.props.children)
         }
     })
@@ -227,7 +228,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
 
     const newVnode = newInstance.render()
-    
+
     //更新原来组件的信息
     oldComponentVnode._instance.props = newProps
     oldComponentVnode._instance.context = newContext
@@ -249,7 +250,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
 export function update(oldVnode, newVnode, parentDomNode: Element, parentContext) {
     newVnode._hostNode = oldVnode._hostNode
-    
+
     if (oldVnode.type === newVnode.type) {
         if (oldVnode.type === "#text") {
             newVnode._hostNode = oldVnode._hostNode //更新一个dom节点
@@ -438,7 +439,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     }
 
     setRef(Vnode, instance, domNode)
-    mapProp(domNode, props,Vnode) //为元素添加props
+    mapProp(domNode, props, Vnode) //为元素添加props
 
     Vnode._hostNode = domNode //缓存真实节点
 
@@ -457,7 +458,13 @@ export function render(Vnode, container) {
     if (typeNumber(container) !== 8) {
         throw new Error('Target container is not a DOM element.')
     }
-    const rootDom = renderByLuy(Vnode, container)
 
-    return rootDom
+    if (!rootVnode) {
+        rootVnode = Vnode
+        return renderByLuy(Vnode, container)
+    } else {
+        const root = update(rootVnode, Vnode, container)
+        rootVnode = Vnode
+        return root._hostNode
+    }
 }

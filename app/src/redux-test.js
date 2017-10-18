@@ -1,7 +1,7 @@
-// import React from './Luy'
-// import ReactDOM from './Luy'
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from './Luy'
+import ReactDOM from './Luy'
+// import React from 'react'
+// import ReactDOM from 'react-dom'
 
 
 class Counter extends React.Component {

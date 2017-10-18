@@ -1,8 +1,8 @@
-// import React from './Luy'
-// import ReactDOM from './Luy'
-// import Component from './Luy'
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from './Luy'
+import ReactDOM from './Luy'
+import Component from './Luy'
+// import React from 'react'
+// import ReactDOM from 'react-dom'
 // import Component from '../../index'
 
 let a = [1, 2, 3, 4, 5]
@@ -307,5 +307,8 @@ const render = () => {
 )}
 
 
+render()
+render()
+render()
 render()
 store.subscribe(render)
