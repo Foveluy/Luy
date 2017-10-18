@@ -199,31 +199,28 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
     const newContext = parentContext
     const newInstance = new newComponentVnode.type(newProps)
 
-    if (oldComponentVnode._instance) {
-        if (oldComponentVnode._instance.componentWillReceiveProps) {
-            oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext)
-        }
+    if (oldComponentVnode._instance.componentWillReceiveProps) {
+        oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext)
+    }
 
-        if (oldComponentVnode._instance.shouldComponentUpdate) {
-            let shouldUpdate = oldComponentVnode._instance.shouldComponentUpdate(newProps, oldState, newContext)
-            if (!shouldUpdate) {
-                //无论shouldComponentUpdate结果是如何，数据都会给用户设置上去
-                //但是不一定会刷新
-                newInstance.state = oldState
-                newInstance.context = newContext
+    if (oldComponentVnode._instance.shouldComponentUpdate) {
+        let shouldUpdate = oldComponentVnode._instance.shouldComponentUpdate(newProps, oldState, newContext)
+        if (!shouldUpdate) {
+            //无论shouldComponentUpdate结果是如何，数据都会给用户设置上去
+            //但是不一定会刷新
+            newInstance.state = oldState
+            newInstance.context = newContext
 
-                oldComponentVnode._instance.props = newProps
-                oldComponentVnode._instance.context = newContext
-                newComponentVnode._instance = oldComponentVnode._instance
-                return
-            }
-        }
-
-        if (oldComponentVnode._instance.componentWillUpdate) {
-            oldComponentVnode._instance.componentWillUpdate(newProps, oldState, newContext)
+            oldComponentVnode._instance.props = newProps
+            oldComponentVnode._instance.context = newContext
+            newComponentVnode._instance = oldComponentVnode._instance
+            return
         }
     }
 
+    if (oldComponentVnode._instance.componentWillUpdate) {
+        oldComponentVnode._instance.componentWillUpdate(newProps, oldState, newContext)
+    }
 
     newInstance.state = oldState
     newInstance.context = newContext
