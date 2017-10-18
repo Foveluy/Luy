@@ -227,7 +227,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
 
     const newVnode = newInstance.render()
-
+    
     //更新原来组件的信息
     oldComponentVnode._instance.props = newProps
     oldComponentVnode._instance.context = newContext
@@ -249,6 +249,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
 export function update(oldVnode, newVnode, parentDomNode: Element, parentContext) {
     newVnode._hostNode = oldVnode._hostNode
+    
     if (oldVnode.type === newVnode.type) {
         if (oldVnode.type === "#text") {
             newVnode._hostNode = oldVnode._hostNode //更新一个dom节点
@@ -424,11 +425,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     let domNode
     if (typeof type === 'function') {
         const fixContext = parentContext || {}
-        let userOwner = false
-        if (instance) {
-            userOwner = true
-        }
-        domNode = mountComponent(Vnode, container, fixContext, instance, userOwner)
+        domNode = mountComponent(Vnode, container, fixContext)
     } else if (typeof type === 'string' && type === '#text') {
         domNode = mountTextComponent(Vnode, container)
     } else {
@@ -441,7 +438,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     }
 
     setRef(Vnode, instance, domNode)
-    mapProp(domNode, props) //为元素添加props
+    mapProp(domNode, props,Vnode) //为元素添加props
 
     Vnode._hostNode = domNode //缓存真实节点
 

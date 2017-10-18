@@ -1,7 +1,11 @@
 import { typeNumber, isEventName, isEventNameLowerCase, options } from "./utils";
 import { SyntheticEvent } from './event'
 
-export function mapProp(domNode, props) {
+export function mapProp(domNode, props,Vnode) {
+    if(typeof Vnode.type === 'function'){
+        //如果是组件，则不要map他的props进来
+        return
+    }
     for (let name in props) {
         if (name === 'children') continue
         if (isEventName(name)) {
@@ -37,6 +41,7 @@ export function updateProps(oldProps, newProps, hostNode) {
 
 }
 
+var registerdEvent = {}
 export const mappingStrategy = {
     style: function (domNode, style) {
         if (style !== undefined) {
@@ -48,8 +53,13 @@ export const mappingStrategy = {
     event: function (domNode, eventCb, eventName) {
         let events = domNode.__events || {}
         events[eventName] = eventCb
-        domNode.__events = events
-        addEvent(document, dispatchEvent, eventName)
+        
+        domNode.__events = events//用于triggerEventByPath中获取event
+        if(!registerdEvent[eventName]){//所有事件只注册一次
+            registerdEvent[eventName] = 1
+            addEvent(document, dispatchEvent, eventName)
+            
+        }
     },
     className: function (domNode, className) {
         if (className !== undefined) {
@@ -85,7 +95,7 @@ function addEvent(domNode, fn, eventName) {
 function dispatchEvent(event, eventName, end) {
     const path = getEventPath(event, end)
     let E = new SyntheticEvent(event)
-
+    
     options.async = true
 
     triggerEventByPath(E, path)//触发event默认以冒泡形式
@@ -103,13 +113,15 @@ function dispatchEvent(event, eventName, end) {
  * @param {array} path 
  */
 function triggerEventByPath(e, path: Array) {
-
+    
     for (let i = 0; i < path.length; i++) {
         const events = path[i].__events
+        
         for (let eventName in events) {
             let fn = events[eventName]
             e.currentTarget = path[i]
             if (typeof fn === 'function') {
+                
                 fn.call(path[i], e)//触发回调函数默认以冒泡形式
             }
         }

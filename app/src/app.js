@@ -1,8 +1,8 @@
-import React from './Luy'
-import ReactDOM from './Luy'
-import Component from './Luy'
-// import React from '../../index'
-// import ReactDOM from '../../index'
+// import React from './Luy'
+// import ReactDOM from './Luy'
+// import Component from './Luy'
+import React from 'react'
+import ReactDOM from 'react-dom'
 // import Component from '../../index'
 
 let a = [1, 2, 3, 4, 5]
@@ -120,12 +120,12 @@ export default class App extends React.Component {
 
 
 
-ReactDOM.render(
-  <div>
-    <App />
-  </div>,
-  document.getElementById('root')
-);
+// ReactDOM.render(
+//   <div>
+//     <App />
+//   </div>,
+//   document.getElementById('root')
+// );
 
 // const appRoot = document.getElementById('root');
 // const modalRoot = document.getElementById('modal-root');
@@ -274,3 +274,38 @@ ReactDOM.render(
 //   }
 // }
 // ReactDOM.render(<App />, appRoot);
+
+
+//以下是redux
+import Counter from './redux-test'
+import { createStore } from 'redux'
+
+
+const reducer = (state = 0, action) => {
+  switch (action.type) {
+    case 'INCREMENT':
+      return state + 1
+    case 'DECREMENT':
+      return state - 1
+    default:
+      return state
+  }
+}
+
+const store = createStore(reducer)
+const rootEl = document.getElementById('root')
+
+const render = () => {
+  console.log(299)
+  return ReactDOM.render(
+  <Counter
+    value={store.getState()}
+    onIncrement={() => store.dispatch({ type: 'INCREMENT' })}
+    onDecrement={() => store.dispatch({ type: 'DECREMENT' })}
+  />,
+  rootEl
+)}
+
+
+render()
+store.subscribe(render)
