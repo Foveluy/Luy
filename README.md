@@ -21,5 +21,6 @@ todolist
 - [x] setState函数式参数
 - [x] setState回调
 - [x] 发布第一版本
-- [ ] 支持react生态计划....
+- [x] 支持redux
+- [ ] 支持react-redux
 - [ ] createProtal 冒泡
