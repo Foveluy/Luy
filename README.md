@@ -1,6 +1,7 @@
 # Luy，一个类React框架
 
 所谓类```React```框架就是**和React用法一模一样**的框架。其实当初制造这个框架的目的是为了能更好的学习React内部结构，了解其原理而制作的玩具。但是随着框架的渐渐成长，代码越来越多，我还是决定将其发展下去.
+![](https://github.com/215566435/Luy/blob/master/luy%20icon2.jpg?raw=true)
 
 如何安装?
 =====
@@ -26,12 +27,6 @@ ReactDOM.render(<Luy/>, document.getElementById('root'))
 
 ```
 
-
-
-
-
-
-![](https://github.com/215566435/Luy/blob/master/luy%20icon2.jpg?raw=true)
 
 
 todolist
