@@ -24,7 +24,7 @@ export function createPortal(children, container) {
 
 
 let mountIndex = 0 //全局变量
-var rootVnode = null
+var containerMap = {}
 export var currentOwner = {
     cur: null
 };
@@ -454,17 +454,25 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     return domNode
 }
 
+function areTheyEqual(aDom,bDom){
+    if(aDom === bDom)return true
+    return false
+}
+
 export function render(Vnode, container) {
     if (typeNumber(container) !== 8) {
         throw new Error('Target container is not a DOM element.')
     }
 
-    if (!rootVnode) {
-        rootVnode = Vnode
+    const UniqueKey = container.UniqueKey
+    if(container.UniqueKey){//已经被渲染
+        const oldVnode = containerMap[UniqueKey]
+        const rootVnode = update(oldVnode, Vnode, container)
+        return rootVnode._hostNode
+    }else{
+        //没有被渲染
+        container.UniqueKey = Date.now()
+        containerMap[container.UniqueKey] = Vnode
         return renderByLuy(Vnode, container)
-    } else {
-        const root = update(rootVnode, Vnode, container)
-        rootVnode = Vnode
-        return root._hostNode
     }
 }

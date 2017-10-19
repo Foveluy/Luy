@@ -294,6 +294,7 @@ const reducer = (state = 0, action) => {
 
 const store = createStore(reducer)
 const rootEl = document.getElementById('root')
+const dbmonEl = document.getElementById('dbmon')
 
 const render = () => {
   console.log(299)
@@ -308,7 +309,5 @@ const render = () => {
 
 
 render()
-render()
-render()
-render()
+
 store.subscribe(render)
