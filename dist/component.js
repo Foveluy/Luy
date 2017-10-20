@@ -5,13 +5,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.ReactClass = exports.Com = undefined;
 
-var _assign = require('babel-runtime/core-js/object/assign');
-
-var _assign2 = _interopRequireDefault(_assign);
-
 var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
+
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
+var _assign = require('babel-runtime/core-js/object/assign');
+
+var _assign2 = _interopRequireDefault(_assign);
 
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
@@ -49,16 +53,27 @@ var ReactClass = function () {
     this._renderCallbacks = [];
     this.lifeCycle = Com.CREATE;
     this.stateMergeQueue = [];
+    this._penddingState = [];
     this.refs = {};
   }
 
   (0, _createClass3.default)(ReactClass, [{
     key: 'updateComponent',
     value: function updateComponent() {
+      var _this = this;
 
       var prevState = this.state;
       var oldVnode = this.Vnode;
       var oldContext = this.context;
+
+      this.nextState = this.state;
+      this._penddingState.forEach(function (item) {
+        if (typeof item === 'function') {
+          _this.nextState = (0, _assign2.default)({}, _this.state, item.partialNewState(_this.nextState, _this.props));
+        } else {
+          _this.nextState = (0, _assign2.default)({}, _this.state, item.partialNewState);
+        }
+      });
 
       if (this.nextState !== prevState) {
         this.state = this.nextState;
@@ -70,7 +85,7 @@ var ReactClass = function () {
       if (this.componentWillUpdate) {
         this.componentWillUpdate(this.props, this.nextState, this.context);
       }
-
+      console.log(prevState);
       this.nextState = null;
       var newVnode = this.render();
 
@@ -79,12 +94,24 @@ var ReactClass = function () {
       if (this.componentDidUpdate) {
         this.componentDidUpdate(this.props, prevState, oldContext);
       }
+
+      this._penddingState.forEach(function (item) {
+        if (typeof item.callback === 'function') {
+          item.callback(_this.state, _this.props);
+        }
+      });
+
+      this._penddingState = [];
     }
   }, {
     key: '_updateInLifeCycle',
     value: function _updateInLifeCycle() {
       if (this.stateMergeQueue.length > 0) {
-        this.nextState = (0, _extends3.default)({}, this.state);
+        var tempState = this.state;
+        this._penddingState.forEach(function (item) {
+          tempState = _assign2.default.apply(Object, [{}, tempState].concat((0, _toConsumableArray3.default)(item.partialNewState)));
+        });
+        this.nextState = (0, _extends3.default)({}, tempState);
         this.stateMergeQueue = [];
         this.updateComponent();
       }
@@ -100,7 +127,8 @@ var ReactClass = function () {
   }, {
     key: 'setState',
     value: function setState(partialNewState, callback) {
-      this.nextState = (0, _assign2.default)({}, this.state, partialNewState);
+
+      this._penddingState.push({ partialNewState: partialNewState, callback: callback });
 
       if (this.shouldComponentUpdate) {
         var shouldUpdate = this.shouldComponentUpdate(this.props, this.nextState, this.context);
@@ -116,7 +144,6 @@ var ReactClass = function () {
         //组件更新期
         if (this.lifeCycle === Com.MOUNTTING) {
           //componentDidMount的时候调用setState
-          this.state = (0, _assign2.default)({}, this.state, partialNewState);
           this.stateMergeQueue.push(1);
           return;
         }

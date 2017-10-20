@@ -36,7 +36,7 @@ function createPortal(children, container) {
 
 
 var mountIndex = 0; //全局变量
-var Owner = [];
+var containerMap = {};
 var currentOwner = exports.currentOwner = {
     cur: null
 };
@@ -148,19 +148,6 @@ function updateChild(oldChild, newChild, parentDomNode, parentContext) {
             for (; oldStartIndex - 1 < oldEndIndex; oldStartIndex++) {
                 if (oldChild[oldStartIndex]) {
                     var removeNode = oldChild[oldStartIndex];
-                    // if (typeof oldChild[oldStartIndex].type === 'function') {//不完整的实现，如果孩子是component无法调用到
-                    //     if (removeNode._instance.componentWillUnMount) {
-                    //         removeNode._instance.componentWillUnMount()
-                    //     }
-                    // }
-                    // if (removeNode._PortalHostNode) {
-                    //     const parent = removeNode._PortalHostNode.parentNode
-                    //     parent.removeChild(removeNode._PortalHostNode)
-                    // } else {
-                    //     if (oldChild[oldStartIndex]._hostNode) {//有可能会出现undefind的情况
-                    //         parentDomNode.removeChild(oldChild[oldStartIndex]._hostNode)
-                    //     }
-                    // }
                     disposeVnode(removeNode);
                 }
             }
@@ -189,6 +176,7 @@ function disposeVnode(Vnode) {
             _parent.removeChild(Vnode._hostNode);
         }
     }
+    Vnode._hostNode = null;
 }
 
 function disposeChildVnode(childVnode) {
@@ -200,6 +188,8 @@ function disposeChildVnode(childVnode) {
                 child._instance.componentWillUnMount();
             }
         }
+        child._hostNode = null;
+        child._instance = null;
         if (child.props.children) {
             disposeChildVnode(child.props.children);
         }
@@ -217,29 +207,27 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
     var newContext = parentContext;
     var newInstance = new newComponentVnode.type(newProps);
 
-    if (oldComponentVnode._instance) {
-        if (oldComponentVnode._instance.componentWillReceiveProps) {
-            oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext);
-        }
+    if (oldComponentVnode._instance.componentWillReceiveProps) {
+        oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext);
+    }
 
-        if (oldComponentVnode._instance.shouldComponentUpdate) {
-            var shouldUpdate = oldComponentVnode._instance.shouldComponentUpdate(newProps, oldState, newContext);
-            if (!shouldUpdate) {
-                //无论shouldComponentUpdate结果是如何，数据都会给用户设置上去
-                //但是不一定会刷新
-                newInstance.state = oldState;
-                newInstance.context = newContext;
+    if (oldComponentVnode._instance.shouldComponentUpdate) {
+        var shouldUpdate = oldComponentVnode._instance.shouldComponentUpdate(newProps, oldState, newContext);
+        if (!shouldUpdate) {
+            //无论shouldComponentUpdate结果是如何，数据都会给用户设置上去
+            //但是不一定会刷新
+            newInstance.state = oldState;
+            newInstance.context = newContext;
 
-                oldComponentVnode._instance.props = newProps;
-                oldComponentVnode._instance.context = newContext;
-                newComponentVnode._instance = oldComponentVnode._instance;
-                return;
-            }
+            oldComponentVnode._instance.props = newProps;
+            oldComponentVnode._instance.context = newContext;
+            newComponentVnode._instance = oldComponentVnode._instance;
+            return;
         }
+    }
 
-        if (oldComponentVnode._instance.componentWillUpdate) {
-            oldComponentVnode._instance.componentWillUpdate(newProps, oldState, newContext);
-        }
+    if (oldComponentVnode._instance.componentWillUpdate) {
+        oldComponentVnode._instance.componentWillUpdate(newProps, oldState, newContext);
     }
 
     newInstance.state = oldState;
@@ -266,6 +254,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
 function update(oldVnode, newVnode, parentDomNode, parentContext) {
     newVnode._hostNode = oldVnode._hostNode;
+
     if (oldVnode.type === newVnode.type) {
         if (oldVnode.type === "#text") {
             newVnode._hostNode = oldVnode._hostNode; //更新一个dom节点
@@ -295,12 +284,7 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
         var dom = renderByLuy(newVnode, parentDomNode, true);
 
         if (newVnode._hostNode) {
-            if (typeof newVnode.type === 'function') {
-                console.log('等待实现');
-            }
-
             parentDomNode.insertBefore(dom, oldVnode._hostNode);
-
             parentDomNode.removeChild(oldVnode._hostNode);
         } else {
             parentDomNode.appendChild(dom);
@@ -455,11 +439,7 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
     var domNode = void 0;
     if (typeof type === 'function') {
         var fixContext = parentContext || {};
-        var userOwner = false;
-        if (instance) {
-            userOwner = true;
-        }
-        domNode = mountComponent(Vnode, container, fixContext, instance, userOwner);
+        domNode = mountComponent(Vnode, container, fixContext);
     } else if (typeof type === 'string' && type === '#text') {
         domNode = mountTextComponent(Vnode, container);
     } else {
@@ -472,7 +452,7 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
     }
 
     (0, _Refs.setRef)(Vnode, instance, domNode);
-    (0, _mapProps.mapProp)(domNode, props); //为元素添加props
+    (0, _mapProps.mapProp)(domNode, props, Vnode); //为元素添加props
 
     Vnode._hostNode = domNode; //缓存真实节点
 
@@ -487,11 +467,26 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
     return domNode;
 }
 
+function areTheyEqual(aDom, bDom) {
+    if (aDom === bDom) return true;
+    return false;
+}
+
 function render(Vnode, container) {
     if ((0, _utils.typeNumber)(container) !== 8) {
         throw new Error('Target container is not a DOM element.');
     }
-    var rootDom = renderByLuy(Vnode, container);
 
-    return rootDom;
+    var UniqueKey = container.UniqueKey;
+    if (container.UniqueKey) {
+        //已经被渲染
+        var oldVnode = containerMap[UniqueKey];
+        var rootVnode = update(oldVnode, Vnode, container);
+        return rootVnode._hostNode;
+    } else {
+        //没有被渲染
+        container.UniqueKey = Date.now();
+        containerMap[container.UniqueKey] = Vnode;
+        return renderByLuy(Vnode, container);
+    }
 }

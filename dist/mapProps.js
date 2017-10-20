@@ -18,7 +18,11 @@ var _event = require('./event');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function mapProp(domNode, props) {
+function mapProp(domNode, props, Vnode) {
+    if (Vnode && typeof Vnode.type === 'function') {
+        //如果是组件，则不要map他的props进来
+        return;
+    }
     for (var name in props) {
         if (name === 'children') continue;
         if ((0, _utils.isEventName)(name)) {
@@ -55,6 +59,7 @@ function updateProps(oldProps, newProps, hostNode) {
     mapProp(hostNode, restProps);
 }
 
+var registerdEvent = {};
 var mappingStrategy = exports.mappingStrategy = {
     style: function style(domNode, _style) {
         if (_style !== undefined) {
@@ -66,8 +71,13 @@ var mappingStrategy = exports.mappingStrategy = {
     event: function event(domNode, eventCb, eventName) {
         var events = domNode.__events || {};
         events[eventName] = eventCb;
-        domNode.__events = events;
-        addEvent(document, dispatchEvent, eventName);
+
+        domNode.__events = events; //用于triggerEventByPath中获取event
+        if (!registerdEvent[eventName]) {
+            //所有事件只注册一次
+            registerdEvent[eventName] = 1;
+            addEvent(document, dispatchEvent, eventName);
+        }
     },
     className: function className(domNode, _className) {
         if (_className !== undefined) {
@@ -119,10 +129,12 @@ function triggerEventByPath(e, path) {
 
     for (var i = 0; i < path.length; i++) {
         var events = path[i].__events;
+
         for (var eventName in events) {
             var fn = events[eventName];
             e.currentTarget = path[i];
             if (typeof fn === 'function') {
+
                 fn.call(path[i], e); //触发回调函数默认以冒泡形式
             }
         }
