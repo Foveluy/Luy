@@ -352,9 +352,7 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
         Vnode._PortalHostNode = renderedVnode._PortalHostNode;
     }
 
-    if (instance._updateInLifeCycle) {
-        instance._updateInLifeCycle(); // componentDidMount之后一次性更新
-    }
+    instance._updateInLifeCycle(); // componentDidMount之后一次性更新
 
     return domNode;
 }

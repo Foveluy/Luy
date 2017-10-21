@@ -50,7 +50,6 @@ class ReactClass {
     if (this.componentWillUpdate) {
       this.componentWillUpdate(this.props, this.nextState, this.context)
     }
-    console.log(prevState)
     this.nextState = null
     const newVnode = this.render()
 

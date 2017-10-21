@@ -18,11 +18,22 @@ var _event = require('./event');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var formElement = {
+    input: true,
+    select: true,
+    textarea: true
+};
+
+function isFormElement(domNode) {
+    return formElement[domNode.type];
+}
+
 function mapProp(domNode, props, Vnode) {
     if (Vnode && typeof Vnode.type === 'function') {
         //如果是组件，则不要map他的props进来
         return;
     }
+    if (isFormElement(domNode)) {}
     for (var name in props) {
         if (name === 'children') continue;
         if ((0, _utils.isEventName)(name)) {

@@ -1,10 +1,24 @@
 import { typeNumber, isEventName, isEventNameLowerCase, options } from "./utils";
 import { SyntheticEvent } from './event'
+import { mapControlledElement } from './controlledComponent'
+
+const formElement = {
+    input: true,
+    select: true,
+    textarea: true
+}
+
+function isFormElement(domNode) {
+    return formElement[domNode.type]
+}
 
 export function mapProp(domNode, props, Vnode) {
-    if (Vnode&& typeof Vnode.type === 'function') {
+    if (Vnode && typeof Vnode.type === 'function') {
         //如果是组件，则不要map他的props进来
         return
+    }
+    if (isFormElement(domNode)) {
+        mapControlledElement(domNode, props)
     }
     for (let name in props) {
         if (name === 'children') continue
