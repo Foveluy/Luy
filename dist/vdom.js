@@ -444,9 +444,11 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
         domNode = document.createElement(type);
     }
 
-    if ((0, _utils.typeNumber)(children) > 2 && children !== undefined) {
-        var NewChild = mountChild(children, domNode, parentContext, instance); //flatten之后的child 要保存下来
-        props.children = NewChild;
+    if (typeof type !== 'function') {
+        if ((0, _utils.typeNumber)(children) > 2 && children !== undefined) {
+            var NewChild = mountChild(children, domNode, parentContext, instance); //flatten之后的child 要保存下来
+            props.children = NewChild;
+        }
     }
 
     (0, _Refs.setRef)(Vnode, instance, domNode);

@@ -72,7 +72,7 @@ export const mapControlledElement = function (domNode, props) {
 
             domNode._lastValue = props[controllProp]
             domNode[event] = data[3]
-        }else{
+        } else {
 
         }
 
@@ -87,16 +87,59 @@ function hasOtherControllProperty(props, otherProps) {
     }
 }
 
-function preventUserInput(e){
+function preventUserInput(e) {
     var target = e.target
-    var name = e.type === 'textarea'?'innerHTML':'value' //如果是textarea，他的输入保存在innerHTML里
-    
+    var name = e.type === 'textarea' ? 'innerHTML' : 'value' //如果是textarea，他的输入保存在innerHTML里
+
     target[name] = target._lastValue
 }
 
-function preventUserChange(e){
+function preventUserChange(e) {
+    const target = e.target,
+        value = target._lastValue,
+        options = target.options;
+    if (target.multiple) {
+
+    } else {
+        updateOptionsOne(options, options.length, value)
+    }
 
 }
-function preventUserClick(e){
+function preventUserClick(e) {
     e.preventDefault()
+}
+
+function updateOptionsOne(options, length, lastValue) {
+    const stringValues = {}
+    console.log(options)
+    for (let i = 0; i < length; i++) {
+        let option = options[i]
+        let value = option.value
+        if (value === lastValue) {
+            option.selected = true
+            return
+        }
+    }
+    if (length) {
+        //选中第一个
+        options[0].selected = true
+    }
+}
+
+function updateOptionsMore(options, length, lastValue) {
+    var selectedValue = {}
+    try {
+        for (let i = 0; i < lastValue.length; i++) {
+            selectedValue["&" + lastValue[i]] = true
+        }
+    } catch (e) {
+        /* istanbul ignore next */
+        console.warn('<select multiple="true"> 的value应该对应一个字符串数组')
+    }
+    for (let i = 0; i < n; i++) {
+        let option = options[i]
+        let value = option.value
+        let selected = selectedValue.hasOwnProperty("&" + value)
+        option.selected = selected
+    }
 }

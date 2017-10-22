@@ -65,8 +65,15 @@ function createElement(type: string | Function, config, ...children: array) {
         }
     }
 
+
+    
     if(typeof type === 'function'){
         const newComponent = new type(props)
+        if(typeNumber(newComponent)=== 5){
+            const instance = new newComponent(props)
+
+            return instance.render()
+        }
         if(!newComponent.render){
             return newComponent
         }

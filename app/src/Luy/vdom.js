@@ -431,10 +431,13 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
         domNode = document.createElement(type)
     }
 
-    if (typeNumber(children) > 2 && children !== undefined) {
-        const NewChild = mountChild(children, domNode, parentContext, instance)//flatten之后的child 要保存下来
-        props.children = NewChild
+    if(typeof type !== 'function'){
+        if (typeNumber(children) > 2 && children !== undefined) {
+            const NewChild = mountChild(children, domNode, parentContext, instance)//flatten之后的child 要保存下来
+            props.children = NewChild
+        }
     }
+
 
     setRef(Vnode, instance, domNode)
     mapProp(domNode, props, Vnode) //为元素添加props

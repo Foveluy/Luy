@@ -18,6 +18,12 @@ module.exports = {
         hot: true,
         publicPath: '/',
     },
+    // resolve: {
+    //     alias: {
+    //        'react': './dist/index.js',
+    //        'react-dom': './dist/index.js'
+    //     }
+    //  },
     module: {
         rules: [
             {

@@ -21,13 +21,13 @@ var _controlledComponent = require('./controlledComponent');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var formElement = {
-    input: true,
-    select: true,
-    textarea: true
+    INPUT: true,
+    SELECT: true,
+    TEXTAREA: true
 };
 
 function isFormElement(domNode) {
-    return formElement[domNode.type];
+    return formElement[domNode.nodeName];
 }
 
 function mapProp(domNode, props, Vnode) {
@@ -35,6 +35,7 @@ function mapProp(domNode, props, Vnode) {
         //如果是组件，则不要map他的props进来
         return;
     }
+
     if (isFormElement(domNode)) {
         (0, _controlledComponent.mapControlledElement)(domNode, props);
     }
@@ -75,6 +76,10 @@ function updateProps(oldProps, newProps, hostNode) {
 }
 
 var registerdEvent = {};
+var controlledEvent = {
+    change: 1,
+    input: 1
+};
 var mappingStrategy = exports.mappingStrategy = {
     style: function style(domNode, _style) {
         if (_style !== undefined) {
@@ -86,11 +91,12 @@ var mappingStrategy = exports.mappingStrategy = {
     event: function event(domNode, eventCb, eventName) {
         var events = domNode.__events || {};
         events[eventName] = eventCb;
-
         domNode.__events = events; //用于triggerEventByPath中获取event
+
         if (!registerdEvent[eventName]) {
             //所有事件只注册一次
             registerdEvent[eventName] = 1;
+            console.log(document, eventName);
             addEvent(document, dispatchEvent, eventName);
         }
     },
@@ -113,6 +119,7 @@ var mappingStrategy = exports.mappingStrategy = {
 };
 
 function addEvent(domNode, fn, eventName) {
+
     if (domNode.addEventListener) {
         domNode.addEventListener(eventName, fn, false);
     } else if (domNode.attachEvent) {
@@ -141,14 +148,13 @@ function dispatchEvent(event, eventName, end) {
  * @param {array} path 
  */
 function triggerEventByPath(e, path) {
-
+    var thisEvenType = e.type;
     for (var i = 0; i < path.length; i++) {
         var events = path[i].__events;
-
         for (var eventName in events) {
             var fn = events[eventName];
             e.currentTarget = path[i];
-            if (typeof fn === 'function') {
+            if (typeof fn === 'function' && thisEvenType === eventName) {
 
                 fn.call(path[i], e); //触发回调函数默认以冒泡形式
             }

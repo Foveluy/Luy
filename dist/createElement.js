@@ -88,6 +88,11 @@ function createElement(type, config) {
 
     if (typeof type === 'function') {
         var newComponent = new type(props);
+        if ((0, _utils.typeNumber)(newComponent) === 5) {
+            var instance = new newComponent(props);
+
+            return instance.render();
+        }
         if (!newComponent.render) {
             return newComponent;
         }

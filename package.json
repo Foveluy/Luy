@@ -1,6 +1,6 @@
 {
   "name": "luy",
-  "version": "1.0.3",
+  "version": "1.0.7",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -50,6 +50,7 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "prop-types": "^15.5.10",
     "react": "^15.6.2",
-    "react-dom": "^15.6.1"
+    "react-dom": "^15.6.1",
+    "react-redux": "^5.0.6"
   }
 }
