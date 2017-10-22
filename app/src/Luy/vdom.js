@@ -291,6 +291,18 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
     return newVnode
 }
 
+function renderHoc(instance, props, parentContext) {
+    if (typeNumber(instance) === 5) {
+        const newInstance = new instance(props, parentContext)
+        return renderHoc(newInstance)
+    } else {
+        if (!instance.render) {
+            return instance
+        } else {
+            return instance.render()
+        }
+    }
+}
 
 /**
  * 渲染自定义组件
@@ -301,7 +313,13 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     const { type, props, key, ref } = Vnode
 
     const Component = type
-    const instance = new Component(props)
+    let instance = new Component(props, parentContext)
+
+    if (!instance.render) {
+        instance = renderHoc(instance)
+
+        return renderByLuy(instance, parentDomNode, false, parentContext)
+    }
 
     if (instance.getChildContext) {//如果用户定义getChildContext，那么用它生成子context
         instance.context = extend(extend({}, instance.context), instance.getChildContext());
@@ -384,10 +402,12 @@ function mountChild(childrenVnode, parentDomNode: Element, parentContext, instan
     if (childType === 7) {//list
         flattenChildList = flattenChildren(childrenVnode)
         flattenChildList.forEach((item) => {
-            if (typeof item.type === 'function') { //如果是组件先不渲染子嗣
-                mountComponent(item, parentDomNode, parentContext)
-            } else {
-                renderByLuy(item, parentDomNode, false, parentContext, instance)
+            if (item) {
+                if (typeof item.type === 'function') { //如果是组件先不渲染子嗣
+                    mountComponent(item, parentDomNode, parentContext)
+                } else {
+                    renderByLuy(item, parentDomNode, false, parentContext, instance)
+                }
             }
         })
     }
@@ -419,6 +439,7 @@ export function findDOMNode(ref) {
  */
 let depth = 0
 function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext, instance) {
+
     const { type, props } = Vnode
     const { children } = props
     let domNode
@@ -431,13 +452,12 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
         domNode = document.createElement(type)
     }
 
-    if(typeof type !== 'function'){
+    if (typeof type !== 'function') {
         if (typeNumber(children) > 2 && children !== undefined) {
             const NewChild = mountChild(children, domNode, parentContext, instance)//flatten之后的child 要保存下来
             props.children = NewChild
         }
     }
-
 
     setRef(Vnode, instance, domNode)
     mapProp(domNode, props, Vnode) //为元素添加props
@@ -455,8 +475,8 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     return domNode
 }
 
-function areTheyEqual(aDom,bDom){
-    if(aDom === bDom)return true
+function areTheyEqual(aDom, bDom) {
+    if (aDom === bDom) return true
     return false
 }
 
@@ -466,11 +486,11 @@ export function render(Vnode, container) {
     }
 
     const UniqueKey = container.UniqueKey
-    if(container.UniqueKey){//已经被渲染
+    if (container.UniqueKey) {//已经被渲染
         const oldVnode = containerMap[UniqueKey]
         const rootVnode = update(oldVnode, Vnode, container)
         return rootVnode._hostNode
-    }else{
+    } else {
         //没有被渲染
         container.UniqueKey = Date.now()
         containerMap[container.UniqueKey] = Vnode

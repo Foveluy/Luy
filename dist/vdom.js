@@ -293,6 +293,19 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
     return newVnode;
 }
 
+function renderHoc(instance, props, parentContext) {
+    if ((0, _utils.typeNumber)(instance) === 5) {
+        var newInstance = new instance(props, parentContext);
+        return renderHoc(newInstance);
+    } else {
+        if (!instance.render) {
+            return instance;
+        } else {
+            return instance.render();
+        }
+    }
+}
+
 /**
  * 渲染自定义组件
  * @param {*} Vnode 
@@ -306,7 +319,13 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
 
 
     var Component = type;
-    var instance = new Component(props);
+    var instance = new Component(props, parentContext);
+
+    if (!instance.render) {
+        instance = renderHoc(instance);
+
+        return renderByLuy(instance, parentDomNode, false, parentContext);
+    }
 
     if (instance.getChildContext) {
         //如果用户定义getChildContext，那么用它生成子context
@@ -394,11 +413,13 @@ function mountChild(childrenVnode, parentDomNode, parentContext, instance) {
         //list
         flattenChildList = (0, _createElement.flattenChildren)(childrenVnode);
         flattenChildList.forEach(function (item) {
-            if (typeof item.type === 'function') {
-                //如果是组件先不渲染子嗣
-                mountComponent(item, parentDomNode, parentContext);
-            } else {
-                renderByLuy(item, parentDomNode, false, parentContext, instance);
+            if (item) {
+                if (typeof item.type === 'function') {
+                    //如果是组件先不渲染子嗣
+                    mountComponent(item, parentDomNode, parentContext);
+                } else {
+                    renderByLuy(item, parentDomNode, false, parentContext, instance);
+                }
             }
         });
     }

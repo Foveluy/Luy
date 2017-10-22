@@ -86,17 +86,18 @@ function createElement(type, config) {
         }
     }
 
-    if (typeof type === 'function') {
-        var newComponent = new type(props);
-        if ((0, _utils.typeNumber)(newComponent) === 5) {
-            var instance = new newComponent(props);
+    // if(typeof type === 'function'){
+    //     const newComponent = new type(props)
+    //     if(typeNumber(newComponent)=== 5){
+    //         const instance = new newComponent(props)
 
-            return instance.render();
-        }
-        if (!newComponent.render) {
-            return newComponent;
-        }
-    }
+    //         return instance.render()
+    //     }
+    //     if(!newComponent.render){
+    //         return newComponent
+    //     }
+    // }
+
 
     return new Vnode(type, props, key, ref);
 }
