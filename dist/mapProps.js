@@ -16,6 +16,8 @@ var _utils = require('./utils');
 
 var _event = require('./event');
 
+var _controlledComponent = require('./controlledComponent');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var formElement = {
@@ -33,7 +35,9 @@ function mapProp(domNode, props, Vnode) {
         //如果是组件，则不要map他的props进来
         return;
     }
-    if (isFormElement(domNode)) {}
+    if (isFormElement(domNode)) {
+        (0, _controlledComponent.mapControlledElement)(domNode, props);
+    }
     for (var name in props) {
         if (name === 'children') continue;
         if ((0, _utils.isEventName)(name)) {

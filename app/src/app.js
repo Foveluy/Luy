@@ -296,16 +296,26 @@ const store = createStore(reducer)
 const rootEl = document.getElementById('root')
 const dbmonEl = document.getElementById('dbmon')
 
+function onchange(e){
+  console.log(e.data)
+}
+
 const render = () => {
   console.log(299)
+
+
   return ReactDOM.render(
-  <Counter
-    value={store.getState()}
-    onIncrement={() => store.dispatch({ type: 'INCREMENT' })}
-    onDecrement={() => store.dispatch({ type: 'DECREMENT' })}
-  />,
-  rootEl
-)}
+    <div>
+      <input value='shit' onInput={onchange}></input>
+      <Counter
+        value={store.getState()}
+        onIncrement={() => store.dispatch({ type: 'INCREMENT' })}
+        onDecrement={() => store.dispatch({ type: 'DECREMENT' })}
+      />
+    </div>,
+    rootEl
+  )
+}
 
 
 render()
