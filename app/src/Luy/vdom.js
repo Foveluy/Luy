@@ -198,7 +198,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
     const newProps = newComponentVnode.props
     const newContext = parentContext
-    const newInstance = new newComponentVnode.type(newProps)
+    const newInstance = new newComponentVnode.type(newProps, newContext)
 
     if (oldComponentVnode._instance.componentWillReceiveProps) {
         oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext)
@@ -224,8 +224,8 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
     }
 
     newInstance.state = oldState
-    newInstance.context = newContext
-
+    newInstance.context = extend(extend({}, oldContext), newContext)
+    // console.log(oldContext)
 
     const newVnode = newInstance.render()
 
@@ -237,7 +237,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
     newComponentVnode._instance = oldComponentVnode._instance
 
     //更新真实dom
-    update(oldVnode, newVnode, oldComponentVnode._hostNode)
+    update(oldVnode, newVnode, oldComponentVnode._hostNode, newInstance.context)
 
     if (oldComponentVnode._instance) {
         if (oldComponentVnode._instance.componentDidUpdate) {
@@ -324,7 +324,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     if (instance.getChildContext) {//如果用户定义getChildContext，那么用它生成子context
         instance.context = extend(extend({}, instance.context), instance.getChildContext());
     } else {
-        instance.context = parentContext
+        instance.context = extend({}, parentContext)
     }
 
     if (instance.componentWillMount) {//生命周期函数
@@ -494,6 +494,7 @@ export function render(Vnode, container) {
         //没有被渲染
         container.UniqueKey = Date.now()
         containerMap[container.UniqueKey] = Vnode
-        return renderByLuy(Vnode, container)
+        renderByLuy(Vnode, container)
+        return Vnode._instance
     }
 }

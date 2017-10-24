@@ -331,7 +331,8 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
         //如果用户定义getChildContext，那么用它生成子context
         instance.context = (0, _utils.extend)((0, _utils.extend)({}, instance.context), instance.getChildContext());
     } else {
-        instance.context = parentContext;
+        console.log(parentContext);
+        instance.context = (0, _utils.extend)({}, parentContext);
     }
 
     if (instance.componentWillMount) {
