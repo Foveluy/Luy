@@ -49,5 +49,7 @@ todolist
 - [x] setState回调
 - [x] 发布第一版本
 - [x] 支持redux
-- [ ] 支持react-redux
+- [x] 支持react-redux
+- [ ] 渲染null节点
+- [ ] 支持react-router
 - [ ] createProtal 冒泡

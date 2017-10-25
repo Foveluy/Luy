@@ -205,7 +205,12 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
     var newProps = newComponentVnode.props;
     var newContext = parentContext;
-    var newInstance = new newComponentVnode.type(newProps);
+    var newInstance = new newComponentVnode.type(newProps, newContext);
+
+    if (newInstance.getChildContext) {
+        newContext = (0, _utils.extend)((0, _utils.extend)({}, newContext), newInstance.getChildContext());
+        console.log(newContext);
+    }
 
     if (oldComponentVnode._instance.componentWillReceiveProps) {
         oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext);
@@ -231,7 +236,8 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
     }
 
     newInstance.state = oldState;
-    newInstance.context = newContext;
+    newInstance.context = (0, _utils.extend)((0, _utils.extend)({}, oldContext), newContext);
+    // console.log(oldContext)
 
     var newVnode = newInstance.render();
 
@@ -243,7 +249,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
     newComponentVnode._instance = oldComponentVnode._instance;
 
     //更新真实dom
-    update(oldVnode, newVnode, oldComponentVnode._hostNode);
+    update(oldVnode, newVnode, oldComponentVnode._hostNode, newInstance.context);
 
     if (oldComponentVnode._instance) {
         if (oldComponentVnode._instance.componentDidUpdate) {
@@ -278,6 +284,7 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
         }
         if (typeof oldVnode.type === 'function') {
             //非原生
+
             updateComponent(oldVnode, newVnode, parentContext);
         }
     } else {
@@ -330,8 +337,8 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
     if (instance.getChildContext) {
         //如果用户定义getChildContext，那么用它生成子context
         instance.context = (0, _utils.extend)((0, _utils.extend)({}, instance.context), instance.getChildContext());
+        // console.log(type,instance.context)
     } else {
-        console.log(parentContext);
         instance.context = (0, _utils.extend)({}, parentContext);
     }
 
@@ -500,8 +507,10 @@ function render(Vnode, container) {
     }
 
     var UniqueKey = container.UniqueKey;
+
     if (container.UniqueKey) {
         //已经被渲染
+
         var oldVnode = containerMap[UniqueKey];
         var rootVnode = update(oldVnode, Vnode, container);
         return rootVnode._hostNode;
@@ -509,6 +518,7 @@ function render(Vnode, container) {
         //没有被渲染
         container.UniqueKey = Date.now();
         containerMap[container.UniqueKey] = Vnode;
-        return renderByLuy(Vnode, container);
+        renderByLuy(Vnode, container);
+        return Vnode._instance;
     }
 }

@@ -25,5 +25,6 @@ finally:
 
 print('配置文件设置完毕，准备发布')
 
+os.system('npm run build')
 os.system('npm publish')
     

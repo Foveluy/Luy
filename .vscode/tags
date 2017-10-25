@@ -4,4 +4,14 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+Dict	../publish.py	/^    Dict = json.loads(all_the_text)$/;"	kind:variable	line:8
+all_the_text	../publish.py	/^    all_the_text = file.read( )$/;"	kind:variable	line:7
+dumped	../publish.py	/^    dumped = json.dumps(Dict)$/;"	kind:variable	line:16
+file	../publish.py	/^file = open('.\/package.json','r')$/;"	kind:variable	line:4
+json	../publish.py	/^import json$/;"	kind:namespace	line:1
+last	../publish.py	/^    last = int(version[2]) + 1$/;"	kind:variable	line:11
+newVersion	../publish.py	/^    newVersion = version[0] + '.'+version[1]+'.'+ str(last)$/;"	kind:variable	line:13
+os	../publish.py	/^import os$/;"	kind:namespace	line:2
 publish.py	../publish.py	1;"	kind:file	line:1
+version	../publish.py	/^    version = Dict['version'].split('.')$/;"	kind:variable	line:10
+write	../publish.py	/^    write = open('.\/package.json','w')$/;"	kind:variable	line:18
