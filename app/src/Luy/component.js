@@ -102,6 +102,10 @@ class ReactClass {
 
     } else {
       //组件更新期
+      if(this.lifeCycle === Com.UPDATING){
+        return
+      }
+      
       if (this.lifeCycle === Com.MOUNTTING) {
         //componentDidMount的时候调用setState
         this.stateMergeQueue.push(1)

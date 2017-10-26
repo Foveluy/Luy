@@ -21,6 +21,20 @@ class Vnode {
     }
 }
 
+function renderHoc(instance, props, parentContext) {
+    if (typeNumber(instance) === 5) {
+        const newInstance = new instance(props, parentContext)
+        return renderHoc(newInstance)
+    } else {
+        if (!instance.render) {
+            return instance
+        } else {
+            return instance.render()
+        }
+    }
+}
+
+
 /**
  * 创建虚拟Dom的地方
  * @param {string | Function} type 
@@ -32,6 +46,7 @@ function createElement(type: string | Function, config, ...children: array) {
         key = null,
         ref = null,
         childLength = children.length;
+
 
     if (config != null) {
         //巧妙的将key转化为字符串
@@ -65,20 +80,18 @@ function createElement(type: string | Function, config, ...children: array) {
         }
     }
 
+    if(typeof type === 'function'){
+        let instance = new type(props)
+        let newInstance = renderHoc(instance)
+        console.log(newInstance)
+        if(!newInstance.render){
+            return newInstance
+        }
+    }
 
-
-    // if(typeof type === 'function'){
-    //     const newComponent = new type(props)
-    //     if(typeNumber(newComponent)=== 5){
-    //         const instance = new newComponent(props)
-
-    //         return instance.render()
-    //     }
-    //     if(!newComponent.render){
-    //         return newComponent
-    //     }
-    // }
-
+    if(config === null && childLength === null){
+        return new Vnode('#text', "", null, null)
+    }
 
     return new Vnode(type, props, key, ref);
 }

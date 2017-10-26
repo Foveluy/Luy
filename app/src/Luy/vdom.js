@@ -200,11 +200,10 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
     let newContext = parentContext
     const newInstance = new newComponentVnode.type(newProps, newContext)
 
-    if(newInstance.getChildContext){
-        newContext = extend(extend({},newContext),newInstance.getChildContext()) 
-        console.log(newContext)
+    if (newInstance.getChildContext) {
+        newContext = extend(extend({}, newContext), newInstance.getChildContext())
     }
-
+    oldComponentVnode._instance.lifeCycle = Com.UPDATING
     if (oldComponentVnode._instance.componentWillReceiveProps) {
         oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext)
     }
@@ -232,8 +231,9 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
     newInstance.context = extend(extend({}, oldContext), newContext)
     // console.log(oldContext)
 
-    const newVnode = newInstance.render()
+    let newVnode = newInstance.render()
 
+    newVnode = newVnode?newVnode:new Vnode('#text', "", null, null)
     //更新原来组件的信息
     oldComponentVnode._instance.props = newProps
     oldComponentVnode._instance.context = newContext
@@ -248,6 +248,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
         if (oldComponentVnode._instance.componentDidUpdate) {
             oldComponentVnode._instance.componentDidUpdate(oldProps, oldState, oldContext)
         }
+        oldComponentVnode._instance.lifeCycle = Com.UPDATED
     }
 
 }
@@ -281,7 +282,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
                 parentContext)
         }
         if (typeof oldVnode.type === 'function') {//非原生
-           
+
             updateComponent(oldVnode, newVnode, parentContext)
         }
     } else {
@@ -497,7 +498,7 @@ export function render(Vnode, container) {
     const UniqueKey = container.UniqueKey
 
     if (container.UniqueKey) {//已经被渲染
-        
+
         const oldVnode = containerMap[UniqueKey]
         const rootVnode = update(oldVnode, Vnode, container)
         return rootVnode._hostNode

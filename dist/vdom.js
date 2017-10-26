@@ -209,9 +209,8 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
     if (newInstance.getChildContext) {
         newContext = (0, _utils.extend)((0, _utils.extend)({}, newContext), newInstance.getChildContext());
-        console.log(newContext);
     }
-
+    oldComponentVnode._instance.lifeCycle = _component.Com.UPDATING;
     if (oldComponentVnode._instance.componentWillReceiveProps) {
         oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext);
     }
@@ -241,6 +240,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
     var newVnode = newInstance.render();
 
+    newVnode = newVnode ? newVnode : new _createElement.Vnode('#text', "", null, null);
     //更新原来组件的信息
     oldComponentVnode._instance.props = newProps;
     oldComponentVnode._instance.context = newContext;
@@ -255,6 +255,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
         if (oldComponentVnode._instance.componentDidUpdate) {
             oldComponentVnode._instance.componentDidUpdate(oldProps, oldState, oldContext);
         }
+        oldComponentVnode._instance.lifeCycle = _component.Com.UPDATED;
     }
 }
 
@@ -328,19 +329,7 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
     var Component = type;
     var instance = new Component(props, parentContext);
 
-    if (!instance.render) {
-        instance = renderHoc(instance);
-
-        return renderByLuy(instance, parentDomNode, false, parentContext);
-    }
-
-    if (instance.getChildContext) {
-        //如果用户定义getChildContext，那么用它生成子context
-        instance.context = (0, _utils.extend)((0, _utils.extend)({}, instance.context), instance.getChildContext());
-        // console.log(type,instance.context)
-    } else {
-        instance.context = (0, _utils.extend)({}, parentContext);
-    }
+    instance.context = instance.getChildContext ? (0, _utils.extend)((0, _utils.extend)({}, instance.context), instance.getChildContext()) : (0, _utils.extend)({}, parentContext);
 
     if (instance.componentWillMount) {
         //生命周期函数
@@ -351,12 +340,13 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
     var renderedVnode = instance.render();
     currentOwner.cur = lastOwner;
 
-    renderedVnode.key = key || null;
-
-    if (!renderedVnode) {
+    if (renderedVnode === void 233) {
         console.warn('你可能忘记在组件render()方法中返回jsx了');
         return;
     }
+
+    renderedVnode = renderedVnode ? renderedVnode : new Vnode('#text', "", null, null);
+    renderedVnode.key = key || null;
     var domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance);
 
     if (instance.componentDidMount) {
