@@ -233,7 +233,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
     let newVnode = newInstance.render()
 
-    newVnode = newVnode?newVnode:new Vnode('#text', "", null, null)
+    newVnode = newVnode ? newVnode : new Vnode('#text', "", null, null)
     //更新原来组件的信息
     oldComponentVnode._instance.props = newProps
     oldComponentVnode._instance.context = newContext
@@ -282,8 +282,13 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
                 parentContext)
         }
         if (typeof oldVnode.type === 'function') {//非原生
-
-            updateComponent(oldVnode, newVnode, parentContext)
+            let newInstance = new newVnode.type(newVnode.props, parentContext)
+            newInstance = renderHoc(newInstance)
+            if(newInstance.render){
+                updateComponent(oldVnode, newVnode, parentContext)
+            }else{
+                update(oldVnode,newInstance,parentContext)
+            }
         }
     } else {
         let dom = renderByLuy(newVnode, parentDomNode, true)

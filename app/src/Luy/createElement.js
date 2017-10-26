@@ -21,18 +21,7 @@ class Vnode {
     }
 }
 
-function renderHoc(instance, props, parentContext) {
-    if (typeNumber(instance) === 5) {
-        const newInstance = new instance(props, parentContext)
-        return renderHoc(newInstance)
-    } else {
-        if (!instance.render) {
-            return instance
-        } else {
-            return instance.render()
-        }
-    }
-}
+
 
 
 /**
@@ -80,18 +69,6 @@ function createElement(type: string | Function, config, ...children: array) {
         }
     }
 
-    if(typeof type === 'function'){
-        let instance = new type(props)
-        let newInstance = renderHoc(instance)
-        console.log(newInstance)
-        if(!newInstance.render){
-            return newInstance
-        }
-    }
-
-    if(config === null && childLength === null){
-        return new Vnode('#text', "", null, null)
-    }
 
     return new Vnode(type, props, key, ref);
 }

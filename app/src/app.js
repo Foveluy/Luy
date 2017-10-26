@@ -12,16 +12,36 @@ class Drawer extends React.Component {
 }
 
 const DrawerHOC = () => {
-    return class wrapper extends React.Component {
+    return class Wrapper extends React.Component {
         render() {
             return <Drawer />
         }
     }
 }
 
+class W extends React.Component {
+
+    state = {
+        n: 0
+    }
+    onClick = () => {
+        this.setState({
+            n: this.state.n + 1
+        })
+    }
+    render() {
+        return (
+            <div>
+                {this.state.n % 2 === 1 ? <DrawerHOC /> : 2}
+                <button onClick={this.onClick}>点我</button>
+            </div>
+        )
+    }
+}
+
 ReactDOM.render(
     <div>
-        <DrawerHOC />
+        <W/>
     </div>,
     document.getElementById('root')
 )
