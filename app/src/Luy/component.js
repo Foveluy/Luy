@@ -1,6 +1,7 @@
 // @flow
 import { update } from './vdom'
 import { options, extend } from './utils'
+import { Vnode } from './createElement'
 
 export const Com = {
   CREATE: 0,//创造节点
@@ -51,8 +52,8 @@ class ReactClass {
       this.componentWillUpdate(this.props, this.nextState, this.context)
     }
     this.nextState = null
-    const newVnode = this.render()
-
+    let newVnode = this.render()
+    newVnode = newVnode ? newVnode : new Vnode('#text', "", null, null);
     this.Vnode = update(oldVnode, newVnode, this.dom, this.context)//这个函数返回一个更新后的Vnode
 
     if (this.componentDidUpdate) {
@@ -64,7 +65,7 @@ class ReactClass {
         item.callback(this.state, this.props)
       }
     })
-    
+
     this._penddingState = []
   }
 
@@ -102,10 +103,10 @@ class ReactClass {
 
     } else {
       //组件更新期
-      if(this.lifeCycle === Com.UPDATING){
-        return
+      if (this.lifeCycle === Com.UPDATING) {
+        // return
       }
-      
+
       if (this.lifeCycle === Com.MOUNTTING) {
         //componentDidMount的时候调用setState
         this.stateMergeQueue.push(1)

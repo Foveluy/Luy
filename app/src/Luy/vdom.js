@@ -1,6 +1,6 @@
 //@flow
 import { typeNumber, isSameVnode, mapKeyToIndex, isEventName, extend } from "./utils";
-import { flattenChildren, Vnode } from './createElement'
+import { flattenChildren, Vnode as VnodeClass } from './createElement'
 import { mapProp, mappingStrategy, updateProps } from './mapProps'
 import { setRef } from './Refs'
 import { Com } from './component'
@@ -17,7 +17,7 @@ export function createPortal(children, container) {
         }
     }
     //用于记录Portal的事物
-    const CreatePortalVnode = new Vnode('#text', "createPortal", null, null)
+    const CreatePortalVnode = new VnodeClass('#text', "createPortal", null, null)
     CreatePortalVnode._PortalHostNode = container
     return CreatePortalVnode
 }
@@ -54,6 +54,7 @@ function updateText(oldTextVnode, newTextVnode, parentDomNode: Element) {
 
 function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) {
     newChild = flattenChildren(newChild)
+    oldChild = flattenChildren(oldChild)
     if (!Array.isArray(oldChild)) oldChild = [oldChild]
     if (!Array.isArray(newChild)) newChild = [newChild]
 
@@ -233,7 +234,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
     let newVnode = newInstance.render()
 
-    newVnode = newVnode ? newVnode : new Vnode('#text', "", null, null)
+    newVnode = newVnode ? newVnode : new VnodeClass('#text', "", null, null)
     //更新原来组件的信息
     oldComponentVnode._instance.props = newProps
     oldComponentVnode._instance.context = newContext
@@ -256,7 +257,6 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
 export function update(oldVnode, newVnode, parentDomNode: Element, parentContext) {
     newVnode._hostNode = oldVnode._hostNode
-
     if (oldVnode.type === newVnode.type) {
         if (oldVnode.type === "#text") {
             newVnode._hostNode = oldVnode._hostNode //更新一个dom节点
@@ -283,11 +283,15 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
         }
         if (typeof oldVnode.type === 'function') {//非原生
             let newInstance = new newVnode.type(newVnode.props, parentContext)
-            newInstance = renderHoc(newInstance)
-            if(newInstance.render){
+            const oldInstance = new oldVnode.type(oldVnode.props,parentContext)
+            if (newInstance.render) {
                 updateComponent(oldVnode, newVnode, parentContext)
-            }else{
-                update(oldVnode,newInstance,parentContext)
+            } else {
+                oldInstance.owner = oldVnode.owner
+                oldInstance.ref = oldVnode.ref
+                oldInstance.key = oldVnode.key
+                oldInstance._hostNode = oldVnode._hostNode
+                update(oldInstance, newInstance,parentDomNode, parentContext)
             }
         }
     } else {
@@ -328,35 +332,31 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     let instance = new Component(props, parentContext)
 
     if (!instance.render) {
-        instance = renderHoc(instance)
-
+       
         return renderByLuy(instance, parentDomNode, false, parentContext)
     }
 
     if (instance.getChildContext) {//如果用户定义getChildContext，那么用它生成子context
         instance.context = extend(extend({}, instance.context), instance.getChildContext());
-        // console.log(type,instance.context)
     } else {
         instance.context = extend({}, parentContext)
     }
-
-
 
     if (instance.componentWillMount) {//生命周期函数
         instance.componentWillMount()
     }
     let lastOwner = currentOwner.cur
     currentOwner.cur = instance
-    const renderedVnode = instance.render()
+    let renderedVnode = instance.render()
     currentOwner.cur = lastOwner
 
-    renderedVnode.key = key || null
-
-    if (!renderedVnode) {
+    if (renderedVnode === void 233) {
         console.warn('你可能忘记在组件render()方法中返回jsx了')
         return
     }
-    const domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance)
+    renderedVnode = renderedVnode ? renderedVnode : new VnodeClass('#text', "", null, null);
+
+    const domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance);
 
     if (instance.componentDidMount) {
         instance.lifeCycle = Com.MOUNTTING
@@ -365,11 +365,13 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
         instance.lifeCycle = Com.MOUNT
     }
 
+    renderedVnode.key = key || null
     instance.Vnode = renderedVnode
     instance.Vnode._hostNode = domNode//用于在更新时期oldVnode的时候获取_hostNode
     instance.Vnode._mountIndex = mountIndexAdd()
 
     Vnode._instance = instance // 在父节点上的child元素会保存一个自己
+    Vnode._hostNode = domNode
 
     setRef(Vnode, instance, domNode)
 

@@ -18,12 +18,12 @@ module.exports = {
         hot: true,
         publicPath: '/',
     },
-    // resolve: {
-    //     alias: {
-    //        'react': './dist/index.js',
-    //        'react-dom': './dist/index.js'
-    //     }
-    //  },
+    resolve: {
+        alias: {
+           'react': '/Users/Floveluy/Desktop/Luy/app/src/Luy/index.js',
+           'react-dom': '/Users/Floveluy/Desktop/Luy/app/src/Luy/index.js'
+        }
+     },
     module: {
         rules: [
             {

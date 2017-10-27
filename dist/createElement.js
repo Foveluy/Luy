@@ -36,25 +36,14 @@ var Vnode = function Vnode(type, props, key, ref) {
     this.ref = ref;
 };
 
-function renderHoc(instance, props, parentContext) {
-    if ((0, _utils.typeNumber)(instance) === 5) {
-        var newInstance = new instance(props, parentContext);
-        return renderHoc(newInstance);
-    } else {
-        if (!instance.render) {
-            return instance;
-        } else {
-            return instance.render();
-        }
-    }
-}
-
 /**
  * 创建虚拟Dom的地方
  * @param {string | Function} type 
  * @param {object} config 
  * @param {array} children 
  */
+
+
 function createElement(type, config) {
     for (var _len = arguments.length, children = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
         children[_key - 2] = arguments[_key];
@@ -95,19 +84,6 @@ function createElement(type, config) {
                 props[_propName] = defaultProps[_propName];
             }
         }
-    }
-
-    if (typeof type === 'function') {
-        var instance = new type(props);
-        var newInstance = renderHoc(instance);
-        console.log(newInstance);
-        if (!newInstance.render) {
-            return newInstance;
-        }
-    }
-
-    if (config === null && childLength === null) {
-        return new Vnode('#text', "", null, null);
     }
 
     return new Vnode(type, props, key, ref);
