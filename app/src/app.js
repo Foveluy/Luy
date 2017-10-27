@@ -1,7 +1,7 @@
-import React from './Luy'
-import ReactDOM from './Luy'
-import { Component } from './Luy'
-import {Children} from './Luy'
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { Component } from 'react'
+import { Children } from 'react'
 import { createStore } from 'redux'
 import { Provider, connect } from 'react-redux'
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
@@ -13,7 +13,7 @@ const page2 = () => {
     return (<div>p2</div>)
 }
 const page3 = () => {
-    return (<div>p1</div>)
+    return (<div>p3</div>)
 }
 
 class Child extends React.Component {
@@ -34,11 +34,18 @@ class Linker extends React.Component {
     render() {
         return (
             <Router>
-                <div className='navigator container'>
-                    <Link to="/">Home</Link>
-                    <Link to="/page2">page2</Link>
+                <div>
+                    <ul>
+                        <li><Link to="/">Home</Link></li>
+                        <li><Link to="/about">About</Link></li>
+                        <li><Link to="/topics">Topics</Link></li>
+                    </ul>
+
+                    <hr />
+
                     <Route exact path="/" component={page1} />
-                    <Route exact="/page2" component={page2} />
+                    <Route path="/about" component={page2} />
+                    <Route path="/topics" component={page3} />
                 </div>
             </Router>
         )
@@ -48,7 +55,7 @@ class Linker extends React.Component {
 
 class Drawer extends Component {
     render() {
-        return <div><Linker/>12</div>
+        return <div><Linker />12</div>
     }
 }
 

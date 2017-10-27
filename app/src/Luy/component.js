@@ -54,7 +54,7 @@ class ReactClass {
     this.nextState = null
     let newVnode = this.render()
     newVnode = newVnode ? newVnode : new Vnode('#text', "", null, null);
-    this.Vnode = update(oldVnode, newVnode, this.dom, this.context)//这个函数返回一个更新后的Vnode
+    this.Vnode = update(oldVnode, newVnode, this.Vnode._hostNode, this.context)//这个函数返回一个更新后的Vnode
 
     if (this.componentDidUpdate) {
       this.componentDidUpdate(this.props, prevState, oldContext)

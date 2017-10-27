@@ -296,12 +296,12 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
         }
     } else {
         let dom = renderByLuy(newVnode, parentDomNode, true)
-
+        const parentNode = oldVnode._hostNode.parentNode
         if (newVnode._hostNode) {
-            parentDomNode.insertBefore(dom, oldVnode._hostNode)
-            parentDomNode.removeChild(oldVnode._hostNode)
+            parentNode.insertBefore(dom, oldVnode._hostNode)
+            parentNode.removeChild(oldVnode._hostNode)
         } else {
-            parentDomNode.appendChild(dom)
+            parentNode.appendChild(dom)
         }
     }
     return newVnode
