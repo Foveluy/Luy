@@ -32,7 +32,10 @@ ReactDOM.render(<Luy/>, document.getElementById('root'))
 todolist
 -------
 
-- [Luy第一版性能测试](http://htmlpreview.github.io/?https://github.com/215566435/Luy/blob/master/benchmarks/Luy.html)
+- [Luy第一版性能测试](http://htmlpreview.github.io/?https://github.com/215566435/Luy/blob/master/performance/luy/index.html)
+- [react官方性能测试](http://htmlpreview.github.io/?https://github.com/215566435/Luy/blob/master/performance/react/index.html)
+- [Anu性能测试](http://htmlpreview.github.io/?https://github.com/215566435/Luy/blob/master/performance/anu/index.html)
+
 
 - [x] 第一次渲染
 - [x] 虚拟DOM
