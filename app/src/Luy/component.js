@@ -11,6 +11,7 @@ export const Com = {
   MOUNTTING: 4//节点正在挂载
 }
 
+var uniqueId = 0
 // 用户用来继承的 Component 类
 class ReactClass {
   constructor(props, context) {
@@ -24,7 +25,8 @@ class ReactClass {
     this.stateMergeQueue = []
     this._penddingState = []
     this.refs = {}
-    this._uniqueId = Date.now()
+    this._uniqueId = uniqueId
+    uniqueId++
   }
 
   updateComponent() {
@@ -106,7 +108,9 @@ class ReactClass {
     } else {
       //组件更新期
       if (this.lifeCycle === Com.UPDATING) {
-        // return
+        console.log('更新期')
+
+        return
       }
 
       if (this.lifeCycle === Com.MOUNTTING) {

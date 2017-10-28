@@ -79,7 +79,7 @@ function createElement(type: string | Function, config, ...children: array) {
  */
 export function flattenChildren(children: Array) {
     
-    if (children === undefined) return new Vnode('#text', "flattenChildren", null, null)
+    if (children === undefined) return new Vnode('#text', "", null, null)
     
     let length = children.length
     let ary = [],

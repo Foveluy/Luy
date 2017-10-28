@@ -68,25 +68,44 @@ const DrawerHOC = () => {
     }
 }
 
+const List = () => {
+    return (<div>
+        <p>1</p>
+        <p>1</p>
+        <p>1</p>
+    </div>)
+}
+
+class NULL extends React.Component {
+    render() {
+        return null
+    }
+}
+
 class W extends React.Component {
 
     state = {
-        n: 1
+        n: 213123123123
     }
     onClick = () => {
         this.props.click()
+        console.log(this.props.number)
+        console.log(`state的大小：${this.state.n}`)
+    }
+    componentWillReceiveProps(){
+        console.log('进来了')
+        this.setState({
+            n:this.state.n + 1
+        })
     }
     render() {
-        // const HOC = DrawerHOC()
+        const HOC = DrawerHOC()
         return (
             <div>
-                {/* <HOC /> */}
-                {/* <div><Drawer /></div> */}
-                {this.props.number % 2 === 1 ? <div>fuck</div> : (<div>
-                    <p>1</p>
-                    <p>1</p>
-                    <p>1</p>
-                </div>)}
+                {<HOC />}
+                {/* {<div><Drawer /></div>} */}
+                {this.state.n}
+                {this.props.number % 2 === 1 ? <div><NULL/>{this.props.number}</div> : <List />}
                 <button onClick={this.onClick}>点我</button>
             </div>
         )
@@ -108,7 +127,7 @@ const mapState = (state) => {
     }
 }
 const mapDispatch = (dispatch) => {
-    
+
     return {
         click: () => dispatch({ type: 'type', number: 1 })
     }
@@ -119,9 +138,7 @@ const Wrapper = connect(mapState, mapDispatch)(W)
 const render = () => (
     ReactDOM.render(
         <Provider store={store}>
-            <div>
-                <Wrapper />
-            </div>
+            <Wrapper />
         </Provider>
         ,
         document.getElementById('root')
