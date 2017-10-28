@@ -24,6 +24,7 @@ class ReactClass {
     this.stateMergeQueue = []
     this._penddingState = []
     this.refs = {}
+    this._uniqueId = Date.now()
   }
 
   updateComponent() {
@@ -53,6 +54,7 @@ class ReactClass {
     }
     this.nextState = null
     let newVnode = this.render()
+
     newVnode = newVnode ? newVnode : new Vnode('#text', "", null, null);
     this.Vnode = update(oldVnode, newVnode, this.Vnode._hostNode, this.context)//这个函数返回一个更新后的Vnode
 
@@ -115,9 +117,9 @@ class ReactClass {
 
       if (options.async === true) {
         //事件中调用
-        let dirty = options.dirtyComponent[this]
+        let dirty = options.dirtyComponent[this._uniqueId]
         if (!dirty) {
-          options.dirtyComponent[this] = this
+          options.dirtyComponent[this._uniqueId] = this
         }
         return
       }

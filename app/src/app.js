@@ -25,6 +25,7 @@ class Child extends React.Component {
     }
 }
 
+
 class Linker extends React.Component {
 
     click(idx) {
@@ -73,33 +74,53 @@ class W extends React.Component {
         n: 1
     }
     onClick = () => {
-        this.setState({
-            n: this.state.n + 1
-        })
+        this.props.click()
     }
     render() {
-        const HOC = DrawerHOC()
+        // const HOC = DrawerHOC()
         return (
             <div>
-                {this.state.n % 2 === 1 ? <HOC /> : 2}
+                {/* <HOC /> */}
+                {/* <div><Drawer /></div> */}
+                {this.props.number % 2 === 1 ? <div>fuck</div> : (<div>
+                    <p>1</p>
+                    <p>1</p>
+                    <p>1</p>
+                </div>)}
                 <button onClick={this.onClick}>点我</button>
             </div>
         )
     }
 }
 
-const reduer = (state = {}, action) => {
+const reducer = (state = 1, action) => {
+
+    if (action.type == 'type') {
+        const newState = typeof state === 'object' ? action.number : state + action.number
+        return newState
+    }
     return state
 }
+const mapState = (state) => {
+    console.log(state)
+    return {
+        number: state
+    }
+}
+const mapDispatch = (dispatch) => {
+    
+    return {
+        click: () => dispatch({ type: 'type', number: 1 })
+    }
+}
 
-const store = createStore(reduer)
-const Wrapper = connect()(W)
-
+const store = createStore(reducer)
+const Wrapper = connect(mapState, mapDispatch)(W)
 const render = () => (
     ReactDOM.render(
         <Provider store={store}>
             <div>
-                <W />
+                <Wrapper />
             </div>
         </Provider>
         ,
@@ -108,6 +129,9 @@ const render = () => (
 )
 
 render()
+render()
+render()
+
 
 store.subscribe(render)
 

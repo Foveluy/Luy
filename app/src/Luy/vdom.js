@@ -45,7 +45,6 @@ function mountIndexAdd() {
 
 function updateText(oldTextVnode, newTextVnode, parentDomNode: Element) {
     let dom: Element = oldTextVnode._hostNode
-
     if (oldTextVnode.props !== newTextVnode.props) {
 
         dom.nodeValue = newTextVnode.props
@@ -152,6 +151,8 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
 }
 
 function disposeVnode(Vnode) {//主要用于删除Vnode对应的节点
+    const { type, props } = Vnode
+    if (!type) return
     if (typeof Vnode.type === 'function') {
         if (Vnode._instance.componentWillUnMount) {
             Vnode._instance.componentWillUnMount()
@@ -189,7 +190,16 @@ function disposeChildVnode(childVnode) {
     })
 }
 
-function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
+
+/**
+ * 当我们更新组件的时候，并不需要重新创建一个组件，而是拿到久的组件的props,state,context就可以进行重新render
+ * 而且要注意的是，组件的更新并不需要比对或者交换state,因为组件的更新完全依靠外部的context和props
+ * @param {*} oldComponentVnode 老的孩子组件，_instance里面有着这个组件的实例
+ * @param {*} newComponentVnode 新的组件
+ * @param {*} parentContext 父亲context
+ * @param {*} parentDomNode 父亲节点
+ */
+function updateComponent(oldComponentVnode, newComponentVnode, parentContext, parentDomNode) {
     const {
         oldState,
         oldProps,
@@ -199,12 +209,20 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 
     const newProps = newComponentVnode.props
     let newContext = parentContext
-    const newInstance = new newComponentVnode.type(newProps, newContext)
+    const instance = oldComponentVnode._instance
+    // const willReceive = oldContext !== newContext || oldProps !== newProps
+    //如果props和context中的任意一个改变了，那么就会触发组件的receive,render,update等
+    //但是依旧会继续往下比较
 
-    if (newInstance.getChildContext) {
-        newContext = extend(extend({}, newContext), newInstance.getChildContext())
+    //更新原来组件的信息
+    oldComponentVnode._instance.props = newProps
+
+    if (instance.getChildContext) {
+        oldComponentVnode._instance.context = extend(extend({}, newContext), instance.getChildContext())
     }
+
     oldComponentVnode._instance.lifeCycle = Com.UPDATING
+
     if (oldComponentVnode._instance.componentWillReceiveProps) {
         oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext)
     }
@@ -214,12 +232,8 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
         if (!shouldUpdate) {
             //无论shouldComponentUpdate结果是如何，数据都会给用户设置上去
             //但是不一定会刷新
-            newInstance.state = oldState
-            newInstance.context = newContext
-
             oldComponentVnode._instance.props = newProps
             oldComponentVnode._instance.context = newContext
-            newComponentVnode._instance = oldComponentVnode._instance
             return
         }
     }
@@ -228,22 +242,13 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
         oldComponentVnode._instance.componentWillUpdate(newProps, oldState, newContext)
     }
 
-    newInstance.state = oldState
-    newInstance.context = extend(extend({}, oldContext), newContext)
-    // console.log(oldContext)
+    let newVnode = oldComponentVnode._instance.render ? oldComponentVnode._instance.render() : new newComponentVnode.type(newProps, newContext)
+    newVnode = newVnode ? newVnode : new VnodeClass('#text', "[update]", null, null)
+    let fixedOldVnode = oldVnode ? oldVnode : oldComponentVnode._instance
 
-    let newVnode = newInstance.render()
 
-    newVnode = newVnode ? newVnode : new VnodeClass('#text', "", null, null)
-    //更新原来组件的信息
-    oldComponentVnode._instance.props = newProps
-    oldComponentVnode._instance.context = newContext
-
-    //更新父组件的信息
-    newComponentVnode._instance = oldComponentVnode._instance
-
-    //更新真实dom
-    update(oldVnode, newVnode, oldComponentVnode._hostNode, newInstance.context)
+    //更新真实dom,保存新的节点
+    update(fixedOldVnode, newVnode, oldComponentVnode._hostNode, instance.context)
 
     if (oldComponentVnode._instance) {
         if (oldComponentVnode._instance.componentDidUpdate) {
@@ -282,21 +287,26 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
                 parentContext)
         }
         if (typeof oldVnode.type === 'function') {//非原生
-            let newInstance = new newVnode.type(newVnode.props, parentContext)
-            const oldInstance = new oldVnode.type(oldVnode.props,parentContext)
-            if (newInstance.render) {
-                updateComponent(oldVnode, newVnode, parentContext)
-            } else {
-                oldInstance.owner = oldVnode.owner
-                oldInstance.ref = oldVnode.ref
-                oldInstance.key = oldVnode.key
-                oldInstance._hostNode = oldVnode._hostNode
-                update(oldInstance, newInstance,parentDomNode, parentContext)
-            }
+            updateComponent(oldVnode, newVnode, parentContext, parentDomNode)
+            newVnode.owner = oldVnode.owner
+            newVnode.ref = oldVnode.ref
+            newVnode.key = oldVnode.key
+            newVnode._instance = oldVnode._instance
+            // let newInstance = new newVnode.type(newVnode.props, parentContext)
+            // const oldInstance = new oldVnode.type(oldVnode.props, parentContext)
+            // if (newInstance.render) {
+
+            // } else {
+            //     oldInstance.owner = oldVnode.owner
+            //     oldInstance.ref = oldVnode.ref
+            //     oldInstance.key = oldVnode.key
+            //     oldInstance._hostNode = oldVnode._hostNode
+            //     update(oldInstance, newInstance, parentDomNode, parentContext)
+            // }
         }
     } else {
         let dom = renderByLuy(newVnode, parentDomNode, true)
-        const parentNode = oldVnode._hostNode.parentNode
+        const parentNode = parentDomNode
         if (newVnode._hostNode) {
             parentNode.insertBefore(dom, oldVnode._hostNode)
             parentNode.removeChild(oldVnode._hostNode)
@@ -332,8 +342,9 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     let instance = new Component(props, parentContext)
 
     if (!instance.render) {
-       
-        return renderByLuy(instance, parentDomNode, false, parentContext)
+        Vnode._instance = instance;//for react-redux
+
+        return renderByLuy(instance, parentDomNode, false, parentContext);
     }
 
     if (instance.getChildContext) {//如果用户定义getChildContext，那么用它生成子context
@@ -354,7 +365,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
         console.warn('你可能忘记在组件render()方法中返回jsx了')
         return
     }
-    renderedVnode = renderedVnode ? renderedVnode : new VnodeClass('#text', "", null, null);
+    renderedVnode = renderedVnode ? renderedVnode : new VnodeClass('#text', "[mount]", null, null);
 
     const domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance);
 
@@ -456,8 +467,8 @@ export function findDOMNode(ref) {
  */
 let depth = 0
 function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext, instance) {
-
     const { type, props } = Vnode
+    if (!type) return
     const { children } = props
     let domNode
     if (typeof type === 'function') {
@@ -503,14 +514,13 @@ export function render(Vnode, container) {
     }
 
     const UniqueKey = container.UniqueKey
-
     if (container.UniqueKey) {//已经被渲染
-
         const oldVnode = containerMap[UniqueKey]
         const rootVnode = update(oldVnode, Vnode, container)
         return rootVnode._hostNode
     } else {
         //没有被渲染
+        console.log('被插入')
         container.UniqueKey = Date.now()
         containerMap[container.UniqueKey] = Vnode
         renderByLuy(Vnode, container)

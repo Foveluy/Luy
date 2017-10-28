@@ -73,10 +73,10 @@ export const mappingStrategy = {
         let events = domNode.__events || {}
         events[eventName] = eventCb
         domNode.__events = events//用于triggerEventByPath中获取event
-
+        
         if (!registerdEvent[eventName]) {//所有事件只注册一次
             registerdEvent[eventName] = 1
-            console.log(document,eventName)
+            
             addEvent(document, dispatchEvent, eventName)
         }
     },
@@ -116,7 +116,7 @@ function addEvent(domNode, fn, eventName) {
 function dispatchEvent(event, eventName, end) {
     const path = getEventPath(event, end)
     let E = new SyntheticEvent(event)
-    
+
     options.async = true
 
     triggerEventByPath(E, path)//触发event默认以冒泡形式
