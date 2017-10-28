@@ -46,10 +46,14 @@
         "build": "./node_modules/.bin/babel --out-dir ./dist ./app/src/Luy",
         "jest": "jest --watch",
         "temp": "NODE_ENV=production webpack -p --config webpack.pro.config.js ",
-        "anu":"webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback --config 'webpack.anu.config.js' ",
+        "bench": "./bench.sh ",
+        "anu": "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback --config 'webpack.anu.config.js' ",
         "react": "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback --config 'webpack.react.config.js' ",
         "dev": "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback",
-        "push": "python3 ./publish.py"
+        "push": "python3 ./publish.py",
+        "anuBench": "NODE_ENV=production webpack -p --config './performance/webpack.config/webpack.anuPerformence.config.js' ",
+        "luyBench": "NODE_ENV=production webpack -p --config './performance/webpack.config/webpack.luyPerformence.config.js' ",
+        "reactBench": "NODE_ENV=production webpack -p --config './performance/webpack.config/webpack.reactPerformence.config.js' "
     },
     "keywords": [
         "react-like",

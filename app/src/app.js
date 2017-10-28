@@ -92,10 +92,10 @@ class W extends React.Component {
         console.log(this.props.number)
         console.log(`state的大小：${this.state.n}`)
     }
-    componentWillReceiveProps(){
+    componentWillReceiveProps() {
         console.log('进来了')
         this.setState({
-            n:this.state.n + 1
+            n: this.state.n + 1
         })
     }
     render() {
@@ -105,7 +105,7 @@ class W extends React.Component {
                 {<HOC />}
                 {/* {<div><Drawer /></div>} */}
                 {this.state.n}
-                {this.props.number % 2 === 1 ? <div><NULL/>{this.props.number}</div> : <List />}
+                {this.props.number % 2 === 1 ? <div><NULL />{this.props.number}</div> : <List />}
                 <button onClick={this.onClick}>点我</button>
             </div>
         )
@@ -145,10 +145,7 @@ const render = () => (
     )
 )
 
-render()
-render()
-render()
 
 
-store.subscribe(render)
+// store.subscribe(render)
 

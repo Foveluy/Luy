@@ -23,8 +23,9 @@ try:
 finally:
     file.close( )
 
-print('配置文件设置完毕，准备发布')
+print('配置文件设置完毕，准备打包')
 
 os.system('npm run build')
+print('创建build完毕，准备发布')
 os.system('npm publish')
     

@@ -50,6 +50,6 @@ todolist
 - [x] 发布第一版本
 - [x] 支持redux
 - [x] 支持react-redux
-- [ ] 渲染null节点
-- [ ] 支持react-router
+- [x] 渲染null节点
+- [x] 支持react-router
 - [ ] createProtal 冒泡
