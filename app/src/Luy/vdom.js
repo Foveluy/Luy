@@ -75,6 +75,12 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
         })
         return newChild
     }
+    if (!newLength && oldLength >= 0) {
+        oldChild.forEach((oldVnode) => {
+            disposeVnode(oldVnode)
+        })
+        return newChild[0]
+    }
 
     while (oldStartIndex <= oldEndIndex && newStartIndex <= newEndIndex) {
         if (oldStartVnode === undefined) {

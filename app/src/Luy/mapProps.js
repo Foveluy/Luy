@@ -1,4 +1,4 @@
-import { typeNumber, isEventName, isEventNameLowerCase, options } from "./utils";
+import { typeNumber, isEventName, isEventNameLowerCase, options, styleHelper } from "./utils";
 import { SyntheticEvent } from './event'
 import { mapControlledElement } from './controlledComponent'
 
@@ -74,11 +74,12 @@ const specialHook = {
     }
 }
 
+
 export const mappingStrategy = {
     style: function (domNode, style) {
         if (style !== undefined) {
             Object.keys(style).forEach((styleName) => {
-                domNode.style[styleName] = style[styleName]
+                domNode.style[styleName] = styleHelper(style[styleName])
             })
         }
     },

@@ -1,0 +1,5 @@
+.todolist.close:hover {
+    color: white;
+    cursor: pointer;
+    background: #108EE9;
+}
