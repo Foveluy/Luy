@@ -48,7 +48,7 @@ export function updateProps(oldProps, newProps, hostNode) {
 
     let restProps = {}
     for (let newName in newProps) {//新增原来没有的属性
-        if (!oldProps[newName]) {
+        if (oldProps[newName] === void 666) {
             restProps[newName] = newProps[newName]
         }
     }
@@ -61,6 +61,19 @@ const controlledEvent = {
     change: 1,
     input: 1
 }
+function createHandle(e) {
+    dispatchEvent(e, 'change');
+}
+
+const specialHook = {
+    //react将text,textarea,password元素中的onChange事件当成onInput事件
+    change: function (dom) {
+        if (/text|password/.test(dom.type)) {
+            addEvent(document, createHandle, "input");
+        }
+    }
+}
+
 export const mappingStrategy = {
     style: function (domNode, style) {
         if (style !== undefined) {
@@ -73,10 +86,13 @@ export const mappingStrategy = {
         let events = domNode.__events || {}
         events[eventName] = eventCb
         domNode.__events = events//用于triggerEventByPath中获取event
-        
+
         if (!registerdEvent[eventName]) {//所有事件只注册一次
             registerdEvent[eventName] = 1
-            
+
+            if (specialHook[eventName]) {
+                specialHook[eventName](domNode)
+            }
             addEvent(document, dispatchEvent, eventName)
         }
     },
@@ -116,8 +132,10 @@ function addEvent(domNode, fn, eventName) {
 function dispatchEvent(event, eventName, end) {
     const path = getEventPath(event, end)
     let E = new SyntheticEvent(event)
-
     options.async = true
+    if (eventName) {
+        E.type = eventName
+    }
 
     triggerEventByPath(E, path)//触发event默认以冒泡形式
     options.async = false

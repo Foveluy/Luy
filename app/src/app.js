@@ -2,9 +2,13 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { Component } from 'react'
 import { Children } from 'react'
-import { createStore } from 'redux'
-import { Provider, connect } from 'react-redux'
+import { createStore, combineReducers } from 'redux'
+import { Provider } from 'react-redux'
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
+
+
+import { todoListReducer } from "./react-redux.exp"
+import TodoList from "./react-redux.exp"
 
 const page1 = () => {
     return (<div>p1</div>)
@@ -54,98 +58,24 @@ class Linker extends React.Component {
 }
 
 
-class Drawer extends Component {
-    render() {
-        return <div><Linker />12</div>
-    }
-}
 
-const DrawerHOC = () => {
-    return class Wrapper extends React.Component {
-        render() {
-            return <Drawer />
-        }
-    }
-}
+const reducers = combineReducers({
+    todoList: todoListReducer
+})
 
-const List = () => {
-    return (<div>
-        <p>1</p>
-        <p>1</p>
-        <p>1</p>
-    </div>)
-}
 
-class NULL extends React.Component {
-    render() {
-        return null
-    }
-}
-
-class W extends React.Component {
-
-    state = {
-        n: 213123123123
-    }
-    onClick = () => {
-        this.props.click()
-        console.log(this.props.number)
-        console.log(`state的大小：${this.state.n}`)
-    }
-    componentWillReceiveProps() {
-        console.log('进来了')
-        this.setState({
-            n: this.state.n + 1
-        })
-    }
-    render() {
-        const HOC = DrawerHOC()
-        return (
-            <div>
-                {<HOC />}
-                {/* {<div><Drawer /></div>} */}
-                {this.state.n}
-                {this.props.number % 2 === 1 ? <div><NULL />{this.props.number}</div> : <List />}
-                <button onClick={this.onClick}>点我</button>
-            </div>
-        )
-    }
-}
-
-const reducer = (state = 1, action) => {
-
-    if (action.type == 'type') {
-        const newState = typeof state === 'object' ? action.number : state + action.number
-        return newState
-    }
-    return state
-}
-const mapState = (state) => {
-    console.log(state)
-    return {
-        number: state
-    }
-}
-const mapDispatch = (dispatch) => {
-
-    return {
-        click: () => dispatch({ type: 'type', number: 1 })
-    }
-}
-
-const store = createStore(reducer)
-const Wrapper = connect(mapState, mapDispatch)(W)
+const store = createStore(reducers)
 const render = () => (
     ReactDOM.render(
         <Provider store={store}>
-            <Wrapper />
+            <TodoList />
         </Provider>
         ,
         document.getElementById('root')
     )
 )
 
+render()
 
-
-// store.subscribe(render)
+store.subscribe(render)
 

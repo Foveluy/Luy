@@ -288,7 +288,6 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
         }
         if (typeof oldVnode.type === 'string') {//原生html
             updateProps(oldVnode.props, newVnode.props, newVnode._hostNode)
-
             if (oldVnode.ref !== newVnode.ref) {
                 if (typeNumber(oldVnode.ref) === 5) {
                     oldVnode.ref(null)
@@ -309,17 +308,6 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
             newVnode.ref = oldVnode.ref
             newVnode.key = oldVnode.key
             newVnode._instance = oldVnode._instance
-            // let newInstance = new newVnode.type(newVnode.props, parentContext)
-            // const oldInstance = new oldVnode.type(oldVnode.props, parentContext)
-            // if (newInstance.render) {
-
-            // } else {
-            //     oldInstance.owner = oldVnode.owner
-            //     oldInstance.ref = oldVnode.ref
-            //     oldInstance.key = oldVnode.key
-            //     oldInstance._hostNode = oldVnode._hostNode
-            //     update(oldInstance, newInstance, parentDomNode, parentContext)
-            // }
         }
     } else {
         let dom = renderByLuy(newVnode, parentDomNode, true)
