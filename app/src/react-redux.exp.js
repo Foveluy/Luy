@@ -8,45 +8,67 @@ var mountID = 0
 const TodoItem = ({ key, value, title, onClose }) => (
     <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
         <span style={{ fontSize: 15 }}>{title + 1}.{value}</span>
-        <span
-            className='todolist close'
+        <button
+            className='ccc'
             style={{
                 width: 30,
                 height: 30,
-                fontSize: 20,
                 border: "1px solid rgba(120,120,120,0.5)",
                 borderRadius: '50%',
                 textAlign: 'center'
             }}
             onClick={onClose}
-        >-
-        </span>
+        >
+            -
+        </button>
     </div>
 )
 
 class TodoList extends React.Component {
+    state = {
+        warning: false
+    }
     onInputChange = (e) => {
+        if (this.props.inputText && this.state.warning) {
+            this.setState({
+                warning: false
+            })
+        }
         this.props.onInputChange(e.target.value)
     }
     onAdd = () => {
+        if (!this.props.inputText) {
+            this.setState({
+                warning: true
+            })
+            return
+        }
         this.props.add()
-    }
-    componentWillReceiveProps() {
-        // this.setState({
-        //     n: this.state.n + 1
-        // })
     }
     render() {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
-                <h1>TodoList</h1>
+                <h1>Luy Example TodoList</h1>
                 <p>你输入的内容：{this.props.inputText}</p>
                 <div>
                     <input value={this.props.inputText} onChange={this.onInputChange} />
-                    <button onClick={this.onAdd}>Add</button>
+
+                    <button
+                        className='todolist add'
+                        onClick={this.onAdd}
+                        style={{
+                            marginLeft: 8,
+                            borderRadius: '50%',
+                            width: 30,
+                            height: 30,
+                            border: "1px solid rgba(120,120,120,0.5)"
+                        }}
+                    >
+                        +
+                    </button>
+                    <div style={{ color: '#f46e65' }} hidden={!this.state.warning}>请输入一些东西～</div>
                     <div>
                         {this.props.list.map((item, index) => {
-
                             return (<TodoItem
                                 key={item.id}
                                 title={index}
@@ -64,7 +86,6 @@ class TodoList extends React.Component {
 
 const mapState = (state) => {
     const { todoList } = state
-    console.log(todoList)
     return {
         inputText: todoList.inputText,
         list: todoList.list

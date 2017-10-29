@@ -48,7 +48,7 @@ class Linker extends React.Component {
 
                     <hr />
 
-                    <Route exact path="/" component={page1} />
+                    <Route exact path="/" component={TodoList} />
                     <Route path="/about" component={page2} />
                     <Route path="/topics" component={page3} />
                 </div>
@@ -69,7 +69,7 @@ const render = () => (
     ReactDOM.render(
         <Provider store={store}>
             <div>
-                <TodoList />
+                <Linker/>
             </div>
         </Provider>
         ,

@@ -1,4 +1,17 @@
-.todolist.close:hover {
+
+.ccc{
+    background: white;
+}
+.ccc:hover {
+    color: white;
+    background: #108EE9;
+}
+
+.todolist.add {
+    background: white;
+}
+
+.todolist.add:hover {
     color: white;
     cursor: pointer;
     background: #108EE9;

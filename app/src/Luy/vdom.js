@@ -224,7 +224,6 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
     //更新原来组件的信息
     oldComponentVnode._instance.props = newProps
 
-
     if (instance.getChildContext) {
         oldComponentVnode._instance.context = extend(extend({}, newContext), instance.getChildContext())
     }
@@ -328,7 +327,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
             newVnode._instance = oldVnode._instance
         }
     } else {
-        let dom = renderByLuy(newVnode, parentDomNode, true)
+        let dom = renderByLuy(newVnode, parentDomNode, true, parentContext)
         const parentNode = parentDomNode.parentNode
         if (newVnode._hostNode) {
             parentNode.insertBefore(dom, oldVnode._hostNode)
