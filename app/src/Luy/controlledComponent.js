@@ -90,7 +90,6 @@ function hasOtherControllProperty(props, otherProps) {
 function preventUserInput(e) {
     var target = e.target
     var name = e.type === 'textarea' ? 'innerHTML' : 'value' //如果是textarea，他的输入保存在innerHTML里
-
     target[name] = target._lastValue
 }
 

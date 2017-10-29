@@ -108,7 +108,7 @@ export const mappingStrategy = {
         }
     },
     otherProps: function (domNode, prop, propName) {
-        if (prop && propName) {
+        if (prop !== void 666 || propName !== void 666) {
             domNode[propName] = prop
         }
     }

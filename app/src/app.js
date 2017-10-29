@@ -68,7 +68,9 @@ const store = createStore(reducers)
 const render = () => (
     ReactDOM.render(
         <Provider store={store}>
-            <TodoList />
+            <div>
+                <TodoList />
+            </div>
         </Provider>
         ,
         document.getElementById('root')

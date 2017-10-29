@@ -68,12 +68,13 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
         newEndVnode = newChild[newEndIndex],
         hascode = {};
 
-    // if (newLength && !oldLength) {
-    //     newChild.forEach((newVnode) => {
-    //         renderByLuy(newVnode, parentDomNode, false, parentContext)
-    //     })
-    //     return newChild
-    // }
+    if (newLength >= 0 && !oldLength) {
+        newChild.forEach((newVnode, index) => {
+            renderByLuy(newVnode, parentDomNode, false, parentContext)
+            newChild[index] = newVnode
+        })
+        return newChild
+    }
 
     while (oldStartIndex <= oldEndIndex && newStartIndex <= newEndIndex) {
         if (oldStartVnode === undefined) {
@@ -127,12 +128,12 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
             for (; newStartIndex - 1 < newEndIndex; newStartIndex++) {
                 if (newChild[newStartIndex]) {
                     let newDomNode = renderByLuy(newChild[newStartIndex], parentDomNode, true, parentContext)
-                    if (oldChild[oldChild.length - 1]) {
-                        parentDomNode.insertBefore(newDomNode, oldChild[oldChild.length - 1]._hostNode)
-                    } else {
+                    parentDomNode.appendChild(newDomNode)
+                    // if (oldChild[oldChild.length - 1]) {
 
-                        parentDomNode.appendChild(newDomNode)
-                    }
+                    // } else {
+                    //     parentDomNode.insertBefore(newDomNode, oldChild[oldChild.length - 1]._hostNode)
+                    // }
                     newChild[newStartIndex]._hostNode = newDomNode
                 }
             }
@@ -303,6 +304,17 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
                 parentContext)
         }
         if (typeof oldVnode.type === 'function') {//非原生
+            if (!oldVnode._instance.render) {
+                const { props } = newVnode
+                const newStateLessInstance = new newVnode.type(props, parentContext)
+                update(oldVnode._instance, newStateLessInstance, parentDomNode, parentContext)
+                newStateLessInstance.owner = oldVnode._instance.owner
+                newStateLessInstance.ref = oldVnode._instance.ref
+                newStateLessInstance.key = oldVnode._instance.key
+                newVnode._instance = newStateLessInstance
+                return newVnode
+            }
+
             updateComponent(oldVnode, newVnode, parentContext, parentDomNode)
             newVnode.owner = oldVnode.owner
             newVnode.ref = oldVnode.ref
@@ -319,7 +331,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
             parentNode.appendChild(dom)
             newVnode._hostNode = dom
         }
-        
+
     }
     return newVnode
 }

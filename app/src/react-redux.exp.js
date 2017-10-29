@@ -1,34 +1,36 @@
 import React from 'react'
 import { connect } from 'react-redux'
-class TodoList extends React.Component {
 
-    state = {
-        n: ''
-    }
+const TodoItem = ({ key, value, title }) => (
+    <div key={key}>{title + 1}.{value}</div>
+)
+
+class TodoList extends React.Component {
     onInputChange = (e) => {
-        console.log(e.target.value)
-        // this.props.click()
-        this.setState({
-            n: e.target.value
-        })
+        this.props.onInputChange(e.target.value)
     }
     onAdd = () => {
-
+        this.props.add()
     }
     componentWillReceiveProps() {
-        this.setState({
-            n: this.state.n + 1
-        })
+        // this.setState({
+        //     n: this.state.n + 1
+        // })
     }
     render() {
         return (
-            <div>
-
+            <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
                 <h1>TodoList</h1>
-                {this.state.n}
-                <input value={this.state.n} type='text' onChange={this.onInputChange} />
-                <div>{this.props.number}</div>
-                <button onClick={this.onAdd}>Add</button>
+                <p>你输入的内容：{this.props.inputText}</p>
+                <div>
+                    <input value={this.props.inputText} onChange={this.onInputChange} />
+                    <button onClick={this.onAdd}>Add</button>
+                    <div>
+                        {this.props.list.map((item, index) => {
+                            return <TodoItem key={index} title={index} value={item} />
+                        })}
+                    </div>
+                </div>
             </div>
         )
     }
@@ -36,24 +38,32 @@ class TodoList extends React.Component {
 
 
 const mapState = (state) => {
-    console.log(state)
+    const { todoList } = state
     return {
-        number: state.todoList
+        inputText: todoList.inputText,
+        list: todoList.list
     }
 }
 const mapDispatch = (dispatch) => {
 
     return {
-        click: () => dispatch({ type: 'type', number: 1 })
+        onInputChange: (value) => dispatch({ type: 'input', value: value }),
+        add: () => dispatch({ type: 'add' })
     }
 }
 
-export const todoListReducer = (state = 1, action) => {
+const initState = {
+    inputText: '',
+    list: []
+}
 
-    if (action.type == 'type') {
-        const newState = typeof state === 'object' ? action.number : state + action.number
-        return newState
+export const todoListReducer = (state = initState, action) => {
+    if (action.type === 'input') {
+        return { ...state, inputText: action.value }
+    } else if (action.type === 'add') {
+        return { ...state, list: [...state.list, state.inputText], inputText: '' }
     }
+
     return state
 }
 export default connect(mapState, mapDispatch)(TodoList)
