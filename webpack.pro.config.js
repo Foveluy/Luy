@@ -18,6 +18,12 @@ module.exports = {
         hot: true,
         publicPath: '/',
     },
+    resolve: {
+        alias: {
+           'react': '/Users/Floveluy/Desktop/Luy/app/src/Luy/index.js',
+           'react-dom': '/Users/Floveluy/Desktop/Luy/app/src/Luy/index.js'
+        }
+     },
     // externals: {
     //     'react': {
     //       'commonjs': 'react',

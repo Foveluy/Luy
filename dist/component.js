@@ -29,6 +29,8 @@ var _vdom = require('./vdom');
 
 var _utils = require('./utils');
 
+var _createElement = require('./createElement');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Com = exports.Com = {
@@ -37,10 +39,12 @@ var Com = exports.Com = {
   UPDATING: 2, //节点正在更新
   UPDATED: 3, //节点已经更新
   MOUNTTING: 4 //节点正在挂载
-
-
-  // 用户用来继承的 Component 类
 };
+
+
+var uniqueId = 0;
+// 用户用来继承的 Component 类
+
 var ReactClass = function () {
   function ReactClass(props, context) {
     (0, _classCallCheck3.default)(this, ReactClass);
@@ -55,6 +59,8 @@ var ReactClass = function () {
     this.stateMergeQueue = [];
     this._penddingState = [];
     this.refs = {};
+    this._uniqueId = uniqueId;
+    uniqueId++;
   }
 
   (0, _createClass3.default)(ReactClass, [{
@@ -88,7 +94,8 @@ var ReactClass = function () {
       this.nextState = null;
       var newVnode = this.render();
 
-      this.Vnode = (0, _vdom.update)(oldVnode, newVnode, this.dom, this.context); //这个函数返回一个更新后的Vnode
+      newVnode = newVnode ? newVnode : new _createElement.Vnode('#text', "", null, null);
+      this.Vnode = (0, _vdom.update)(oldVnode, newVnode, this.Vnode._hostNode, this.context); //这个函数返回一个更新后的Vnode
 
       if (this.componentDidUpdate) {
         this.componentDidUpdate(this.props, prevState, oldContext);
@@ -142,6 +149,8 @@ var ReactClass = function () {
       } else {
         //组件更新期
         if (this.lifeCycle === Com.UPDATING) {
+          console.log('更新期');
+
           return;
         }
 
@@ -153,9 +162,9 @@ var ReactClass = function () {
 
         if (_utils.options.async === true) {
           //事件中调用
-          var dirty = _utils.options.dirtyComponent[this];
+          var dirty = _utils.options.dirtyComponent[this._uniqueId];
           if (!dirty) {
-            _utils.options.dirtyComponent[this] = this;
+            _utils.options.dirtyComponent[this._uniqueId] = this;
           }
           return;
         }

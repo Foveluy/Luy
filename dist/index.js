@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.createElement = exports.Children = exports.Component = undefined;
 
 var _createElement = require('./createElement');
 
@@ -22,4 +23,7 @@ var React = {
     Children: _Children.Children,
     Component: _component.ReactClass
 };
+var Component = exports.Component = _component.ReactClass;
+var Children = exports.Children = _Children.Children;
+var createElement = exports.createElement = _createElement.createElement;
 exports.default = React;

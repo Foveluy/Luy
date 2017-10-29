@@ -79,7 +79,7 @@ export const mappingStrategy = {
     style: function (domNode, style) {
         if (style !== undefined) {
             Object.keys(style).forEach((styleName) => {
-                domNode.style[styleName] = styleHelper(style[styleName])
+                domNode.style[styleName] = styleHelper(styleName,style[styleName])
             })
         }
     },

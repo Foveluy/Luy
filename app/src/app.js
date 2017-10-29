@@ -8,16 +8,12 @@ import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
 
 
 import { todoListReducer } from "./react-redux.exp"
-import TodoList from "./react-redux.exp"
 
-const page1 = () => {
-    return (<div>p1</div>)
-}
-const page2 = () => {
-    return (<div>p2</div>)
-}
+import TodoList from "./react-redux.exp"
+import LayoutDemo from './draggerLayout/App';
+
 const page3 = () => {
-    return (<div>p3</div>)
+    return (<div>本demo完全由luy框架提供,作者:方正</div>)
 }
 
 class Child extends React.Component {
@@ -41,16 +37,16 @@ class Linker extends React.Component {
             <Router>
                 <div>
                     <ul>
-                        <li><Link to="/">Home</Link></li>
-                        <li><Link to="/about">About</Link></li>
-                        <li><Link to="/topics">Topics</Link></li>
+                        <li><Link to="/">TodoList</Link></li>
+                        <li><Link to="/layout">Layout系统</Link></li>
+                        <li><Link to="/about">关于</Link></li>
                     </ul>
 
                     <hr />
 
                     <Route exact path="/" component={TodoList} />
-                    <Route path="/about" component={page2} />
-                    <Route path="/topics" component={page3} />
+                    <Route path="/layout" component={LayoutDemo} />
+                    <Route path="/about" component={page3} />
                 </div>
             </Router>
         )

@@ -21,9 +21,13 @@ var numberMap = {
  * 给数字类的加上'px'
  * @param {*} styleNumber 
  */
-export function styleHelper(styleNumber) {
+const specialStyle = {
+    zIndex: 1
+}
+export function styleHelper(styleName, styleNumber) {
     if (typeNumber(styleNumber) === 3) {
-        return styleNumber + 'px'
+        const style = specialStyle[styleName] ? styleNumber : styleNumber + 'px'
+        return style
     }
     return styleNumber
 }

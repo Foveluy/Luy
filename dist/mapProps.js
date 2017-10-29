@@ -68,7 +68,7 @@ function updateProps(oldProps, newProps, hostNode) {
     var restProps = {};
     for (var newName in newProps) {
         //新增原来没有的属性
-        if (!oldProps[newName]) {
+        if (oldProps[newName] === void 666) {
             restProps[newName] = newProps[newName];
         }
     }
@@ -80,11 +80,24 @@ var controlledEvent = {
     change: 1,
     input: 1
 };
+function createHandle(e) {
+    dispatchEvent(e, 'change');
+}
+
+var specialHook = {
+    //react将text,textarea,password元素中的onChange事件当成onInput事件
+    change: function change(dom) {
+        if (/text|password/.test(dom.type)) {
+            addEvent(document, createHandle, "input");
+        }
+    }
+};
+
 var mappingStrategy = exports.mappingStrategy = {
     style: function style(domNode, _style) {
         if (_style !== undefined) {
             (0, _keys2.default)(_style).forEach(function (styleName) {
-                domNode.style[styleName] = _style[styleName];
+                domNode.style[styleName] = (0, _utils.styleHelper)(styleName, _style[styleName]);
             });
         }
     },
@@ -96,7 +109,10 @@ var mappingStrategy = exports.mappingStrategy = {
         if (!registerdEvent[eventName]) {
             //所有事件只注册一次
             registerdEvent[eventName] = 1;
-            console.log(document, eventName);
+
+            if (specialHook[eventName]) {
+                specialHook[eventName](domNode);
+            }
             addEvent(document, dispatchEvent, eventName);
         }
     },
@@ -112,7 +128,7 @@ var mappingStrategy = exports.mappingStrategy = {
         }
     },
     otherProps: function otherProps(domNode, prop, propName) {
-        if (prop && propName) {
+        if (prop !== void 666 || propName !== void 666) {
             domNode[propName] = prop;
         }
     }
@@ -130,8 +146,10 @@ function addEvent(domNode, fn, eventName) {
 function dispatchEvent(event, eventName, end) {
     var path = getEventPath(event, end);
     var E = new _event.SyntheticEvent(event);
-
     _utils.options.async = true;
+    if (eventName) {
+        E.type = eventName;
+    }
 
     triggerEventByPath(E, path); //触发event默认以冒泡形式
     _utils.options.async = false;

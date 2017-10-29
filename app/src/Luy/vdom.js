@@ -83,11 +83,14 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
     }
 
     while (oldStartIndex <= oldEndIndex && newStartIndex <= newEndIndex) {
-        if (oldStartVnode === undefined) {
-            oldStartVnode = oldChild[++oldStartIndex]
-        }
-        else if (oldEndVnode === undefined) {
-            oldEndVnode = oldChild[--oldEndIndex]
+        if (oldStartVnode === undefined || oldStartVnode === null) {
+            oldStartVnode = oldChild[++oldStartIndex];
+        } else if (oldEndVnode === undefined || oldEndVnode === null) {
+            oldEndVnode = oldChild[--oldEndIndex];
+        } else if (newStartVnode === undefined || newStartVnode === null) {
+            newStartVnode = newChild[++newStartIndex];
+        } else if (newEndVnode === undefined || newEndVnode === null) {
+            newEndVnode = newChild[--newEndIndex];
         }
         else if (isSameVnode(oldStartVnode, newStartVnode)) {
             update(oldStartVnode, newStartVnode, newStartVnode._hostNode, parentContext)

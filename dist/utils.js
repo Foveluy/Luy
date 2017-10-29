@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.styleHelper = styleHelper;
 exports.typeNumber = typeNumber;
 exports.isSameVnode = isSameVnode;
 exports.mapKeyToIndex = mapKeyToIndex;
@@ -25,6 +26,21 @@ var numberMap = {
     "[object Symbol]": 6,
     "[object Array]": 7
 };
+
+/**
+ * 给数字类的加上'px'
+ * @param {*} styleNumber 
+ */
+var specialStyle = {
+    zIndex: 1
+};
+function styleHelper(styleName, styleNumber) {
+    if (typeNumber(styleNumber) === 3) {
+        var style = specialStyle[styleName] ? styleNumber : styleNumber + 'px';
+        return style;
+    }
+    return styleNumber;
+}
 
 /**
  * undefined: 0, null: 1, boolean:2, number: 3, string: 4, function: 5, symbol:6, array: 7, object:8

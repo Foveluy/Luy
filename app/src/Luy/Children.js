@@ -7,6 +7,9 @@ export const Children = {
         if (childVnode === null || childVnode === undefined) {
             return childVnode
         }
+        if (typeNumber(childVnode) !== 7) {
+            return callback.call(context, childVnode, 0)
+        }
 
         var ret = []
         flattenChildren(childVnode).forEach((oldVnode, index) => {
@@ -35,10 +38,10 @@ export const Children = {
     },
     forEach(childVnode, callback, context) {
         let flatten = flattenChildren(childVnode)
-        if(typeNumber(flatten) === 7){
+        if (typeNumber(flatten) === 7) {
             flattenChildren(childVnode).forEach(callback, context);
-        }else{
-            callback.call(context,childVnode)
+        } else {
+            callback.call(context, childVnode)
         }
     },
 

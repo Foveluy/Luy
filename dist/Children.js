@@ -15,6 +15,9 @@ var Children = exports.Children = {
         if (childVnode === null || childVnode === undefined) {
             return childVnode;
         }
+        if ((0, _utils.typeNumber)(childVnode) !== 7) {
+            return callback.call(context, childVnode, 0);
+        }
 
         var ret = [];
         (0, _createElement.flattenChildren)(childVnode).forEach(function (oldVnode, index) {
