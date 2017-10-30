@@ -22,7 +22,7 @@ describe("ReactComponent", function() {
 
     it("should throw when supplying a ref outside of render method", () => {
         var instance = <div ref="badDiv" />;
-
+        console.log(ReactTestUtils.renderIntoDocument(instance))
         instance = ReactTestUtils.renderIntoDocument(instance);
         expect(instance.nodeName.toLowerCase()).toBe("div");
     });

@@ -265,9 +265,14 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
         oldComponentVnode._instance.componentWillUpdate(newProps, oldState, newContext);
     }
 
+    var lastOwner = currentOwner.cur;
+    currentOwner.cur = oldComponentVnode._instance;
+
     var newVnode = oldComponentVnode._instance.render ? oldComponentVnode._instance.render() : new newComponentVnode.type(newProps, newContext);
     newVnode = newVnode ? newVnode : new _createElement.Vnode('#text', "", null, null);
     var fixedOldVnode = oldVnode ? oldVnode : oldComponentVnode._instance;
+
+    currentOwner.cur = lastOwner;
 
     var willUpdate = _utils.options.dirtyComponent[oldComponentVnode._instance._uniqueId]; //因为用react-redux更新的时候
     if (willUpdate) {
@@ -306,9 +311,9 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
             //原生html
             (0, _mapProps.updateProps)(oldVnode.props, newVnode.props, newVnode._hostNode);
             if (oldVnode.ref !== newVnode.ref) {
-                if ((0, _utils.typeNumber)(oldVnode.ref) === 5) {
-                    oldVnode.ref(null);
-                }
+                // if (typeNumber(oldVnode.ref) === 5) {
+                //     oldVnode.ref(null)
+                // }
                 (0, _Refs.setRef)(newVnode, oldVnode.owner, newVnode._hostNode);
             }
 

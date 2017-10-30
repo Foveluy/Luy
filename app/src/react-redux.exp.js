@@ -6,7 +6,7 @@ import './style.css'
 var mountID = 0
 
 const TodoItem = ({ key, value, title, onClose }) => (
-    <div key={key} style={{ display: 'flex',justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
         <span style={{ fontSize: 15 }}>{title + 1}.{value}</span>
         <button
             className='ccc'
@@ -35,6 +35,7 @@ class TodoList extends React.Component {
             })
         }
         this.props.onInputChange(e.target.value)
+        console.log(this.node)
     }
     onAdd = () => {
         if (!this.props.inputText) {
@@ -49,7 +50,7 @@ class TodoList extends React.Component {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
                 <h1>Luy Example TodoList</h1>
-                <p>你输入的内容：{this.props.inputText}</p>
+                <p ref={(node) => this.node = node}>你输入的内容：{this.props.inputText}</p>
                 <div>
                     <input value={this.props.inputText} onChange={this.onInputChange} />
 
