@@ -86,6 +86,7 @@ var ReactClass = function () {
       }
       if (this.getChildContext) {
         this.context = (0, _utils.extend)((0, _utils.extend)({}, this.context), this.getChildContext());
+        console.log(this.context);
       }
 
       if (this.componentWillUpdate) {

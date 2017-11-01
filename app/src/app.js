@@ -59,13 +59,12 @@ const reducers = combineReducers({
     todoList: todoListReducer
 })
 
-
 const store = createStore(reducers)
 const render = () => (
     ReactDOM.render(
         <Provider store={store}>
             <div>
-                <Linker/>
+                <Linker />
             </div>
         </Provider>
         ,
@@ -73,7 +72,51 @@ const render = () => (
     )
 )
 
-render()
+// render()
 
-store.subscribe(render)
+// store.subscribe(render)
 
+class Parent extends React.Component {
+
+    state = {
+        flag: true
+    };
+
+    getChildContext() {
+        return {
+            flag: this.state.flag
+        };
+    }
+
+    render() {
+        return <div>{this.props.children}</div>;
+    }
+}
+
+class Dhild extends React.Component {
+
+
+    render() {
+        return <div />;
+    }
+}
+
+class Wrapper extends React.Component {
+    render() {
+        return (
+            <Parent ref="parent">
+                <Dhild ref="child" />
+            </Parent>
+        );
+    }
+}
+
+const wp = ReactDOM.render(
+    <Wrapper />
+    ,
+    document.getElementById('root')
+)
+
+wp.refs.parent.setState({
+    flag: false
+})

@@ -238,6 +238,8 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
 
     if (instance.getChildContext) {
         oldComponentVnode._instance.context = (0, _utils.extend)((0, _utils.extend)({}, newContext), instance.getChildContext());
+    } else {
+        oldComponentVnode._instance.context = (0, _utils.extend)({}, newContext);
     }
 
     oldComponentVnode._instance.lifeCycle = _component.Com.UPDATING;

@@ -225,10 +225,12 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
     //但是依旧会继续往下比较
 
     //更新原来组件的信息
-    oldComponentVnode._instance.props = newProps
+    oldComponentVnode._instance.props = newProps 
 
     if (instance.getChildContext) {
         oldComponentVnode._instance.context = extend(extend({}, newContext), instance.getChildContext())
+    }else{
+        oldComponentVnode._instance.context = extend({}, newContext)
     }
 
     oldComponentVnode._instance.lifeCycle = Com.UPDATING
@@ -262,7 +264,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
     let newVnode = oldComponentVnode._instance.render ? oldComponentVnode._instance.render() : new newComponentVnode.type(newProps, newContext)
     newVnode = newVnode ? newVnode : new VnodeClass('#text', "", null, null)
     let fixedOldVnode = oldVnode ? oldVnode : oldComponentVnode._instance
-    
+
     currentOwner.cur = lastOwner
 
     const willUpdate = options.dirtyComponent[oldComponentVnode._instance._uniqueId]//因为用react-redux更新的时候

@@ -49,6 +49,7 @@ class ReactClass {
     }
     if (this.getChildContext) {
       this.context = extend(extend({}, this.context), this.getChildContext());
+      console.log(this.context)
     }
 
     if (this.componentWillUpdate) {
