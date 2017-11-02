@@ -225,11 +225,11 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
     //但是依旧会继续往下比较
 
     //更新原来组件的信息
-    oldComponentVnode._instance.props = newProps 
+    oldComponentVnode._instance.props = newProps
 
     if (instance.getChildContext) {
         oldComponentVnode._instance.context = extend(extend({}, newContext), instance.getChildContext())
-    }else{
+    } else {
         oldComponentVnode._instance.context = extend({}, newContext)
     }
 
@@ -550,7 +550,7 @@ export function render(Vnode, container) {
     if (container.UniqueKey) {//已经被渲染
         const oldVnode = containerMap[UniqueKey]
         const rootVnode = update(oldVnode, Vnode, container)
-        return rootVnode._hostNode
+        return Vnode._instance
     } else {
         //没有被渲染
         console.log('被插入')

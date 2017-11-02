@@ -77,46 +77,39 @@ const render = () => (
 // store.subscribe(render)
 
 class Parent extends React.Component {
-
-    state = {
-        flag: true
-    };
-
     getChildContext() {
         return {
-            flag: this.state.flag
+            foo: "bar",
+            depth: 0
         };
     }
-
     render() {
-        return <div>{this.props.children}</div>;
+        return <Dhild />;
     }
 }
 
 class Dhild extends React.Component {
 
 
+    getChildContext() {
+        return {
+            depth: this.context.depth + 1
+        };
+    }
+
+    render() {
+        return <Grandchild />;
+    }
+}
+
+class Grandchild extends React.Component {
+
     render() {
         return <div />;
     }
 }
-
-class Wrapper extends React.Component {
-    render() {
-        return (
-            <Parent ref="parent">
-                <Dhild ref="child" />
-            </Parent>
-        );
-    }
-}
-
 const wp = ReactDOM.render(
-    <Wrapper />
+    <Parent />
     ,
     document.getElementById('root')
 )
-
-wp.refs.parent.setState({
-    flag: false
-})

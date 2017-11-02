@@ -22,8 +22,6 @@ class Vnode {
 }
 
 
-
-
 /**
  * 创建虚拟Dom的地方
  * @param {string | Function} type 
