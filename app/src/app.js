@@ -72,9 +72,9 @@ const render = () => (
     )
 )
 
-// render()
+render()
 
-// store.subscribe(render)
+store.subscribe(render)
 
 class Parent extends React.Component {
     getChildContext() {
@@ -103,13 +103,19 @@ class Dhild extends React.Component {
 }
 
 class Grandchild extends React.Component {
+    componentDidMount(){
+        console.log(this.refs.shit.nodeName)
+        Object.keys(this.refs.shit).map((key)=>{
+            console.log(key,'-->',this.refs.shit[key])
+        })
 
+    }
     render() {
-        return <div />;
+        return <div ref='shit'/>;
     }
 }
-const wp = ReactDOM.render(
-    <Parent />
-    ,
-    document.getElementById('root')
-)
+// const wp = ReactDOM.render(
+//     <Parent />
+//     ,
+//     document.getElementById('root')
+// )

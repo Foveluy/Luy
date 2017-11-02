@@ -370,11 +370,17 @@ function renderHoc(instance, props, parentContext) {
  * @param {Element} parentDomNode 
  */
 function mountComponent(Vnode, parentDomNode: Element, parentContext) {
-    const { type, props, key, ref } = Vnode
+    const {
+        type,
+        props,
+        key,
+        ref
+    } = Vnode;
 
-    const Component = type
-    let instance = new Component(props, parentContext)
+    const Component = type;
+    let instance = new Component(props, parentContext);
 
+    /**无状态组件的渲染 */
     if (!instance.render) {
         Vnode._instance = instance;//for react-redux
         return renderByLuy(instance, parentDomNode, false, parentContext);
@@ -383,53 +389,52 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     if (instance.getChildContext) {//如果用户定义getChildContext，那么用它生成子context
         instance.context = extend(extend({}, instance.context), instance.getChildContext());
     } else {
-        instance.context = extend({}, parentContext)
+        instance.context = extend({}, parentContext);
     }
 
-    if (instance.componentWillMount) {//生命周期函数
-        instance.componentWillMount()
-    }
-    let lastOwner = currentOwner.cur
-    currentOwner.cur = instance
-    let renderedVnode = instance.render()
-    currentOwner.cur = lastOwner
+    //生命周期函数
+    instance.componentWillMount && instance.componentWillMount();
+
+    let lastOwner = currentOwner.cur;
+    currentOwner.cur = instance;
+    let renderedVnode = instance.render();
+    currentOwner.cur = lastOwner;
 
     if (renderedVnode === void 233) {
-        console.warn('你可能忘记在组件render()方法中返回jsx了')
-        return
+        console.warn('你可能忘记在组件render()方法中返回jsx了');
+        return;
     }
     renderedVnode = renderedVnode ? renderedVnode : new VnodeClass('#text', "", null, null);
 
     const domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance);
 
     if (instance.componentDidMount) {
-        instance.lifeCycle = Com.MOUNTTING
-        instance.componentDidMount()
-        instance.componentDidMount = null//暂时不知道为什么要设置为空
-        instance.lifeCycle = Com.MOUNT
+        instance.lifeCycle = Com.MOUNTTING;
+        instance.componentDidMount();
+        instance.componentDidMount = null;//防止用户调用
+        instance.lifeCycle = Com.MOUNT;
     }
 
-    renderedVnode.key = key || null
-    instance.Vnode = renderedVnode
-    instance.Vnode._hostNode = domNode//用于在更新时期oldVnode的时候获取_hostNode
-    instance.Vnode._mountIndex = mountIndexAdd()
+    renderedVnode.key = key || null;
+    instance.Vnode = renderedVnode;
+    instance.Vnode._hostNode = domNode;//用于在更新时期oldVnode的时候获取_hostNode
+    instance.Vnode._mountIndex = mountIndexAdd();
 
-    Vnode._instance = instance // 在父节点上的child元素会保存一个自己
-    Vnode._hostNode = domNode
+    Vnode._instance = instance; // 在父节点上的child元素会保存一个自己
+    Vnode._hostNode = domNode;
 
-    setRef(Vnode, instance, domNode)
+    setRef(Vnode, instance, domNode);
 
     if (renderedVnode._PortalHostNode) {//支持react createPortal
-        Vnode._PortalHostNode = renderedVnode._PortalHostNode
+        Vnode._PortalHostNode = renderedVnode._PortalHostNode;
     }
 
-    instance._updateInLifeCycle() // componentDidMount之后一次性更新
+    instance._updateInLifeCycle(); // componentDidMount之后一次性更新
 
     return domNode
 }
 
 function mountNativeElement(Vnode, parentDomNode: Element, instance) {
-
     const domNode = renderByLuy(Vnode, parentDomNode, false, instance)
     Vnode._hostNode = domNode
     Vnode._mountIndex = mountIndexAdd()
@@ -500,17 +505,21 @@ export function findDOMNode(ref) {
  */
 let depth = 0
 function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext, instance) {
-    const { type, props } = Vnode
-    if (!type) return
-    const { children } = props
-    let domNode
+    const {
+        type,
+        props
+    } = Vnode;
+
+    if (!type) return;
+    const { children } = props;
+    let domNode;
     if (typeof type === 'function') {
-        const fixContext = parentContext || {}
-        domNode = mountComponent(Vnode, container, fixContext)
+        const fixContext = parentContext || {};
+        domNode = mountComponent(Vnode, container, fixContext);
     } else if (typeof type === 'string' && type === '#text') {
-        domNode = mountTextComponent(Vnode, container)
+        domNode = mountTextComponent(Vnode, container);
     } else {
-        domNode = document.createElement(type)
+        domNode = document.createElement(type);
     }
 
     if (typeof type !== 'function') {
@@ -552,8 +561,7 @@ export function render(Vnode, container) {
         const rootVnode = update(oldVnode, Vnode, container)
         return Vnode._instance
     } else {
-        //没有被渲染
-        console.log('被插入')
+        //第一次渲染的时候
         container.UniqueKey = Date.now()
         containerMap[container.UniqueKey] = Vnode
         renderByLuy(Vnode, container)

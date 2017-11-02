@@ -1,7 +1,7 @@
 import { typeNumber } from "./utils";
-import {currentOwner} from './vdom'
+import { currentOwner } from './vdom'
 
-var tmp =[]
+var tmp = []
 
 const RESERVED_PROPS = {
     ref: true,
@@ -20,6 +20,18 @@ class Vnode {
         this.ref = ref
     }
 }
+
+function Vnode(type, props, key, ref) {
+    this.owner = currentOwner.cur
+    this.type = type
+    this.props = props
+    this.key = key
+    this.ref = ref
+}
+
+
+
+
 
 
 /**
@@ -67,7 +79,6 @@ function createElement(type: string | Function, config, ...children: array) {
         }
     }
 
-
     return new Vnode(type, props, key, ref);
 }
 
@@ -76,9 +87,9 @@ function createElement(type: string | Function, config, ...children: array) {
  * @param {*} children 
  */
 export function flattenChildren(children: Array) {
-    
+
     if (children === undefined) return new Vnode('#text', "", null, null)
-    
+
     let length = children.length
     let ary = [],
         isLastSimple = false, //判断上一个元素是否是string 或者 number
@@ -127,7 +138,7 @@ export function flattenChildren(children: Array) {
         }
         return item
     })
-    
+
     return ary
 }
 
