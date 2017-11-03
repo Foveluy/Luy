@@ -167,6 +167,7 @@ function disposeVnode(Vnode) {//主要用于删除Vnode对应的节点
         if (Vnode._instance.componentWillUnMount) {
             Vnode._instance.componentWillUnMount()
         }
+
         clearRefs(Vnode._instance.ref)
     }
     if (Vnode.props.children) {
@@ -342,7 +343,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
         const parentNode = parentDomNode.parentNode
         if (newVnode._hostNode) {
             parentNode.insertBefore(dom, oldVnode._hostNode)
-            parentNode.removeChild(oldVnode._hostNode)
+            disposeVnode(oldVnode)
         } else {
             parentNode.appendChild(dom)
             newVnode._hostNode = dom

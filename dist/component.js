@@ -86,7 +86,6 @@ var ReactClass = function () {
       }
       if (this.getChildContext) {
         this.context = (0, _utils.extend)((0, _utils.extend)({}, this.context), this.getChildContext());
-        console.log(this.context);
       }
 
       if (this.componentWillUpdate) {
@@ -150,8 +149,6 @@ var ReactClass = function () {
       } else {
         //组件更新期
         if (this.lifeCycle === Com.UPDATING) {
-          console.log('更新期');
-
           return;
         }
 

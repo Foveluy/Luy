@@ -4,20 +4,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.Vnode = exports.createElement = undefined;
-
-var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
 exports.flattenChildren = flattenChildren;
 
 var _utils = require('./utils');
 
 var _vdom = require('./vdom');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var tmp = [];
 
 var RESERVED_PROPS = {
     ref: true,
@@ -26,15 +17,13 @@ var RESERVED_PROPS = {
     __source: true
 };
 
-var Vnode = function Vnode(type, props, key, ref) {
-    (0, _classCallCheck3.default)(this, Vnode);
-
+function Vnode(type, props, key, ref) {
     this.owner = _vdom.currentOwner.cur;
     this.type = type;
     this.props = props;
     this.key = key;
     this.ref = ref;
-};
+}
 
 /**
  * 创建虚拟Dom的地方
@@ -42,8 +31,6 @@ var Vnode = function Vnode(type, props, key, ref) {
  * @param {object} config 
  * @param {array} children 
  */
-
-
 function createElement(type, config) {
     for (var _len = arguments.length, children = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
         children[_key - 2] = arguments[_key];

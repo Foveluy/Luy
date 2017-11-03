@@ -5,29 +5,51 @@ import './style.css'
 
 var mountID = 0
 
-const TodoItem = ({ key, value, title, onClose }) => (
-    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-        <span style={{ fontSize: 15 }}>{title + 1}.{value}</span>
-        <button
-            className='ccc'
-            style={{
-                width: 30,
-                height: 30,
-                border: "1px solid rgba(120,120,120,0.5)",
-                borderRadius: '50%',
-                textAlign: 'center'
-            }}
-            onClick={onClose}
-        >
-            -
-        </button>
-    </div>
-)
+
+
+
+class TodoItem extends React.Component {
+    componentWillUnMount() {
+        console.log('删除')
+    }
+    shouldComponentUpdate(nextProp) {
+        return nextProp.value !== this.props.value
+    }
+
+    render() {
+        console.log('render')
+        const { key, value, title, onClose } = this.props
+        return (
+            <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                <span style={{ fontSize: 15 }}>{title + 1}.{value}</span>
+                <button
+                    className='ccc'
+                    style={{
+                        width: 30,
+                        height: 30,
+                        border: "1px solid rgba(120,120,120,0.5)",
+                        borderRadius: '50%',
+                        textAlign: 'center'
+                    }}
+                    onClick={onClose}
+                >
+                    -
+            </button>
+            </div>
+        )
+    }
+}
+
+
 
 class TodoList extends React.Component {
     state = {
         warning: false
     }
+    componentDidMount() {
+        console.log('挂载')
+    }
+
     onInputChange = (e) => {
         if (this.props.inputText && this.state.warning) {
             this.setState({
@@ -35,7 +57,7 @@ class TodoList extends React.Component {
             })
         }
         this.props.onInputChange(e.target.value)
-        console.log(this.node)
+
     }
     onAdd = () => {
         if (!this.props.inputText) {
@@ -45,6 +67,9 @@ class TodoList extends React.Component {
             return
         }
         this.props.add()
+    }
+    clearAll = () => {
+        this.props.clearAll()
     }
     render() {
         return (
@@ -67,6 +92,8 @@ class TodoList extends React.Component {
                     >
                         +
                     </button>
+                    <button onClick={this.clearAll}>删除全部</button>
+
                     <div style={{ color: '#f46e65' }} hidden={!this.state.warning}>请输入一些东西～</div>
                     <div>
                         {this.props.list.map((item, index) => {
@@ -97,7 +124,8 @@ const mapDispatch = (dispatch) => {
     return {
         onInputChange: (value) => dispatch({ type: 'input', value: value }),
         add: () => dispatch({ type: 'add' }),
-        close: (id) => dispatch({ type: 'delete', id: id })
+        close: (id) => dispatch({ type: 'delete', id: id }),
+        clearAll: () => dispatch({ type: 'clear' })
     }
 }
 
@@ -120,6 +148,8 @@ export const todoListReducer = (state = initState, action) => {
             }
         })
         return { ...state, list: [...newList] }
+    } else if (action.type === 'clear') {
+        return { ...state, list: [] }
     }
 
     return state

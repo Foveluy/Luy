@@ -18,7 +18,7 @@ const page3 = () => {
 
 class Child extends React.Component {
     componentDidMount() {
-        console.log(this.context)
+        
     }
     render() {
         return <p> </p>

@@ -10,7 +10,6 @@ git clone https://github.com/215566435/Luy.git
 cd Luy
 npm install
 npm run study
-
 ```
 
 

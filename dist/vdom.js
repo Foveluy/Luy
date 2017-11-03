@@ -177,6 +177,8 @@ function disposeVnode(Vnode) {
         if (Vnode._instance.componentWillUnMount) {
             Vnode._instance.componentWillUnMount();
         }
+
+        (0, _Refs.clearRefs)(Vnode._instance.ref);
     }
     if (Vnode.props.children) {
         disposeChildVnode(Vnode.props.children);
@@ -347,7 +349,7 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
         var parentNode = parentDomNode.parentNode;
         if (newVnode._hostNode) {
             parentNode.insertBefore(dom, oldVnode._hostNode);
-            parentNode.removeChild(oldVnode._hostNode);
+            disposeVnode(oldVnode);
         } else {
             parentNode.appendChild(dom);
             newVnode._hostNode = dom;
@@ -396,10 +398,9 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
         instance.context = (0, _utils.extend)({}, parentContext);
     }
 
-    if (instance.componentWillMount) {
-        //生命周期函数
-        instance.componentWillMount();
-    }
+    //生命周期函数
+    instance.componentWillMount && instance.componentWillMount();
+
     var lastOwner = currentOwner.cur;
     currentOwner.cur = instance;
     var renderedVnode = instance.render();
@@ -416,7 +417,7 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
     if (instance.componentDidMount) {
         instance.lifeCycle = _component.Com.MOUNTTING;
         instance.componentDidMount();
-        instance.componentDidMount = null; //暂时不知道为什么要设置为空
+        instance.componentDidMount = null; //防止用户调用
         instance.lifeCycle = _component.Com.MOUNT;
     }
 
@@ -441,7 +442,6 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
 }
 
 function mountNativeElement(Vnode, parentDomNode, instance) {
-
     var domNode = renderByLuy(Vnode, parentDomNode, false, instance);
     Vnode._hostNode = domNode;
     Vnode._mountIndex = mountIndexAdd();
@@ -518,6 +518,7 @@ function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
     var type = Vnode.type,
         props = Vnode.props;
 
+
     if (!type) return;
     var children = props.children;
 
@@ -569,10 +570,9 @@ function render(Vnode, container) {
         //已经被渲染
         var oldVnode = containerMap[UniqueKey];
         var rootVnode = update(oldVnode, Vnode, container);
-        return rootVnode._hostNode;
+        return Vnode._instance;
     } else {
-        //没有被渲染
-        console.log('被插入');
+        //第一次渲染的时候
         container.UniqueKey = Date.now();
         containerMap[container.UniqueKey] = Vnode;
         renderByLuy(Vnode, container);

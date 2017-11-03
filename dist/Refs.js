@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.setRef = setRef;
+exports.clearRefs = clearRefs;
 
 var _utils = require('./utils');
 
@@ -12,6 +13,16 @@ function setRef(Vnode, instance, domNode) {
         var refType = (0, _utils.typeNumber)(Vnode.ref);
         if (refStrategy[refType]) {
             refStrategy[refType](Vnode, Vnode.owner, domNode);
+        }
+    }
+}
+
+function clearRefs(refs) {
+    if (typeof refs === 'function') {
+        refs(null);
+    } else {
+        for (var refName in refs) {
+            refs[refName] = null;
         }
     }
 }

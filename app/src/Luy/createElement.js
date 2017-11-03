@@ -1,7 +1,6 @@
 import { typeNumber } from "./utils";
 import { currentOwner } from './vdom'
 
-var tmp = []
 
 const RESERVED_PROPS = {
     ref: true,
@@ -18,6 +17,8 @@ function Vnode(type, props, key, ref) {
     this.key = key
     this.ref = ref
 }
+
+
 
 /**
  * 创建虚拟Dom的地方
