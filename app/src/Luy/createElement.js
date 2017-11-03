@@ -11,16 +11,6 @@ const RESERVED_PROPS = {
 }
 
 
-class Vnode {
-    constructor(type, props, key, ref) {
-        this.owner = currentOwner.cur
-        this.type = type
-        this.props = props
-        this.key = key
-        this.ref = ref
-    }
-}
-
 function Vnode(type, props, key, ref) {
     this.owner = currentOwner.cur
     this.type = type
@@ -28,11 +18,6 @@ function Vnode(type, props, key, ref) {
     this.key = key
     this.ref = ref
 }
-
-
-
-
-
 
 /**
  * 创建虚拟Dom的地方
