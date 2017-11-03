@@ -2,7 +2,7 @@
 import { typeNumber, isSameVnode, mapKeyToIndex, isEventName, extend, options } from "./utils";
 import { flattenChildren, Vnode as VnodeClass } from './createElement'
 import { mapProp, mappingStrategy, updateProps } from './mapProps'
-import { setRef } from './Refs'
+import { setRef, clearRefs } from './Refs'
 import { Com } from './component'
 
 
@@ -167,6 +167,7 @@ function disposeVnode(Vnode) {//主要用于删除Vnode对应的节点
         if (Vnode._instance.componentWillUnMount) {
             Vnode._instance.componentWillUnMount()
         }
+        clearRefs(Vnode._instance.ref)
     }
     if (Vnode.props.children) {
         disposeChildVnode(Vnode.props.children)
@@ -370,17 +371,11 @@ function renderHoc(instance, props, parentContext) {
  * @param {Element} parentDomNode 
  */
 function mountComponent(Vnode, parentDomNode: Element, parentContext) {
-    const {
-        type,
-        props,
-        key,
-        ref
-    } = Vnode;
+    const { type, props, key, ref } = Vnode
 
-    const Component = type;
-    let instance = new Component(props, parentContext);
+    const Component = type
+    let instance = new Component(props, parentContext)
 
-    /**无状态组件的渲染 */
     if (!instance.render) {
         Vnode._instance = instance;//for react-redux
         return renderByLuy(instance, parentDomNode, false, parentContext);

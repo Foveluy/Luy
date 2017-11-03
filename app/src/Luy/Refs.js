@@ -8,6 +8,16 @@ export function setRef(Vnode, instance, domNode) {
     }
 }
 
+export function clearRefs(refs) {
+    if (typeof refs === 'function') {
+        refs(null)
+    } else {
+        for (let refName in refs) {
+            refs[refName] = null
+        }
+    }
+}
+
 const refStrategy = {
     3: function (Vnode, instance, domNode) {
         if (Vnode._instance) {
