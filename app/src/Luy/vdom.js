@@ -2,7 +2,8 @@
 import { typeNumber, isSameVnode, mapKeyToIndex, isEventName, extend, options } from "./utils";
 import { flattenChildren, Vnode as VnodeClass } from './createElement'
 import { mapProp, mappingStrategy, updateProps } from './mapProps'
-import { setRef, clearRefs } from './Refs'
+import { setRef } from './Refs'
+import { disposeVnode } from './dispose'
 import { Com } from './component'
 
 
@@ -29,7 +30,6 @@ export var currentOwner = {
     cur: null
 };
 
-
 function instanceProps(componentVnode) {
     return {
         oldState: componentVnode._instance.state,
@@ -46,7 +46,6 @@ function mountIndexAdd() {
 function updateText(oldTextVnode, newTextVnode, parentDomNode: Element) {
     let dom: Element = oldTextVnode._hostNode
     if (oldTextVnode.props !== newTextVnode.props) {
-
         dom.nodeValue = newTextVnode.props
     }
 }
@@ -148,7 +147,6 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
             }
 
         } else if (newStartIndex > newEndIndex) {
-
             for (; oldStartIndex - 1 < oldEndIndex; oldStartIndex++) {
                 if (oldChild[oldStartIndex]) {
                     let removeNode = oldChild[oldStartIndex]
@@ -160,47 +158,7 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
     return newChild
 }
 
-function disposeVnode(Vnode) {//主要用于删除Vnode对应的节点
-    const { type, props } = Vnode
-    if (!type) return
-    if (typeof Vnode.type === 'function') {
-        if (Vnode._instance.componentWillUnMount) {
-            Vnode._instance.componentWillUnMount()
-        }
 
-        clearRefs(Vnode._instance.ref)
-    }
-    if (Vnode.props.children) {
-        disposeChildVnode(Vnode.props.children)
-    }
-    if (Vnode._PortalHostNode) {
-        const parent = Vnode._PortalHostNode.parentNode
-        parent.removeChild(Vnode._PortalHostNode)
-    } else {
-        if (Vnode._hostNode) {//有可能会出现undefind的情况
-            const parent = Vnode._hostNode.parentNode
-            parent.removeChild(Vnode._hostNode)
-        }
-    }
-    Vnode._hostNode = null
-}
-
-function disposeChildVnode(childVnode) {
-    let children = childVnode
-    if (typeNumber(children) !== 7) children = [children]
-    children.forEach((child) => {
-        if (typeof child.type === 'function') {
-            if (child._instance.componentWillUnMount) {
-                child._instance.componentWillUnMount()
-            }
-        }
-        child._hostNode = null
-        child._instance = null
-        if (child.props.children) {
-            disposeChildVnode(child.props.children)
-        }
-    })
-}
 
 
 /**
@@ -353,18 +311,6 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
     return newVnode
 }
 
-function renderHoc(instance, props, parentContext) {
-    if (typeNumber(instance) === 5) {
-        const newInstance = new instance(props, parentContext)
-        return renderHoc(newInstance)
-    } else {
-        if (!instance.render) {
-            return instance
-        } else {
-            return instance.render()
-        }
-    }
-}
 
 /**
  * 渲染自定义组件
