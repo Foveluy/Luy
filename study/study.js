@@ -1,33 +1,75 @@
 import React from './createElement'
 
+class Component {
+    constructor(props) {
+        this.props = props;
+        this.state = this.state || {};
+
+        this.nextState = null;
+    }
+
+    setState(partialState) {
+        const preState = this.state;//存一份之前的，以后有用
+        this.nextState = { ...this.state, ...partialState };//存一份新的，以后有用
+        this.state = this.nextState;
+
+        const oldVnode = this.Vnode;//注意这里，就是我们之前记录的Vnode.
+        const newVnode = this.render();
+        updateComponent(this, oldVnode, newVnode);//注意要把组件的实例传递过来  
+    }
+    render() { }
+}
+
+function updateComponent(instance, oldVnode, newVnode) {
+    if (oldVnode.type === newVnode.type) {
+        mapProps(oldVnode._hostNode, newVnode.props)
+    } else {
+        //remove
+    }
+}
+
 function renderByLuy(Vnode, container) {
-    console.log(Vnode)
     if (!Vnode) return //判断一下，如果Vnode不是正常的值，那就返回了
     const {
         type,
         props
     } = Vnode;
-    
+
     if (!type) return;
     const { children } = props;
 
+    let domNode;
+    const VnodeType = typeof type;
+    if (VnodeType === 'function') {
+        domNode = renderComponent(Vnode, container);
+    } else if (VnodeType === 'string') {
+        domNode = document.createElement(type);
+    }
 
-    let domNode = document.createElement(type);
     mapProps(domNode, props);
-    /* 
-    注意这里的mountChildren函数的第二个参数是我们刚刚创建的domNode
-    因为我们的孩子并不是挂在最开始的节点之下，我们的孩子应该挂在我们刚刚生成的节点之下
-    因此，我们这里的参数传递的就是domNode
-    */
     mountChildren(children, domNode);
 
+    Vnode._hostNode = domNode;//用于回溯
     container.appendChild(domNode);
+    return domNode;
 }
 
-function mountChildren(children, domNode) {
+function renderComponent(Vnode, container) {
+    const ComponentClass = Vnode.type;
+    const { props } = Vnode.props;
+    const instance = new ComponentClass(props);
+
+    const renderedVnode = instance.render();
+    const domNode = renderByLuy(renderedVnode, container);
+
+    instance.Vnode = renderedVnode;
+    return domNode
+}
+
+function mountChildren(children, container) {
     //此时，children是一个Vnode，我们需要把他创建出来，挂在domNode上
     //因此我们又可以调用renderByLuy函数
-    renderByLuy(children, domNode)
+    renderByLuy(children, container)
 }
 
 function mapProps(domNode, props) {
@@ -46,19 +88,30 @@ function mapProps(domNode, props) {
     }
 }
 
+class FuckApp extends Component {
+    constructor(props) {
+        super(props);
+        setInterval(function () {
+            const color = ['#eee', 'black', 'red', 'green', 'blue','grey','#133234','#123213','222345','998232']
+            const rand = parseInt(Math.min(10, Math.random() * 10))
+            this.setState({
+                color: color[rand]
+            })
+        }.bind(this), 1000);
+    }
+    state = {
+        color: 'red'
+    }
+
+    render() {
+        return <div
+            style={{ height: '100px', width: '100px', background: this.state.color }}
+            className='I am FuckApp component' />
+    }
+}
+
+
 renderByLuy(
-    <div>
-        <div>
-            <div>
-                <div>
-                    <div>
-                        <div>
-                            <div />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <FuckApp />
     , document.getElementById('root')
 );
