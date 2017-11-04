@@ -16,14 +16,6 @@ const page3 = () => {
     return (<div>本demo完全由luy框架提供,作者:方正</div>)
 }
 
-class Child extends React.Component {
-    componentDidMount() {
-        
-    }
-    render() {
-        return <p> </p>
-    }
-}
 
 
 class Linker extends React.Component {
@@ -72,7 +64,104 @@ const render = () => (
     )
 )
 
-render()
+// render()
 
-store.subscribe(render)
+// store.subscribe(render)
 
+const appRoot = document.getElementById('root');
+const modalRoot = document.getElementById('modal-root');
+
+class Modal extends React.Component {
+    constructor(props) {
+        super(props);
+        this.el = document.createElement('div');
+    }
+
+    componentDidMount() {
+        modalRoot.appendChild(this.el);
+    }
+
+    componentWillUnmount() {
+        modalRoot.removeChild(this.el);
+    }
+
+    render() {
+        return ReactDOM.createPortal(
+            this.props.children,
+            this.el,
+        );
+    }
+}
+
+class Parent extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            clicks: 0,
+            modal: false
+        };
+        this.handleClick = this.handleClick.bind(this);
+        this.ModalBtn = this.ModalBtn.bind(this);
+    }
+
+    handleClick(e) {
+        console.log(e)
+        if (e.target.className === 'mod') {
+            this.setState({
+                modal: false
+            })
+        } else {
+            this.setState(prevState => ({
+                clicks: prevState.clicks + 1
+            }));
+        }
+    }
+    ModalBtn() {
+        this.setState({
+            modal: !this.state.modal
+        })
+    }
+    renderModal() {
+        return (
+            <Modal>
+                <Child />
+            </Modal>
+        )
+    }
+
+    render() {
+        return (
+            <div onClick={this.handleClick}>
+                <p>Number of clicks: {this.state.clicks}</p>
+                <button onClick={this.ModalBtn}>点击这里会出现一个modal</button>
+                {this.state.modal ? this.renderModal() : <div></div>}
+            </div>
+        );
+    }
+}
+
+function Child() {
+    return (
+        <div
+            className="mod"
+            style={{
+                top: 0,
+                left: 0,
+                display: 'flex',
+                position: 'absolute',
+                height: '100%',
+                width: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(0,0,0,0.5)'
+            }}
+        >
+            <div>
+                <h1>点击周围黑色，关掉modal</h1>
+                <button>点击这里，数字增加</button>
+            </div>
+        </div>
+    );
+}
+
+ReactDOM.render(<Parent />, appRoot);

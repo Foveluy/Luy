@@ -79,7 +79,7 @@ export const mappingStrategy = {
     style: function (domNode, style) {
         if (style !== undefined) {
             Object.keys(style).forEach((styleName) => {
-                domNode.style[styleName] = styleHelper(styleName,style[styleName])
+                domNode.style[styleName] = styleHelper(styleName, style[styleName])
             })
         }
     },
@@ -182,6 +182,9 @@ function getEventPath(event, end) {
             path.push(begin)
         }
         begin = begin.parentNode//迭代
+        if (begin && begin._PortalHostNode) {
+            begin = begin._PortalHostNode
+        }
         if (!begin) {
             break
         }

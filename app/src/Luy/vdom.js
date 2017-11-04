@@ -10,12 +10,15 @@ import { Com } from './component'
 
 //Top Api
 export function createPortal(children, container) {
+    let domNode;
     if (container) {
         if (Array.isArray(children)) {
-            mountChild(children, container)
+            domNode = mountChild(children, container)
         } else {
-            renderByLuy(children, container)
+            domNode = render(children, container)
         }
+    } else {
+        throw new Error('请给portal一个插入的目标')
     }
     //用于记录Portal的事物
     const CreatePortalVnode = new VnodeClass('#text', "createPortal", null, null)
@@ -291,10 +294,11 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
             }
 
             updateComponent(oldVnode, newVnode, parentContext, parentDomNode)
-            newVnode.owner = oldVnode.owner
-            newVnode.ref = oldVnode.ref
-            newVnode.key = oldVnode.key
-            newVnode._instance = oldVnode._instance
+            newVnode.owner = oldVnode.owner;
+            newVnode.ref = oldVnode.ref;
+            newVnode.key = oldVnode.key;
+            newVnode._instance = oldVnode._instance;
+            newVnode._PortalHostNode = oldVnode._PortalHostNode ? oldVnode._PortalHostNode : void 666;
         }
     } else {
         let dom = renderByLuy(newVnode, parentDomNode, true, parentContext)
@@ -369,6 +373,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
 
     if (renderedVnode._PortalHostNode) {//支持react createPortal
         Vnode._PortalHostNode = renderedVnode._PortalHostNode;
+        renderedVnode._PortalHostNode._PortalHostNode = domNode;
     }
 
     instance._updateInLifeCycle(); // componentDidMount之后一次性更新

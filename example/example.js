@@ -1,151 +1,74 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import { Component } from 'react'
-import { Children } from 'react'
-import { createStore } from 'redux'
-import { Provider, connect } from 'react-redux'
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
+import React from '../app/src/Luy/index.js'
+import ReactDOM from '.../app/src/Luy/index.js'
+import { Component } from '../app/src/Luy/index.js'
 
-const page1 = () => {
-    return (<div>p1</div>)
-}
-const page2 = () => {
-    return (<div>p2</div>)
-}
-const page3 = () => {
-    return (<div>p3</div>)
-}
+const appRoot = document.getElementById('root');
+const modalRoot = document.getElementById('modal-root');
 
-class Child extends React.Component {
+class Modal extends React.Component {
+    constructor(props) {
+        super(props);
+        this.el = document.createElement('div');
+    }
+
     componentDidMount() {
-        console.log(this.context)
+        modalRoot.appendChild(this.el);
     }
+
+    componentWillUnmount() {
+        modalRoot.removeChild(this.el);
+    }
+
     render() {
-        return <p> </p>
+        return ReactDOM.createPortal(
+            this.props.children,
+            this.el,
+        );
     }
 }
 
+class Parent extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { clicks: 0 };
+        this.handleClick = this.handleClick.bind(this);
+    }
 
-class Linker extends React.Component {
-
-    click(idx) {
-        console.log(idx)
+    handleClick() {
+        // This will fire when the button in Child is clicked,
+        // updating Parent's state, even though button
+        // is not direct descendant in the DOM.
+        this.setState(prevState => ({
+            clicks: prevState.clicks + 1
+        }));
     }
 
     render() {
         return (
-            <Router>
-                <div>
-                    <ul>
-                        <li><Link to="/">Home</Link></li>
-                        <li><Link to="/about">About</Link></li>
-                        <li><Link to="/topics">Topics</Link></li>
-                    </ul>
-
-                    <hr />
-
-                    <Route exact path="/" component={page1} />
-                    <Route path="/about" component={page2} />
-                    <Route path="/topics" component={page3} />
-                </div>
-            </Router>
-        )
-    }
-}
-
-
-class Drawer extends Component {
-    render() {
-        return <div><Linker />12</div>
-    }
-}
-
-const DrawerHOC = () => {
-    return class Wrapper extends React.Component {
-        render() {
-            return <Drawer />
-        }
-    }
-}
-
-const List = () => {
-    return (<div>
-        <p>1</p>
-        <p>1</p>
-        <p>1</p>
-    </div>)
-}
-
-class NULL extends React.Component {
-    render() {
-        return null
-    }
-}
-
-class W extends React.Component {
-
-    state = {
-        n: 213123123123
-    }
-    onClick = () => {
-        this.props.click()
-        console.log(this.props.number)
-        console.log(`state的大小：${this.state.n}`)
-    }
-    componentWillReceiveProps() {
-        console.log('进来了')
-        this.setState({
-            n: this.state.n + 1
-        })
-    }
-    render() {
-        const HOC = DrawerHOC()
-        return (
-            <div>
-                {<HOC />}
-                {/* {<div><Drawer /></div>} */}
-                {this.state.n}
-                {this.props.number % 2 === 1 ? <div><NULL />{this.props.number}</div> : <List />}
-                <button onClick={this.onClick}>点我</button>
+            <div onClick={this.handleClick}>
+                <p>Number of clicks: {this.state.clicks}</p>
+                <p>
+                    Open up the browser DevTools
+          to observe that the button
+          is not a child of the div
+          with the onClick handler.
+        </p>
+                <Modal>
+                    <Child />
+                </Modal>
             </div>
-        )
+        );
     }
 }
 
-const reducer = (state = 1, action) => {
-
-    if (action.type == 'type') {
-        const newState = typeof state === 'object' ? action.number : state + action.number
-        return newState
-    }
-    return state
-}
-const mapState = (state) => {
-    console.log(state)
-    return {
-        number: state
-    }
-}
-const mapDispatch = (dispatch) => {
-
-    return {
-        click: () => dispatch({ type: 'type', number: 1 })
-    }
+function Child() {
+    // The click event on this button will bubble up to parent,
+    // because there is no 'onClick' attribute defined
+    return (
+        <div className="mod" style={{ background: 'black' }}>
+            <button>Click</button>
+        </div>
+    );
 }
 
-const store = createStore(reducer)
-const Wrapper = connect(mapState, mapDispatch)(W)
-const render = () => (
-    ReactDOM.render(
-        <Provider store={store}>
-            <Wrapper />
-        </Provider>
-        ,
-        document.getElementById('root')
-    )
-)
-
-
-
-store.subscribe(render)
-
+ReactDOM.render(<Parent />, appRoot);

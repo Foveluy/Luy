@@ -36,13 +36,14 @@ class ReactClass {
     const oldContext = this.context
 
     this.nextState = this.state
-    this._penddingState.forEach((item) => {
-      if (typeof item === 'function') {
-        this.nextState = Object.assign({}, this.state, item.partialNewState(this.nextState, this.props))
+    for (let index in this._penddingState) {
+      const item = this._penddingState[index];
+      if (typeof item.partialNewState === 'function') {
+        this.nextState = Object.assign({}, this.nextState, item.partialNewState(this.nextState, this.props))
       } else {
         this.nextState = Object.assign({}, this.state, item.partialNewState)
       }
-    })
+    }
 
     if (this.nextState !== prevState) {
       this.state = this.nextState;

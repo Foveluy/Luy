@@ -10,6 +10,7 @@ const React = {
     createElement: createEle,/** babel的默认设置是调用createElement这个函数 */
     render,
     cloneElement,
+    createPortal,
     Children: child,
     Component: ReactClass
 }
