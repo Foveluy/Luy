@@ -131,7 +131,7 @@ class Parent extends React.Component {
 
     render() {
         return (
-            <div onClick={this.handleClick}>
+            <div onClick={this.handleClick} onTouchStart={this.handleClick}>
                 <p>Number of clicks: {this.state.clicks}</p>
                 <button onClick={this.ModalBtn}>点击这里会出现一个modal</button>
                 {this.state.modal ? this.renderModal() : <div></div>}
