@@ -17,23 +17,27 @@ var _mapProps = require('./mapProps');
 
 var _Refs = require('./Refs');
 
+var _dispose = require('./dispose');
+
 var _component = require('./component');
 
 //Top Api
 function createPortal(children, container) {
+    var domNode = void 0;
     if (container) {
         if (Array.isArray(children)) {
-            mountChild(children, container);
+            domNode = mountChild(children, container);
         } else {
-            renderByLuy(children, container);
+            domNode = render(children, container);
         }
+    } else {
+        throw new Error('请给portal一个插入的目标');
     }
     //用于记录Portal的事物
     var CreatePortalVnode = new _createElement.Vnode('#text', "createPortal", null, null);
     CreatePortalVnode._PortalHostNode = container;
     return CreatePortalVnode;
 }
-
 
 var mountIndex = 0; //全局变量
 var containerMap = {};
@@ -57,7 +61,6 @@ function mountIndexAdd() {
 function updateText(oldTextVnode, newTextVnode, parentDomNode) {
     var dom = oldTextVnode._hostNode;
     if (oldTextVnode.props !== newTextVnode.props) {
-
         dom.nodeValue = newTextVnode.props;
     }
 }
@@ -89,7 +92,7 @@ function updateChild(oldChild, newChild, parentDomNode, parentContext) {
     }
     if (!newLength && oldLength >= 0) {
         oldChild.forEach(function (oldVnode) {
-            disposeVnode(oldVnode);
+            (0, _dispose.disposeVnode)(oldVnode);
         });
         return newChild[0];
     }
@@ -155,62 +158,15 @@ function updateChild(oldChild, newChild, parentDomNode, parentContext) {
                 }
             }
         } else if (newStartIndex > newEndIndex) {
-
             for (; oldStartIndex - 1 < oldEndIndex; oldStartIndex++) {
                 if (oldChild[oldStartIndex]) {
                     var removeNode = oldChild[oldStartIndex];
-                    disposeVnode(removeNode);
+                    (0, _dispose.disposeVnode)(removeNode);
                 }
             }
         }
     }
     return newChild;
-}
-
-function disposeVnode(Vnode) {
-    //主要用于删除Vnode对应的节点
-    var type = Vnode.type,
-        props = Vnode.props;
-
-    if (!type) return;
-    if (typeof Vnode.type === 'function') {
-        if (Vnode._instance.componentWillUnMount) {
-            Vnode._instance.componentWillUnMount();
-        }
-
-        (0, _Refs.clearRefs)(Vnode._instance.ref);
-    }
-    if (Vnode.props.children) {
-        disposeChildVnode(Vnode.props.children);
-    }
-    if (Vnode._PortalHostNode) {
-        var parent = Vnode._PortalHostNode.parentNode;
-        parent.removeChild(Vnode._PortalHostNode);
-    } else {
-        if (Vnode._hostNode) {
-            //有可能会出现undefind的情况
-            var _parent = Vnode._hostNode.parentNode;
-            _parent.removeChild(Vnode._hostNode);
-        }
-    }
-    Vnode._hostNode = null;
-}
-
-function disposeChildVnode(childVnode) {
-    var children = childVnode;
-    if ((0, _utils.typeNumber)(children) !== 7) children = [children];
-    children.forEach(function (child) {
-        if (typeof child.type === 'function') {
-            if (child._instance.componentWillUnMount) {
-                child._instance.componentWillUnMount();
-            }
-        }
-        child._hostNode = null;
-        child._instance = null;
-        if (child.props.children) {
-            disposeChildVnode(child.props.children);
-        }
-    });
 }
 
 /**
@@ -343,32 +299,20 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
             newVnode.ref = oldVnode.ref;
             newVnode.key = oldVnode.key;
             newVnode._instance = oldVnode._instance;
+            newVnode._PortalHostNode = oldVnode._PortalHostNode ? oldVnode._PortalHostNode : void 666;
         }
     } else {
         var dom = renderByLuy(newVnode, parentDomNode, true, parentContext);
         var parentNode = parentDomNode.parentNode;
         if (newVnode._hostNode) {
             parentNode.insertBefore(dom, oldVnode._hostNode);
-            disposeVnode(oldVnode);
+            (0, _dispose.disposeVnode)(oldVnode);
         } else {
             parentNode.appendChild(dom);
             newVnode._hostNode = dom;
         }
     }
     return newVnode;
-}
-
-function renderHoc(instance, props, parentContext) {
-    if ((0, _utils.typeNumber)(instance) === 5) {
-        var newInstance = new instance(props, parentContext);
-        return renderHoc(newInstance);
-    } else {
-        if (!instance.render) {
-            return instance;
-        } else {
-            return instance.render();
-        }
-    }
 }
 
 /**
@@ -434,6 +378,7 @@ function mountComponent(Vnode, parentDomNode, parentContext) {
     if (renderedVnode._PortalHostNode) {
         //支持react createPortal
         Vnode._PortalHostNode = renderedVnode._PortalHostNode;
+        renderedVnode._PortalHostNode._PortalHostNode = domNode;
     }
 
     instance._updateInLifeCycle(); // componentDidMount之后一次性更新

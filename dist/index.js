@@ -20,6 +20,7 @@ var React = {
     createElement: _createElement.createElement, /** babel的默认设置是调用createElement这个函数 */
     render: _vdom.render,
     cloneElement: _cloneElement.cloneElement,
+    createPortal: _vdom.createPortal,
     Children: _Children.Children,
     Component: _component.ReactClass
 };

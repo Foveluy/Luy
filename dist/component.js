@@ -73,13 +73,14 @@ var ReactClass = function () {
       var oldContext = this.context;
 
       this.nextState = this.state;
-      this._penddingState.forEach(function (item) {
-        if (typeof item === 'function') {
-          _this.nextState = (0, _assign2.default)({}, _this.state, item.partialNewState(_this.nextState, _this.props));
+      for (var index in this._penddingState) {
+        var item = this._penddingState[index];
+        if (typeof item.partialNewState === 'function') {
+          this.nextState = (0, _assign2.default)({}, this.nextState, item.partialNewState(this.nextState, this.props));
         } else {
-          _this.nextState = (0, _assign2.default)({}, _this.state, item.partialNewState);
+          this.nextState = (0, _assign2.default)({}, this.state, item.partialNewState);
         }
-      });
+      }
 
       if (this.nextState !== prevState) {
         this.state = this.nextState;

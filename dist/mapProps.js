@@ -195,6 +195,9 @@ function getEventPath(event, end) {
             path.push(begin);
         }
         begin = begin.parentNode; //迭代
+        if (begin && begin._PortalHostNode) {
+            begin = begin._PortalHostNode;
+        }
         if (!begin) {
             break;
         }
