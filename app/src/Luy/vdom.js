@@ -317,7 +317,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
 
 
 /**
- * 渲染自定义组件
+ * 递归渲染虚拟组件
  * @param {*} Vnode 
  * @param {Element} parentDomNode 
  */
@@ -470,13 +470,14 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     }
 
     if (typeof type !== 'function') {
+        //当Vnode是一个虚拟组件的时候，则不要渲染他的子组件，而是等到创建他了以后，再根据他的render函数来渲染
         if (typeNumber(children) > 2 && children !== undefined) {
             const NewChild = mountChild(children, domNode, parentContext, instance)//flatten之后的child 要保存下来
             props.children = NewChild
         }
     }
 
-    setRef(Vnode, instance, domNode)
+    setRef(Vnode, instance, domNode)//为虚拟组件添加ref
     mapProp(domNode, props, Vnode) //为元素添加props
 
     Vnode._hostNode = domNode //缓存真实节点
@@ -492,11 +493,12 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     return domNode
 }
 
-function areTheyEqual(aDom, bDom) {
-    if (aDom === bDom) return true
-    return false
-}
 
+/**
+ * 
+ * @param {Vnode} Vnode Vnode是一颗虚拟DOM树，他的生成方式是babel-transform-react-jsx调用createElement进行的。
+ * @param {Element} container 这是一个真实DOM节点，用于插入虚拟DOM。
+ */
 export function render(Vnode, container) {
     if (typeNumber(container) !== 8) {
         throw new Error('Target container is not a DOM element.')

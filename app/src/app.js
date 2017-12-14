@@ -31,7 +31,7 @@ class Linker extends React.Component {
                     <ul>
                         <li><Link to="/">TodoList</Link></li>
                         <li><Link to="/layout">Layout系统</Link></li>
-                        <li><Link to="/about">关于</Link></li>
+                        <li><Link to="/about">关于这个框架</Link></li>
                     </ul>
 
                     <hr />
@@ -64,9 +64,9 @@ const render = () => (
     )
 )
 
-// render()
+render()
 
-// store.subscribe(render)
+store.subscribe(render)
 
 const appRoot = document.getElementById('root');
 const modalRoot = document.getElementById('modal-root');
@@ -164,4 +164,4 @@ function Child() {
     );
 }
 
-ReactDOM.render(<Parent />, appRoot);
+// ReactDOM.render(<Parent />, appRoot);

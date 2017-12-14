@@ -1,6 +1,9 @@
 const { resolve } = require('path');
 const webpack = require('webpack');
 
+
+console.log(resolve('.app/src/Luy/index.js'))
+
 module.exports = {
     context: __dirname,
     entry: [
@@ -20,10 +23,10 @@ module.exports = {
     },
     resolve: {
         alias: {
-           'react': '/Users/Floveluy/Desktop/Luy/app/src/Luy/index.js',
-           'react-dom': '/Users/Floveluy/Desktop/Luy/app/src/Luy/index.js'
+            'react': resolve('app/src/Luy/index.js'),
+            'react-dom': resolve('app/src/Luy/index.js')
         }
-     },
+    },
     module: {
         rules: [
             {
