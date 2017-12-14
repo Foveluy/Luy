@@ -20,8 +20,8 @@ module.exports = {
     },
     resolve: {
         alias: {
-           'react': '/Users/Floveluy/Desktop/Luy/app/src/Luy/index.js',
-           'react-dom': '/Users/Floveluy/Desktop/Luy/app/src/Luy/index.js'
+           'react': '/Users/Floveluy/Desktop/Luy/src/Luy/index.js',
+           'react-dom': '/Users/Floveluy/Desktop/Luy/src/Luy/index.js'
         }
      },
     // externals: {

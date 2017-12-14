@@ -16,8 +16,6 @@ const page3 = () => {
     return (<div>本demo完全由luy框架提供,作者:方正</div>)
 }
 
-
-
 class Linker extends React.Component {
 
     click(idx) {
@@ -33,9 +31,7 @@ class Linker extends React.Component {
                         <li><Link to="/layout">Layout系统</Link></li>
                         <li><Link to="/about">关于这个框架</Link></li>
                     </ul>
-
                     <hr />
-
                     <Route exact path="/" component={TodoList} />
                     <Route path="/layout" component={LayoutDemo} />
                     <Route path="/about" component={page3} />
