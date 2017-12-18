@@ -20,7 +20,8 @@ export function disposeVnode(Vnode) {//主要用于删除Vnode对应的节点
     } else {
         if (Vnode._hostNode) {//有可能会出现undefind的情况
             const parent = Vnode._hostNode.parentNode
-            parent.removeChild(Vnode._hostNode)
+            if (parent)
+                parent.removeChild(Vnode._hostNode)
         }
     }
     Vnode._hostNode = null
@@ -35,6 +36,7 @@ function disposeChildVnode(childVnode) {
                 child._instance.componentWillUnMount()
             }
         }
+        console.log(child);
         const parent = child._hostNode.parentNode
         parent.removeChild(child._hostNode)
         child._hostNode = null
