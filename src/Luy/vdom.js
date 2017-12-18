@@ -331,7 +331,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     let instance = new Component(props, parentContext)
 
     if (!instance.render) {
-        Vnode._instance = instance;//for react-redux
+        Vnode._instance = instance;//for react-redux,这里是渲染无状态组件
         return renderByLuy(instance, parentDomNode, false, parentContext);
     }
 

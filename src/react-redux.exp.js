@@ -15,6 +15,9 @@ class TodoItem extends React.Component {
     shouldComponentUpdate(nextProp) {
         return nextProp.value !== this.props.value
     }
+    componentDidMount() {
+        throw new Error('就这样先')
+    }
 
     render() {
         console.log('render')
@@ -48,7 +51,7 @@ class TodoList extends React.Component {
     }
     componentDidMount() {
         console.log('挂载')
-        throw new Error('就这样先')
+
     }
 
     onInputChange = (e) => {

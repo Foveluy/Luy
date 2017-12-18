@@ -13,6 +13,8 @@ export function catchError(Instance, hookname, args) {
         }
     } catch (e) {
         // throw new Error(e);
-        disposeVnode(Instance.Vnode);
+        // disposeVnode(Instance.Vnode);
+
+        console.log(Instance)
     }
 }
