@@ -100,14 +100,15 @@ class TodoList extends React.Component {
 
                     <div style={{ color: '#f46e65' }} hidden={!this.state.warning}>请输入一些东西～</div>
                     <div>
-                        {this.props.list.map((item, index) => {
+                        <TodoItem />
+                        {/* {this.props.list.map((item, index) => {
                             return (<TodoItem
                                 key={item.id}
                                 title={index}
                                 value={item.value}
                                 onClose={() => { this.props.close(item.id) }}
                             />)
-                        })}
+                        })} */}
                     </div>
                 </div>
             </div>

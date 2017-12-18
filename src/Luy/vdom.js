@@ -330,6 +330,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     const Component = type
     let instance = new Component(props, parentContext)
 
+
     if (!instance.render) {
         Vnode._instance = instance;//for react-redux,这里是渲染无状态组件
         return renderByLuy(instance, parentDomNode, false, parentContext);
@@ -363,6 +364,12 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     instance.Vnode = renderedVnode;
     instance.Vnode._hostNode = domNode;//用于在更新时期oldVnode的时候获取_hostNode
     instance.Vnode._mountIndex = mountIndexAdd();
+
+    instance.Vnode.parentVnode = Vnode.parentVnode;//回溯用的
+    // instance.Vnode.displayName = Component.name;//记录名字
+    console.log(Component.name);
+    // renderedVnode.displayName = Component.name;//记录名字
+
 
     Vnode._instance = instance; // 在父节点上的child元素会保存一个自己
     Vnode._hostNode = domNode;
@@ -403,7 +410,7 @@ function mountTextComponent(Vnode, domNode: Element) {
     return textDomNode
 }
 
-function mountChild(childrenVnode, parentDomNode: Element, parentContext, instance) {
+function mountChild(childrenVnode, parentDomNode: Element, parentContext, instance, parentVnode) {
 
     let childType = typeNumber(childrenVnode)
     let flattenChildList = childrenVnode;
@@ -413,6 +420,8 @@ function mountChild(childrenVnode, parentDomNode: Element, parentContext, instan
     }
 
     if (childType === 8 && childrenVnode !== undefined) { //Vnode
+        flattenChildList.parentVnode = parentVnode;//记录父亲节点，为了回溯
+        flattenChildList.parentVnode.displayName = flattenChildList.type.name;
         if (typeNumber(childrenVnode.type) === 5) {
             flattenChildList._hostNode = renderByLuy(flattenChildList, parentDomNode, false, parentContext, instance)
         } else if (typeNumber(childrenVnode.type) === 3 || typeNumber(childrenVnode.type) === 4) {
@@ -423,6 +432,8 @@ function mountChild(childrenVnode, parentDomNode: Element, parentContext, instan
         flattenChildList = flattenChildren(childrenVnode)
         flattenChildList.forEach((item) => {
             if (item) {
+                item.parentVnode = parentVnode;
+                item.parentVnode.displayName = item.type.name
                 if (typeof item.type === 'function') { //如果是组件先不渲染子嗣
                     mountComponent(item, parentDomNode, parentContext)
                 } else {
@@ -433,6 +444,8 @@ function mountChild(childrenVnode, parentDomNode: Element, parentContext, instan
     }
     if (childType === 4 || childType === 3) {//string or number
         flattenChildList = flattenChildren(childrenVnode)
+        flattenChildList.parentVnode = parentVnode;
+        flattenChildList.parentVnode.displayName = flattenChildList.type.name
         mountTextComponent(flattenChildList, parentDomNode)
     }
     return flattenChildList
@@ -479,7 +492,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     if (typeof type !== 'function') {
         //当Vnode是一个虚拟组件的时候，则不要渲染他的子组件，而是等到创建他了以后，再根据他的render函数来渲染
         if (typeNumber(children) > 2 && children !== undefined) {
-            const NewChild = mountChild(children, domNode, parentContext, instance)//flatten之后的child 要保存下来
+            const NewChild = mountChild(children, domNode, parentContext, instance, Vnode)//flatten之后的child 要保存下来
             props.children = NewChild
         }
     }

@@ -15,6 +15,17 @@ export function catchError(Instance, hookname, args) {
         // throw new Error(e);
         // disposeVnode(Instance.Vnode);
 
-        console.log(Instance)
+        // console.log(Instance.Vnode)
+        let n = 0;
+        let Vnode = Instance.Vnode.parentVnode
+        do {
+            console.log(Vnode)
+            console.log(Vnode.displayName)
+            n = n + 1;
+            if (n === 10) {
+                break;
+            }
+        }
+        while (Vnode = Vnode.parentVnode)
     }
 }
