@@ -35,6 +35,8 @@ function disposeChildVnode(childVnode) {
                 child._instance.componentWillUnMount()
             }
         }
+        const parent = child._hostNode.parentNode
+        parent.removeChild(child._hostNode)
         child._hostNode = null
         child._instance = null
         if (child.props.children) {

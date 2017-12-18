@@ -17,11 +17,6 @@ const page3 = () => {
 }
 
 class Linker extends React.Component {
-
-    click(idx) {
-        console.log(idx)
-    }
-
     render() {
         return (
             <Router>

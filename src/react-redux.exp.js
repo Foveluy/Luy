@@ -48,6 +48,7 @@ class TodoList extends React.Component {
     }
     componentDidMount() {
         console.log('挂载')
+        throw new Error('就这样先')
     }
 
     onInputChange = (e) => {

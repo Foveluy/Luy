@@ -5,6 +5,7 @@ import { mapProp, mappingStrategy, updateProps } from './mapProps'
 import { setRef } from './Refs'
 import { disposeVnode } from './dispose'
 import { Com } from './component'
+import { catchError } from './ErrorBoundary';
 
 
 
@@ -198,8 +199,8 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
 
     oldComponentVnode._instance.lifeCycle = Com.UPDATING
     if (oldComponentVnode._instance.componentWillReceiveProps) {
-        oldComponentVnode._instance.componentWillReceiveProps(newProps, newContext)
-        let mergedState = oldComponentVnode._instance.state
+        catchError(oldComponentVnode._instance, 'componentWillReceiveProps', [newProps, newContext]);
+        let mergedState = oldComponentVnode._instance.state;
         oldComponentVnode._instance._penddingState.forEach((partialState) => {
             mergedState = extend(extend({}, mergedState), partialState.partialNewState)
         })
@@ -207,7 +208,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
     }
 
     if (oldComponentVnode._instance.shouldComponentUpdate) {
-        let shouldUpdate = oldComponentVnode._instance.shouldComponentUpdate(newProps, oldState, newContext)
+        let shouldUpdate = catchError(oldComponentVnode._instance, 'shouldComponentUpdate', [newProps, oldState, newContext]);
         if (!shouldUpdate) {
             //无论shouldComponentUpdate结果是如何，数据都会给用户设置上去
             //但是不一定会刷新
@@ -218,20 +219,22 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
     }
 
     if (oldComponentVnode._instance.componentWillUpdate) {
-        oldComponentVnode._instance.componentWillUpdate(newProps, oldState, newContext)
+        catchError(oldComponentVnode._instance, 'componentWillUpdate', [newProps, oldState, newContext])
     }
 
     let lastOwner = currentOwner.cur
     currentOwner.cur = oldComponentVnode._instance
 
     let newVnode = oldComponentVnode._instance.render ? oldComponentVnode._instance.render() : new newComponentVnode.type(newProps, newContext)
-    newVnode = newVnode ? newVnode : new VnodeClass('#text', "", null, null)
+    newVnode = newVnode ? newVnode : new VnodeClass('#text', "", null, null)//用户有可能返回null，当返回null的时候使用一个空白dom代替
     let fixedOldVnode = oldVnode ? oldVnode : oldComponentVnode._instance
 
     currentOwner.cur = lastOwner
 
-    const willUpdate = options.dirtyComponent[oldComponentVnode._instance._uniqueId]//因为用react-redux更新的时候
+    const willUpdate = options.dirtyComponent[oldComponentVnode._instance._uniqueId]//因为用react-redux更新的时候，不然会重复更新.
     if (willUpdate) {
+        //如果这个component正好是需要更新的component，那么则更新，然后就将他从map中删除
+        //不然会重复更新
         delete options.dirtyComponent[oldComponentVnode._instance._uniqueId]
     }
 
@@ -248,7 +251,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
 
     if (oldComponentVnode._instance) {
         if (oldComponentVnode._instance.componentDidUpdate) {
-            oldComponentVnode._instance.componentDidUpdate(oldProps, oldState, oldContext)
+            catchError(oldComponentVnode._instance, 'componentDidUpdate', [oldProps, oldState, oldContext]);
         }
         oldComponentVnode._instance.lifeCycle = Com.UPDATED
     }
@@ -339,11 +342,13 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     }
 
     //生命周期函数
-    instance.componentWillMount && instance.componentWillMount();
+    if (instance.componentWillMount) {
+        catchError(instance, 'componentWillMount', [])
+    }
 
     let lastOwner = currentOwner.cur;
     currentOwner.cur = instance;
-    let renderedVnode = instance.render();
+    let renderedVnode = catchError(instance, 'render', []);
     currentOwner.cur = lastOwner;
 
     if (renderedVnode === void 233) {
@@ -353,13 +358,6 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     renderedVnode = renderedVnode ? renderedVnode : new VnodeClass('#text', "", null, null);
 
     const domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance);
-
-    if (instance.componentDidMount) {
-        instance.lifeCycle = Com.MOUNTTING;
-        instance.componentDidMount();
-        instance.componentDidMount = null;//防止用户调用
-        instance.lifeCycle = Com.MOUNT;
-    }
 
     renderedVnode.key = key || null;
     instance.Vnode = renderedVnode;
@@ -374,6 +372,15 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     if (renderedVnode._PortalHostNode) {//支持react createPortal
         Vnode._PortalHostNode = renderedVnode._PortalHostNode;
         renderedVnode._PortalHostNode._PortalHostNode = domNode;
+    }
+
+    if (instance.componentDidMount) {
+        //Moutting变量用于标记组件是否正在挂载
+        //如果正在挂载，则所有的setState全部都要合并
+        instance.lifeCycle = Com.MOUNTTING;
+        catchError(instance, 'componentDidMount', []);
+        instance.componentDidMount = null;//防止用户调用
+        instance.lifeCycle = Com.MOUNT;
     }
 
     instance._updateInLifeCycle(); // componentDidMount之后一次性更新
