@@ -5,7 +5,7 @@ import { mapProp, mappingStrategy, updateProps } from './mapProps'
 import { setRef } from './Refs'
 import { disposeVnode } from './dispose'
 import { Com } from './component'
-import { catchError, collectErrorVnode, getReturn, runExection } from './ErrorBoundary';
+import { catchError, collectErrorVnode, getReturn, runException } from './ErrorBoundary';
 
 
 
@@ -225,7 +225,8 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
     let lastOwner = currentOwner.cur
     currentOwner.cur = oldComponentVnode._instance
 
-    let newVnode = oldComponentVnode._instance.render ? oldComponentVnode._instance.render() : new newComponentVnode.type(newProps, newContext)
+
+    let newVnode = oldComponentVnode._instance.render ? catchError(oldComponentVnode._instance, 'render', []) : new newComponentVnode.type(newProps, newContext)
     newVnode = newVnode ? newVnode : new VnodeClass('#text', "", null, null)//用户有可能返回null，当返回null的时候使用一个空白dom代替
     let fixedOldVnode = oldVnode ? oldVnode : oldComponentVnode._instance
 
@@ -329,7 +330,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
 
     const Component = type
     let instance = new Component(props, parentContext)
-
+    Vnode._instance = instance; // 在父节点上的child元素会保存一个自己
 
     if (!instance.render) {
         Vnode._instance = instance;//for react-redux,这里是渲染无状态组件
@@ -349,7 +350,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
 
     let lastOwner = currentOwner.cur;
     currentOwner.cur = instance;
-    let renderedVnode = catchError(instance, 'render', []);
+    let renderedVnode = catchError(instance, 'render', [Vnode]);
     currentOwner.cur = lastOwner;
 
     if (renderedVnode === void 233) {
@@ -363,7 +364,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     instance.Vnode = renderedVnode;
     instance.Vnode._hostNode = domNode;//用于在更新时期oldVnode的时候获取_hostNode
     instance.Vnode._mountIndex = mountIndexAdd();
-    Vnode._instance = instance; // 在父节点上的child元素会保存一个自己
+
 
     Vnode.displayName = Component.name;//以下这两行用于componentDidcatch
     instance.Vnode.return = Vnode;//必须要在插入前设置return(父Vnode)给所有的Vnode.
@@ -390,9 +391,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
         instance.lifeCycle = Com.MOUNT;
     }
 
-
     instance._updateInLifeCycle(); // componentDidMount之后一次性更新
-
     return domNode
 }
 
@@ -525,13 +524,14 @@ export function render(Vnode, container) {
     if (container.UniqueKey) {//已经被渲染
         const oldVnode = containerMap[UniqueKey]
         const rootVnode = update(oldVnode, Vnode, container)
+        runException();
         return Vnode._instance
     } else {
         //第一次渲染的时候
         container.UniqueKey = Date.now();
         containerMap[container.UniqueKey] = Vnode;
         renderByLuy(Vnode, container);
-        runExection(123)
-        return Vnode._instance
+        runException();
+        return Vnode._instance;
     }
 }

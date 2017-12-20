@@ -1,5 +1,11 @@
 import { disposeVnode } from './dispose';
 import { typeNumber } from './utils';
+
+var _errorVnode = [];
+var V_Instance = [];
+var errorMsg = '';
+var error = undefined;
+
 /**
  * 捕捉错误的核心代码，错误只会发生在用户事件回调，ref，setState回调，生命周期函数
  * @param {*} Instance 需要捕捉的虚拟组件实例
@@ -9,22 +15,26 @@ import { typeNumber } from './utils';
 export function catchError(Instance, hookname, args) {
     try {
         if (Instance[hookname]) {
-            const resulte = Instance[hookname].apply(Instance, args)
+            var resulte = void 666;
+            if (hookname === 'render') {
+                resulte = Instance[hookname].apply(Instance)
+            }
+            resulte = Instance[hookname].apply(Instance, args)
             return resulte
         }
     } catch (e) {
         // throw new Error(e);
         // disposeVnode(Instance.Vnode);
-        let Vnode = Instance.Vnode
-        console.log(`method ${hookname} gets error`)
-        console.log(Instance)
-        collectErrorVnode(e, Instance);
+        let Vnode = void 666;
+        Vnode = Instance.Vnode;
+        if (hookname === 'render') {
+            Vnode = args[0];
+        }
+        console.log(`method ${hookname} gets error`);
+        console.log(args[0]);
+        collectErrorVnode(e, Vnode);
     }
 }
-
-var _errorVnode = [];
-var V_Instance = [];
-var errorMsg = '';
 
 export function getReturn(Vnode) {
     if (Vnode.return === void 666) {
@@ -56,15 +66,13 @@ function pushErrorVnode(Vnode) {
     _errorVnode.push(Vnode);
 }
 
-export
-
-    function collectErrorVnode(error, errorInstance) {
-    var Vnode = errorInstance.Vnode;
+export function collectErrorVnode(error, _Vnode) {
+    var Vnode = _Vnode;
     const error_ary = [];
     do {
         error_ary.push(Vnode);
         if (Vnode.return) {
-            console.log(`<${Vnode.displayName || getName(Vnode, Vnode.type)}/> created by ${Vnode.return.displayName || getName(Vnode.return, Vnode.return.type)}`)
+            // console.log(`<${Vnode.displayName || getName(Vnode, Vnode.type)}/> created by ${Vnode.return.displayName || getName(Vnode.return, Vnode.return.type)}`)
             errorMsg += `in <${Vnode.displayName || getName(Vnode, Vnode.type)}/> created by ${Vnode.return.displayName || getName(Vnode.return, Vnode.return.type)}\n`;
             if (Vnode._instance) {
                 if (Vnode._instance.componentDidCatch) {
@@ -73,14 +81,14 @@ export
                         componentDidCatch: Vnode._instance.componentDidCatch
                     });
                 }
-                console.log(`<${Vnode.displayName || getName(Vnode, Vnode.type)}/> 拥有医生节点的能力`)
+                // console.log(`<${Vnode.displayName || getName(Vnode, Vnode.type)}/> 拥有医生节点的能力`)
             }
         }
     }
     while (Vnode = Vnode.return);
 }
 
-export function runExection(error) {
+export function runException() {
     var ins = V_Instance.shift()
     do {
         if (ins === void 666) {
@@ -94,7 +102,7 @@ export function runExection(error) {
                 disposeVnode(instance.Vnode);
                 break;
             } catch (e) {
-                console.log(e);
+                console.log(e, '多个错误发生，此处只处理一个错误');
             }
         }
     } while (ins = V_Instance.shift())

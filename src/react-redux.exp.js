@@ -13,11 +13,15 @@ class TodoItem extends React.Component {
         console.log('删除')
     }
     shouldComponentUpdate(nextProp) {
-        return nextProp.value !== this.props.value
+        // return nextProp.value !== this.props.value
+        return true;
     }
     componentDidMount() {
-        throw new Error('就这样先')
+
         // console.log('TodoItem componentDidMount')
+    }
+    componentWillUpdate() {
+        throw new Error('新的错误');
     }
 
     render() {
@@ -67,6 +71,7 @@ class TodoList extends React.Component {
 
     }
     onAdd = () => {
+
         if (!this.props.inputText) {
             this.setState({
                 warning: true
