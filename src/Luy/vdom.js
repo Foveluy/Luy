@@ -531,7 +531,7 @@ export function render(Vnode, container) {
         container.UniqueKey = Date.now();
         containerMap[container.UniqueKey] = Vnode;
         renderByLuy(Vnode, container);
-        runExection();
+        runExection(123)
         return Vnode._instance
     }
 }

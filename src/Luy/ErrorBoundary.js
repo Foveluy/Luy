@@ -56,23 +56,9 @@ function pushErrorVnode(Vnode) {
     _errorVnode.push(Vnode);
 }
 
-export function runExection() {
-    var ins = V_Instance.shift()
-    do {
-        const { instance, componentDidCatch, error } = ins;
-        if (componentDidCatch) {
-            try {
-                componentDidCatch.call(instance, error, errorMsg);
-                disposeVnode(instance.Vnode);
-                break;
-            } catch (e) {
-                console.log(e);
-            }
-        }
-    } while (ins = V_Instance.shift())
-}
+export
 
-function collectErrorVnode(error, errorInstance) {
+    function collectErrorVnode(error, errorInstance) {
     var Vnode = errorInstance.Vnode;
     const error_ary = [];
     do {
@@ -84,8 +70,7 @@ function collectErrorVnode(error, errorInstance) {
                 if (Vnode._instance.componentDidCatch) {
                     V_Instance.push({
                         instance: Vnode._instance,
-                        componentDidCatch: Vnode._instance.componentDidCatch,
-                        error: error
+                        componentDidCatch: Vnode._instance.componentDidCatch
                     });
                 }
                 console.log(`<${Vnode.displayName || getName(Vnode, Vnode.type)}/> 拥有医生节点的能力`)
@@ -93,4 +78,24 @@ function collectErrorVnode(error, errorInstance) {
         }
     }
     while (Vnode = Vnode.return);
+}
+
+export function runExection(error) {
+    var ins = V_Instance.shift()
+    do {
+        if (ins === void 666) {
+            console.warn(errorMsg)
+            break;
+        }
+        const { instance, componentDidCatch } = ins;
+        if (componentDidCatch) {
+            try {
+                componentDidCatch.call(instance, error, errorMsg);
+                disposeVnode(instance.Vnode);
+                break;
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    } while (ins = V_Instance.shift())
 }

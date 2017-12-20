@@ -53,6 +53,9 @@ class TodoList extends React.Component {
         console.log('挂载')
         console.log('TodoList componentDidMount')
     }
+    componentDidCatch(e, msg) {
+        console.log(msg)
+    }
 
     onInputChange = (e) => {
         if (this.props.inputText && this.state.warning) {

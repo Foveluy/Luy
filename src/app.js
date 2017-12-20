@@ -20,9 +20,7 @@ class Linker extends React.Component {
     componentDidMount() {
         console.log('Linker componentDidMount')
     }
-    componentDidCatch(info, msg) {
-        console.log(msg);
-    }
+
     render() {
         return (
             <Router>

@@ -36,7 +36,7 @@ function disposeChildVnode(childVnode) {
                 child._instance.componentWillUnMount()
             }
         }
-        if (typeNumber(child) !== 4 && typeNumber(child) !== 3) {
+        if (typeNumber(child) !== 4 && typeNumber(child) !== 3 && child._hostNode !== void 666) {
             const parent = child._hostNode.parentNode
             parent.removeChild(child._hostNode)
             child._hostNode = null
