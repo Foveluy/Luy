@@ -36,13 +36,14 @@ function disposeChildVnode(childVnode) {
                 child._instance.componentWillUnMount()
             }
         }
-        console.log(child);
-        const parent = child._hostNode.parentNode
-        parent.removeChild(child._hostNode)
-        child._hostNode = null
-        child._instance = null
-        if (child.props.children) {
-            disposeChildVnode(child.props.children)
+        if (typeNumber(child) !== 4 && typeNumber(child) !== 3) {
+            const parent = child._hostNode.parentNode
+            parent.removeChild(child._hostNode)
+            child._hostNode = null
+            child._instance = null
+            if (child.props.children) {
+                disposeChildVnode(child.props.children)
+            }
         }
     })
 }

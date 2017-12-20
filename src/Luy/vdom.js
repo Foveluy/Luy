@@ -5,7 +5,7 @@ import { mapProp, mappingStrategy, updateProps } from './mapProps'
 import { setRef } from './Refs'
 import { disposeVnode } from './dispose'
 import { Com } from './component'
-import { catchError } from './ErrorBoundary';
+import { catchError, collectErrorVnode, getReturn, runExection } from './ErrorBoundary';
 
 
 
@@ -358,20 +358,20 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     }
     renderedVnode = renderedVnode ? renderedVnode : new VnodeClass('#text', "", null, null);
 
-    const domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance);
 
     renderedVnode.key = key || null;
     instance.Vnode = renderedVnode;
     instance.Vnode._hostNode = domNode;//用于在更新时期oldVnode的时候获取_hostNode
     instance.Vnode._mountIndex = mountIndexAdd();
+    Vnode._instance = instance; // 在父节点上的child元素会保存一个自己
 
-    instance.Vnode.parentVnode = Vnode.parentVnode;//回溯用的
-    // instance.Vnode.displayName = Component.name;//记录名字
-    console.log(Component.name);
+    Vnode.displayName = Component.name;//以下这两行用于componentDidcatch
+    instance.Vnode.return = Vnode;//必须要在插入前设置return(父Vnode)给所有的Vnode.
+
+
+    const domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance);
     // renderedVnode.displayName = Component.name;//记录名字
 
-
-    Vnode._instance = instance; // 在父节点上的child元素会保存一个自己
     Vnode._hostNode = domNode;
 
     setRef(Vnode, instance, domNode);
@@ -389,6 +389,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
         instance.componentDidMount = null;//防止用户调用
         instance.lifeCycle = Com.MOUNT;
     }
+
 
     instance._updateInLifeCycle(); // componentDidMount之后一次性更新
 
@@ -416,12 +417,11 @@ function mountChild(childrenVnode, parentDomNode: Element, parentContext, instan
     let flattenChildList = childrenVnode;
 
     if (childrenVnode === undefined) {
-        flattenChildList = flattenChildren(childrenVnode)
+        flattenChildList = flattenChildren(childrenVnode, parentVnode)
     }
 
     if (childType === 8 && childrenVnode !== undefined) { //Vnode
-        flattenChildList.parentVnode = parentVnode;//记录父亲节点，为了回溯
-        flattenChildList.parentVnode.displayName = flattenChildList.type.name;
+        flattenChildList = flattenChildren(childrenVnode, parentVnode)
         if (typeNumber(childrenVnode.type) === 5) {
             flattenChildList._hostNode = renderByLuy(flattenChildList, parentDomNode, false, parentContext, instance)
         } else if (typeNumber(childrenVnode.type) === 3 || typeNumber(childrenVnode.type) === 4) {
@@ -429,11 +429,9 @@ function mountChild(childrenVnode, parentDomNode: Element, parentContext, instan
         }
     }
     if (childType === 7) {//list
-        flattenChildList = flattenChildren(childrenVnode)
+        flattenChildList = flattenChildren(childrenVnode, parentVnode)
         flattenChildList.forEach((item) => {
             if (item) {
-                item.parentVnode = parentVnode;
-                item.parentVnode.displayName = item.type.name
                 if (typeof item.type === 'function') { //如果是组件先不渲染子嗣
                     mountComponent(item, parentDomNode, parentContext)
                 } else {
@@ -443,10 +441,8 @@ function mountChild(childrenVnode, parentDomNode: Element, parentContext, instan
         })
     }
     if (childType === 4 || childType === 3) {//string or number
-        flattenChildList = flattenChildren(childrenVnode)
-        flattenChildList.parentVnode = parentVnode;
-        flattenChildList.parentVnode.displayName = flattenChildList.type.name
-        mountTextComponent(flattenChildList, parentDomNode)
+        flattenChildList = flattenChildren(childrenVnode, parentVnode);
+        mountTextComponent(flattenChildList, parentDomNode);
     }
     return flattenChildList
 }
@@ -482,6 +478,7 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     let domNode;
     if (typeof type === 'function') {
         const fixContext = parentContext || {};
+
         domNode = mountComponent(Vnode, container, fixContext);
     } else if (typeof type === 'string' && type === '#text') {
         domNode = mountTextComponent(Vnode, container);
@@ -531,9 +528,10 @@ export function render(Vnode, container) {
         return Vnode._instance
     } else {
         //第一次渲染的时候
-        container.UniqueKey = Date.now()
-        containerMap[container.UniqueKey] = Vnode
-        renderByLuy(Vnode, container)
+        container.UniqueKey = Date.now();
+        containerMap[container.UniqueKey] = Vnode;
+        renderByLuy(Vnode, container);
+        runExection();
         return Vnode._instance
     }
 }

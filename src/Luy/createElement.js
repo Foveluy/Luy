@@ -72,7 +72,7 @@ function createElement(type: string | Function, config, ...children: array) {
  * 实际上这里做的事情就是将文字节点全部转换成Vnode
  * @param {*} children 
  */
-export function flattenChildren(children: Array) {
+export function flattenChildren(children: Array, parentVnode) {
 
     if (children === undefined) return new Vnode('#text', "", null, null)
 
@@ -86,7 +86,10 @@ export function flattenChildren(children: Array) {
         return new Vnode('#text', children, null, null)
     }
 
-    if (childType !== 7) return children
+    if (childType !== 7) {
+        children.return = parentVnode;
+        return children
+    }
 
     children.forEach((item, index) => {
         if (typeNumber(item) === 7) {
@@ -121,6 +124,10 @@ export function flattenChildren(children: Array) {
     ary = ary.map((item) => {
         if (typeNumber(item) === 4) {
             item = new Vnode('#text', item, null, null)
+        } else {
+            if (item) {
+                item.return = parentVnode;
+            }
         }
         return item
     })

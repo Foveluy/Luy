@@ -1,12 +1,24 @@
-const { resolve } = require('path');
+'use strict';
+
+const autoprefixer = require('autoprefixer');
+const path = require('path');
 const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
+const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
+const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
+const eslintFormatter = require('react-dev-utils/eslintFormatter');
+const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
+const getClientEnvironment = require('./env');
+const paths = require('./paths');
+const { resolve } = require('path');
 
 module.exports = {
     context: __dirname,
     entry: [
-        'react-hot-loader/patch',
-        'webpack/hot/only-dev-server',
-        './app/src/app.js'
+        require.resolve('./polyfills'),
+        require.resolve('react-dev-utils/webpackHotDevClient'),
+        paths.appIndexJs
     ],
     output: {
         path: resolve(__dirname, 'build'),//打包后的文件存放的地方
@@ -20,10 +32,10 @@ module.exports = {
     },
     resolve: {
         alias: {
-           'react': 'anujs',
-           'react-dom': 'anujs'
+            'react': 'anujs',
+            'react-dom': 'anujs'
         }
-     },
+    },
     module: {
         rules: [
             {

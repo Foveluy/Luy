@@ -17,10 +17,10 @@ class TodoItem extends React.Component {
     }
     componentDidMount() {
         throw new Error('就这样先')
+        // console.log('TodoItem componentDidMount')
     }
 
     render() {
-        console.log('render')
         const { key, value, title, onClose } = this.props
         return (
             <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
@@ -51,7 +51,7 @@ class TodoList extends React.Component {
     }
     componentDidMount() {
         console.log('挂载')
-
+        console.log('TodoList componentDidMount')
     }
 
     onInputChange = (e) => {
