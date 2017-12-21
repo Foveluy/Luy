@@ -1,5 +1,5 @@
 import { disposeVnode } from './dispose';
-import { typeNumber } from './utils';
+import { typeNumber, noop } from './utils';
 
 var _errorVnode = [];
 var V_Instance = [];
@@ -71,6 +71,8 @@ export function collectErrorVnode(error, _Vnode) {
     const error_ary = [];
     do {
         error_ary.push(Vnode);
+
+
         if (Vnode.return) {
             // console.log(`<${Vnode.displayName || getName(Vnode, Vnode.type)}/> created by ${Vnode.return.displayName || getName(Vnode.return, Vnode.return.type)}`)
             errorMsg += `in <${Vnode.displayName || getName(Vnode, Vnode.type)}/> created by ${Vnode.return.displayName || getName(Vnode.return, Vnode.return.type)}\n`;
@@ -90,11 +92,14 @@ export function collectErrorVnode(error, _Vnode) {
 
 export function runException() {
     var ins = V_Instance.shift()
-    do {
-        if (ins === void 666) {
+    if (ins === void 666) {
+        if (errorMsg !== '') {
             console.warn(errorMsg)
-            break;
         }
+        return
+    }
+    do {
+
         const { instance, componentDidCatch } = ins;
         if (componentDidCatch) {
             try {

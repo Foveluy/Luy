@@ -62,6 +62,7 @@ class TodoList extends React.Component {
     }
 
     onInputChange = (e) => {
+        console.log('运行了 onInputChange')
         if (this.props.inputText && this.state.warning) {
             this.setState({
                 warning: false

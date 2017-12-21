@@ -43,3 +43,4 @@ var eventProto = SyntheticEvent.prototype = {
         return "[object Event]";
     }
 };
+

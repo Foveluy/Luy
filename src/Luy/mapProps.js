@@ -1,4 +1,4 @@
-import { typeNumber, isEventName, isEventNameLowerCase, options, styleHelper } from "./utils";
+import { typeNumber, isEventName, isEventNameLowerCase, options, styleHelper, noop } from "./utils";
 import { SyntheticEvent } from './event'
 import { mapControlledElement } from './controlledComponent'
 
@@ -9,7 +9,9 @@ const formElement = {
 }
 
 function isFormElement(domNode) {
-    return formElement[domNode.nodeName]
+    if (domNode) {
+        return formElement[domNode.nodeName]
+    }
 }
 
 export function mapProp(domNode, props, Vnode) {
@@ -36,6 +38,19 @@ export function mapProp(domNode, props, Vnode) {
         }
     }
 }
+
+export function clearEvents(domNode, props, Vnode) {
+    console.log(domNode)
+    for (let name in props) {
+        if (name === 'children') continue
+        if (isEventName(name)) {
+            let eventName = name.slice(2).toLowerCase() //
+            mappingStrategy['clearEvents'](domNode, props[name], eventName)
+            continue
+        }
+    }
+}
+
 
 export function updateProps(oldProps, newProps, hostNode) {
     for (let name in oldProps) {//修改原来有的属性
@@ -83,6 +98,11 @@ export const mappingStrategy = {
             })
         }
     },
+    clearEvents: function (domNode, eventCb, eventName) {
+        let events = domNode.__events || {}
+        events[eventName] = noop;
+        domNode.__events = events//用于triggerEventByPath中获取event
+    },
     event: function (domNode, eventCb, eventName) {
         let events = domNode.__events || {}
         events[eventName] = eventCb
@@ -93,8 +113,9 @@ export const mappingStrategy = {
 
             if (specialHook[eventName]) {
                 specialHook[eventName](domNode)
+            } else {
+                addEvent(document, dispatchEvent, eventName)
             }
-            addEvent(document, dispatchEvent, eventName)
         }
     },
     className: function (domNode, className) {
@@ -131,6 +152,7 @@ function addEvent(domNode, fn, eventName) {
 }
 
 function dispatchEvent(event, eventName, end) {
+    console.log({ event, eventName, end })
     const path = getEventPath(event, end)
     let E = new SyntheticEvent(event)
     options.async = true
@@ -172,7 +194,7 @@ function triggerEventByPath(e, path: Array) {
  * 去寻找触发路径上有函数回调的路径
  * @param {event} event 
  */
-function getEventPath(event, end) {
+export function getEventPath(event, end) {
     let path = []
     let pathEnd = end || document
     let begin: Element = event.target

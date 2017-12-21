@@ -1,9 +1,11 @@
 import { typeNumber } from './utils'
 import { clearRefs } from './Refs'
+import { clearEvents } from './mapProps';
 
 export function disposeVnode(Vnode) {//主要用于删除Vnode对应的节点
     const { type, props } = Vnode
     if (!type) return
+    // clearEvents(Vnode._hostNode, props, Vnode);
     if (typeof Vnode.type === 'function') {
         if (Vnode._instance.componentWillUnMount) {
             Vnode._instance.componentWillUnMount()
@@ -37,6 +39,7 @@ function disposeChildVnode(childVnode) {
             }
         }
         if (typeNumber(child) !== 4 && typeNumber(child) !== 3 && child._hostNode !== void 666) {
+            // clearEvents(child._hostNode, child.props, child);
             const parent = child._hostNode.parentNode
             parent.removeChild(child._hostNode)
             child._hostNode = null

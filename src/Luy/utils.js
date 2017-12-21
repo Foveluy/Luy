@@ -98,3 +98,10 @@ export function extend(obj, props) {
     for (let i in props) obj[i] = props[i];
     return obj;
 }
+
+/**
+ * 空函数
+ */
+export const noop = () => {
+
+}
