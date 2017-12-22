@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { Test } from './test'
 
 import './style.css'
 
@@ -14,7 +15,7 @@ class TodoItem extends React.Component {
     }
     shouldComponentUpdate(nextProp) {
         // return nextProp.value !== this.props.value
-        throw new Error('新的错误');
+        // throw new Error('新的错误');
         return true;
     }
     componentDidMount() {
@@ -22,7 +23,7 @@ class TodoItem extends React.Component {
         // console.log('TodoItem componentDidMount')
     }
     componentWillUpdate() {
-       
+
     }
 
     render() {
@@ -89,6 +90,7 @@ class TodoList extends React.Component {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
                 <h1>Luy Example TodoList</h1>
+                <Test />
                 <p ref={(node) => this.node = node}>你输入的内容：{this.props.inputText}</p>
                 <div>
                     <input value={this.props.inputText} onChange={this.onInputChange} />

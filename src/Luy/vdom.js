@@ -124,8 +124,20 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
             let indexInOld = hascode[newStartVnode.key]
 
             if (indexInOld === undefined) {
-                let newElm = renderByLuy(newStartVnode, parentDomNode, true, parentContext)
-                parentDomNode.insertBefore(newElm, oldStartVnode._hostNode)
+                if (newStartVnode.type === '#text') {
+                    update(oldStartVnode, newStartVnode, parentDomNode, parentContext);
+                } else {
+                    let _parentDomNode = parentDomNode;
+                    if (parentDomNode.nodeName === '#text') {
+                        _parentDomNode = parentDomNode.parentNode;
+                    }
+                    if (oldStartVnode.type === '#text') {
+                        _parentDomNode = parentDomNode.parentNode;
+                    }
+                    let newElm = renderByLuy(newStartVnode, _parentDomNode, true, parentContext)
+                    _parentDomNode.insertBefore(newElm, oldStartVnode._hostNode)
+                }
+
                 newStartVnode = newChild[++newStartIndex]
             } else {
                 let moveVnode = oldChild[indexInOld]
@@ -154,6 +166,10 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
             for (; oldStartIndex - 1 < oldEndIndex; oldStartIndex++) {
                 if (oldChild[oldStartIndex]) {
                     let removeNode = oldChild[oldStartIndex]
+                    if (typeNumber(removeNode._hostNode) === 1) {
+                        //证明这个节点已经被移除；
+                        continue
+                    }
                     disposeVnode(removeNode)
                 }
             }
@@ -225,9 +241,12 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
     let lastOwner = currentOwner.cur
     currentOwner.cur = oldComponentVnode._instance
 
-
     let newVnode = oldComponentVnode._instance.render ? catchError(oldComponentVnode._instance, 'render', []) : new newComponentVnode.type(newProps, newContext)
     newVnode = newVnode ? newVnode : new VnodeClass('#text', "", null, null)//用户有可能返回null，当返回null的时候使用一个空白dom代替
+    const renderedType = typeNumber(newVnode);
+    if (renderedType === 3 && renderedType === 4) {
+        renderedVnode = new VnodeClass('#text', renderedVnode, null, null);
+    }
     let fixedOldVnode = oldVnode ? oldVnode : oldComponentVnode._instance
 
     currentOwner.cur = lastOwner
@@ -263,6 +282,13 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
 export function update(oldVnode, newVnode, parentDomNode: Element, parentContext) {
     newVnode._hostNode = oldVnode._hostNode
     if (oldVnode.type === newVnode.type) {
+        if (typeNumber(oldVnode) === 7) {
+            newVnode = updateChild(oldVnode, newVnode, parentDomNode, parentContext);
+
+            newVnode.return = oldVnode.return;
+            newVnode._hostNode = newVnode[0]._hostNode;
+        }
+
         if (oldVnode.type === "#text") {
             newVnode._hostNode = oldVnode._hostNode //更新一个dom节点
             updateText(oldVnode, newVnode)
@@ -305,6 +331,24 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
             newVnode._PortalHostNode = oldVnode._PortalHostNode ? oldVnode._PortalHostNode : void 666;
         }
     } else {
+        if (typeNumber(newVnode) === 7) {
+            newVnode.forEach((newvnode, index) => {
+
+                let dom = renderByLuy(newvnode, parentDomNode, true, parentContext)
+                if (index === 0) newVnode._hostNode = dom;
+                const parentNode = parentDomNode.parentNode
+                if (newvnode._hostNode) {
+                    parentNode.insertBefore(dom, oldVnode._hostNode)
+                } else {
+                    parentNode.appendChild(dom)
+                    newvnode._hostNode = dom
+                }
+            })
+
+            disposeVnode(oldVnode)
+            return newVnode
+        }
+
         let dom = renderByLuy(newVnode, parentDomNode, true, parentContext)
         const parentNode = parentDomNode.parentNode
         if (newVnode._hostNode) {
@@ -351,6 +395,13 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     let lastOwner = currentOwner.cur;
     currentOwner.cur = instance;
     let renderedVnode = catchError(instance, 'render', [Vnode]);
+    const renderedType = typeNumber(renderedVnode);
+    if (renderedType === 7) {
+        renderedVnode = mountChild(renderedVnode, parentDomNode, parentContext, instance, Vnode);
+    }
+    if (renderedType === 3 && renderedType === 4) {
+        renderedVnode = new VnodeClass('#text', renderedVnode, null, null);
+    }
     currentOwner.cur = lastOwner;
 
     if (renderedVnode === void 233) {
@@ -362,20 +413,25 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
 
     renderedVnode.key = key || null;
     instance.Vnode = renderedVnode;
-    instance.Vnode._hostNode = domNode;//用于在更新时期oldVnode的时候获取_hostNode
     instance.Vnode._mountIndex = mountIndexAdd();
 
 
     Vnode.displayName = Component.name;//以下这两行用于componentDidcatch
     instance.Vnode.return = Vnode;//必须要在插入前设置return(父Vnode)给所有的Vnode.
 
+    var domNode = null;
+    if (renderedType !== 7) {
+        domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance);
+        // renderedVnode.displayName = Component.name;//记录名字
 
-    const domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance);
-    // renderedVnode.displayName = Component.name;//记录名字
-
-    Vnode._hostNode = domNode;
+    } else {
+        domNode = renderedVnode[0]._hostNode;
+    }
 
     setRef(Vnode, instance, domNode);
+
+    Vnode._hostNode = domNode;
+    instance.Vnode._hostNode = domNode;//用于在更新时期oldVnode的时候获取_hostNode
 
     if (renderedVnode._PortalHostNode) {//支持react createPortal
         Vnode._PortalHostNode = renderedVnode._PortalHostNode;
@@ -477,7 +533,6 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
     let domNode;
     if (typeof type === 'function') {
         const fixContext = parentContext || {};
-
         domNode = mountComponent(Vnode, container, fixContext);
     } else if (typeof type === 'string' && type === '#text') {
         domNode = mountTextComponent(Vnode, container);
@@ -492,11 +547,22 @@ function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext
             props.children = NewChild
         }
     }
+    Vnode._hostNode = domNode //缓存真实节点
+
+    if (typeNumber(domNode) === 7) {
+        if (isUpdate) {
+            return domNode
+        } else {
+            if (container && domNode && container.nodeName !== '#text') {
+                domNode.forEach((DOM_SINGLE_Node) => {
+                    container.appendChild(DOM_SINGLE_Node)
+                })
+            }
+        }
+    }
 
     setRef(Vnode, instance, domNode)//为虚拟组件添加ref
     mapProp(domNode, props, Vnode) //为元素添加props
-
-    Vnode._hostNode = domNode //缓存真实节点
 
     if (isUpdate) {
         return domNode

@@ -4,6 +4,11 @@ import { clearEvents } from './mapProps';
 
 export function disposeVnode(Vnode) {//主要用于删除Vnode对应的节点
     const { type, props } = Vnode
+    if (typeNumber(Vnode === 7)) {
+        disposeChildVnode(Vnode);
+        return;
+    }
+
     if (!type) return
     // clearEvents(Vnode._hostNode, props, Vnode);
     if (typeof Vnode.type === 'function') {
