@@ -67,7 +67,7 @@ function pushErrorVnode(Vnode) {
 }
 
 export function collectErrorVnode(error, _Vnode) {
-    var Vnode = _Vnode;
+    var Vnode = _Vnode.return;
     const error_ary = [];
     do {
         error_ary.push(Vnode);

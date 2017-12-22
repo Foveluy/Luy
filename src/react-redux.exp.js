@@ -14,6 +14,7 @@ class TodoItem extends React.Component {
     }
     shouldComponentUpdate(nextProp) {
         // return nextProp.value !== this.props.value
+        throw new Error('新的错误');
         return true;
     }
     componentDidMount() {
@@ -21,7 +22,7 @@ class TodoItem extends React.Component {
         // console.log('TodoItem componentDidMount')
     }
     componentWillUpdate() {
-        throw new Error('新的错误');
+       
     }
 
     render() {
