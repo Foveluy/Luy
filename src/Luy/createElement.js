@@ -123,11 +123,15 @@ export function flattenChildren(children: Array, parentVnode) {
         if (typeNumber(item) === 4) {
             item = new Vnode('#text', item, null, null)
         } else {
-            if (item) {
-                item.return = parentVnode;
+            if (item) {//首先判断是否存在
+                if (typeNumber(item) !== 3 && typeNumber(item) !== 4) {//再判断是不是字符串，或者数字
+                    //不是就加上return
+                    item.return = parentVnode;
+                }
             }
         }
         return item
+        
     })
 
     return ary
