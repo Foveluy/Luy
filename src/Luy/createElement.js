@@ -18,8 +18,6 @@ function Vnode(type, props, key, ref) {
     this.ref = ref
 }
 
-
-
 /**
  * 创建虚拟Dom的地方
  * @param {string | Function} type 

@@ -59,9 +59,9 @@ const render = () => (
     )
 )
 
-render()
+// render()
 
-store.subscribe(render)
+// store.subscribe(render)
 
 const appRoot = document.getElementById('root');
 const modalRoot = document.getElementById('modal-root');
@@ -126,9 +126,9 @@ class Parent extends React.Component {
 
     render() {
         return (
-            <div onClick={this.handleClick} onTouchStart={this.handleClick}>
+            <div onClick={this.handleClick} ref='testing' onTouchStart={this.handleClick}>
                 <p>Number of clicks: {this.state.clicks}</p>
-                <button onClick={this.ModalBtn}>点击这里会出现一个modal</button>
+                <button ref='openDialog' onClick={this.ModalBtn}>点击这里会出现一个modal</button>
                 {this.state.modal ? this.renderModal() : <div></div>}
             </div>
         );
@@ -159,4 +159,90 @@ function Child() {
     );
 }
 
-// ReactDOM.render(<Parent />, appRoot);
+var body = document.body;
+class Inner extends React.Component {
+    render() {
+        return <p>inner</p>;
+    }
+    componentWillUnmount() {
+        // innerWillUnmount = true;
+    }
+    componentWillMount() {
+        // innerWillMount = true;
+    }
+    componentDidMount() {
+        // innerDidMount = true;
+    }
+}
+
+class Container extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            show: false,
+            number: 1
+        };
+    }
+
+    _show() {
+        if (this.state.show) {
+            return; //防止创建多个弹窗
+        }
+        this.setState({ show: true });
+    }
+
+    _close(e) {
+        this.setState({ show: false });
+    }
+
+    render() {
+        const { show } = this.state;
+        console.log(this)
+        return (
+            <div
+                className="Container"
+                onClick={e => {
+                    e.preventDefault();
+                }}
+            >
+                <div className="hasClick" style={{ background: "#00bcd4" }} ref="openDialog" onClick={this._show.bind(this)}>
+                    <div >Click me to show the Portal content</div>
+                    <div>State: {(show && "visible") || "hidden"}</div>
+                    <div ref="vdialog">
+                        {show && (
+                            <Portal>
+                                <div style={{ background: "#ffeebb", height: 200 }}>
+                                    <p ref="number">{this.state.number}</p>
+                                    <Inner />
+                                    <button ref="closeDialog" onClick={this._close.bind(this)} type="button">
+                                        &times; close portal
+                                    </button>
+                                </div>
+                            </Portal>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
+
+class Portal extends React.Component {
+    constructor(props) {
+        super(props);
+        this.node = document.createElement("div");
+        this.node.id = "dynamic";
+        body.appendChild(this.node);
+    }
+    componentWillUnmount() {
+        body.removeChild(this.node);
+    }
+    render() {
+        console.log(this);
+        return ReactDOM.createPortal(this.props.children, this.node);
+    }
+}
+var s = ReactDOM.render(<Container />, appRoot);
+
+
+// const parent = ReactDOM.render(<Parent />, appRoot);

@@ -1,4 +1,4 @@
-import React from "../app/src/Luy";
+import React from "../src/Luy";
 import getTestDocument from "./getTestDocument";
 import ReactTestUtils from "../lib/ReactTestUtils";
 import ReactShallowRenderer from "../lib/ReactShallowRenderer";
@@ -14,7 +14,7 @@ describe("ReactComponent", function () {
       render() {
         return (
           <div>
-            <input type="text"/>
+            <input type="text" />
           </div>
         )
       }

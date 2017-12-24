@@ -152,7 +152,6 @@ function addEvent(domNode, fn, eventName) {
 }
 
 function dispatchEvent(event, eventName, end) {
-    console.log({ event, eventName, end })
     const path = getEventPath(event, end)
     let E = new SyntheticEvent(event)
     options.async = true

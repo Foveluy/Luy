@@ -1,4 +1,4 @@
-import React from "../dist/index";
+import React from "../src/Luy";
 import getTestDocument from "./getTestDocument";
 import ReactTestUtils from "../lib/ReactTestUtils";
 import ReactShallowRenderer from "../lib/ReactShallowRenderer";

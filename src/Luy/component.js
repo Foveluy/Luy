@@ -1,5 +1,5 @@
 // @flow
-import { update } from './vdom'
+import { update, currentOwner } from './vdom'
 import { options, extend } from './utils'
 import { Vnode } from './createElement'
 
@@ -55,10 +55,14 @@ class ReactClass {
     if (this.componentWillUpdate) {
       this.componentWillUpdate(this.props, this.nextState, this.context)
     }
+
+    var lastOwner = currentOwner.cur;
+    currentOwner.cur = this;
     this.nextState = null
     let newVnode = this.render()
 
     newVnode = newVnode ? newVnode : new Vnode('#text', "", null, null);
+    currentOwner.cur = lastOwner;
     this.Vnode = update(oldVnode, newVnode, this.Vnode._hostNode, this.context)//这个函数返回一个更新后的Vnode
 
     if (this.componentDidUpdate) {

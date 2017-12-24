@@ -16,12 +16,16 @@ export function createPortal(children, container) {
         if (Array.isArray(children)) {
             domNode = mountChild(children, container)
         } else {
-            domNode = render(children, container)
+            domNode = render(children, container);
         }
     } else {
         throw new Error('请给portal一个插入的目标')
     }
     //用于记录Portal的事物
+    // let lastOwner = currentOwner.cur;
+    // currentOwner.cur = instance;
+
+
     const CreatePortalVnode = new VnodeClass('#text', "createPortal", null, null)
     CreatePortalVnode._PortalHostNode = container
     return CreatePortalVnode
@@ -452,7 +456,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
 }
 
 function mountNativeElement(Vnode, parentDomNode: Element, instance) {
-    const domNode = renderByLuy(Vnode, parentDomNode, false, instance)
+    const domNode = renderByLuy(Vnode, parentDomNode, false, {}, instance)
     Vnode._hostNode = domNode
     Vnode._mountIndex = mountIndexAdd()
     return domNode
@@ -596,7 +600,7 @@ export function render(Vnode, container) {
         //第一次渲染的时候
         container.UniqueKey = Date.now();
         containerMap[container.UniqueKey] = Vnode;
-        renderByLuy(Vnode, container);
+        renderByLuy(Vnode, container, false, Vnode.context, Vnode.owner);
         runException();
         return Vnode._instance;
     }

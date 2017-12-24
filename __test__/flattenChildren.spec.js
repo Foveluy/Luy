@@ -1,4 +1,4 @@
-import { flattenChildren } from '../app/src/Luy/createElement';
+import { flattenChildren } from '../src/Luy/createElement';
 
 describe('flattenChildren', () => {
     describe('give flattenChildren an array', () => {
