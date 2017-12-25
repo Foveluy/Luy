@@ -159,90 +159,34 @@ function Child() {
     );
 }
 
-var body = document.body;
-class Inner extends React.Component {
-    render() {
-        return <p>inner</p>;
+const BrokenComponentWillMount = class extends React.Component {
+    constructor(props) {
+        super(props);
+        // logger("BrokenComponentWillMount constructor");
     }
-    componentWillUnmount() {
-        // innerWillUnmount = true;
+    render() {
+        // logger("BrokenComponentWillMount render");
+        return <div>{this.props.children}</div>;
     }
     componentWillMount() {
-        // innerWillMount = true;
+        // logger("BrokenComponentWillMount componentWillMount [!]");
+        throw new Error("Hello");
     }
     componentDidMount() {
-        // innerDidMount = true;
+        // logger("BrokenComponentWillMount componentDidMount");
     }
-}
-
-class Container extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            show: false,
-            number: 1
-        };
+    componentWillReceiveProps() {
+        // logger("BrokenComponentWillMount componentWillReceiveProps");
     }
-
-    _show() {
-        if (this.state.show) {
-            return; //防止创建多个弹窗
-        }
-        this.setState({ show: true });
+    componentWillUpdate() {
+        // logger("BrokenComponentWillMount componentWillUpdate");
     }
-
-    _close(e) {
-        this.setState({ show: false });
-    }
-
-    render() {
-        const { show } = this.state;
-        console.log(this)
-        return (
-            <div
-                className="Container"
-                onClick={e => {
-                    e.preventDefault();
-                }}
-            >
-                <div className="hasClick" style={{ background: "#00bcd4" }} ref="openDialog" onClick={this._show.bind(this)}>
-                    <div >Click me to show the Portal content</div>
-                    <div>State: {(show && "visible") || "hidden"}</div>
-                    <div ref="vdialog">
-                        {show && (
-                            <Portal>
-                                <div style={{ background: "#ffeebb", height: 200 }}>
-                                    <p ref="number">{this.state.number}</p>
-                                    <Inner />
-                                    <button ref="closeDialog" onClick={this._close.bind(this)} type="button">
-                                        &times; close portal
-                                    </button>
-                                </div>
-                            </Portal>
-                        )}
-                    </div>
-                </div>
-            </div>
-        );
-    }
-}
-
-class Portal extends React.Component {
-    constructor(props) {
-        super(props);
-        this.node = document.createElement("div");
-        this.node.id = "dynamic";
-        body.appendChild(this.node);
+    componentDidUpdate() {
+        // logger("BrokenComponentWillMount componentDidUpdate");
     }
     componentWillUnmount() {
-        body.removeChild(this.node);
+        // logger("BrokenComponentWillMount componentWillUnmount");
     }
-    render() {
-        console.log(this);
-        return ReactDOM.createPortal(this.props.children, this.node);
-    }
-}
-var s = ReactDOM.render(<Container />, appRoot);
+};
 
-
-// const parent = ReactDOM.render(<Parent />, appRoot);
+const parent = ReactDOM.render(<BrokenComponentWillMount />, appRoot);

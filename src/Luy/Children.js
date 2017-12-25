@@ -5,10 +5,10 @@ export const Children = {
     //context不是组件的context而是组件上下文
     map(childVnode, callback, context) {
         if (childVnode === null || childVnode === undefined) {
-            return childVnode
+            return [childVnode]
         }
         if (typeNumber(childVnode) !== 7) {
-            return callback.call(context, childVnode, 0)
+            return [callback.call(context, childVnode, 0)]
         }
 
         var ret = []
@@ -38,10 +38,11 @@ export const Children = {
     },
     forEach(childVnode, callback, context) {
         let flatten = flattenChildren(childVnode)
+
         if (typeNumber(flatten) === 7) {
             flattenChildren(childVnode).forEach(callback, context);
         } else {
-            callback.call(context, childVnode)
+            callback.call(context, childVnode, 0)
         }
     },
 

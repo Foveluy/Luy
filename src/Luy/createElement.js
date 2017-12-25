@@ -85,7 +85,7 @@ export function flattenChildren(children: Array, parentVnode) {
     }
 
     if (childType !== 7) {
-        children.return = parentVnode;
+        if (parentVnode) children.return = parentVnode;
         return children
     }
 
@@ -126,12 +126,13 @@ export function flattenChildren(children: Array, parentVnode) {
             if (item) {//首先判断是否存在
                 if (typeNumber(item) !== 3 && typeNumber(item) !== 4) {//再判断是不是字符串，或者数字
                     //不是就加上return
-                    item.return = parentVnode;
+                    if (parentVnode) item.return = parentVnode;
+
                 }
             }
         }
         return item
-        
+
     })
 
     return ary

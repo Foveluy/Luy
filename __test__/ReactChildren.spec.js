@@ -2,10 +2,13 @@ import React from "../src/Luy";
 import getTestDocument from "./getTestDocument";
 import ReactTestUtils from "../lib/ReactTestUtils";
 import ReactShallowRenderer from "../lib/ReactShallowRenderer";
+// import spyOn from './matchers';
 
 
 //https://github.com/facebook/react/blob/master/src/isomorphic/children/__tests__/ReactChildren-test.js
 var ReactDOM = window.ReactDOM || React;
+
+
 
 describe("ReactChildren", function () {
   this.timeout(200000);
@@ -37,7 +40,10 @@ describe("ReactChildren", function () {
     callback.calls.reset();
     var mappedChildren = React.Children.map(instance.props.children, callback, context);
     expect(callback).toHaveBeenCalledWith(simpleKid, 0);
-    expect(mappedChildren[0]).toEqual(<span key=".$simple" />);
+    console.log('第一个', mappedChildren[0])
+    console.log('第二个', <span key="simple" />)
+
+    expect(mappedChildren[0]).toEqual(<span key="simple" />);
   });
 
   it("should treat single arrayless child as being in array", () => {

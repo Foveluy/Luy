@@ -30,8 +30,6 @@ export function catchError(Instance, hookname, args) {
         if (hookname === 'render') {
             Vnode = args[0];
         }
-        console.log(`method ${hookname} gets error`);
-        console.log(args[0]);
         collectErrorVnode(e, Vnode);
     }
 }
@@ -67,12 +65,11 @@ function pushErrorVnode(Vnode) {
 }
 
 export function collectErrorVnode(error, _Vnode) {
-    var Vnode = _Vnode.return;
+    var Vnode = _Vnode === void 666 ? void 666 : _Vnode.return;
     const error_ary = [];
     do {
+        if (Vnode === void 666) break;
         error_ary.push(Vnode);
-
-
         if (Vnode.return) {
             // console.log(`<${Vnode.displayName || getName(Vnode, Vnode.type)}/> created by ${Vnode.return.displayName || getName(Vnode.return, Vnode.return.type)}`)
             errorMsg += `in <${Vnode.displayName || getName(Vnode, Vnode.type)}/> created by ${Vnode.return.displayName || getName(Vnode.return, Vnode.return.type)}\n`;
@@ -88,13 +85,16 @@ export function collectErrorVnode(error, _Vnode) {
         }
     }
     while (Vnode = Vnode.return);
+    if (V_Instance.length === 0) {
+        throw error;
+    }
 }
 
 export function runException() {
     var ins = V_Instance.shift()
     if (ins === void 666) {
         if (errorMsg !== '') {
-            console.warn(errorMsg)
+            // console.warn(errorMsg)
         }
         return
     }
