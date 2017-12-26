@@ -11,6 +11,8 @@ import { todoListReducer } from "./react-redux.exp"
 
 import TodoList from "./react-redux.exp"
 import LayoutDemo from './draggerLayout/App';
+import { disposeVnode } from './Luy/dispose';
+import { noop } from './Luy/utils';
 
 const page3 = () => {
     return (<div>本demo完全由luy框架提供,作者:方正</div>)
@@ -159,34 +161,112 @@ function Child() {
     );
 }
 
-const BrokenComponentWillMount = class extends React.Component {
+const logger = noop;
+
+const ErrorBoundary = class extends React.Component {
     constructor(props) {
         super(props);
-        // logger("BrokenComponentWillMount constructor");
+        this.state = { error: null };
+        logger(`${this.props.logName} constructor`);
     }
     render() {
-        // logger("BrokenComponentWillMount render");
+        if (this.state.error && !this.props.forceRetry) {
+            logger(`${this.props.logName} render error`);
+            return this.props.renderError(this.state.error, this.props);
+        }
+        logger(`${this.props.logName} render success`);
         return <div>{this.props.children}</div>;
     }
+    componentDidCatch(error, info) {
+        logger(`${this.props.logName} componentDidCatch`);
+        this.setState({ error });
+    }
     componentWillMount() {
-        // logger("BrokenComponentWillMount componentWillMount [!]");
-        throw new Error("Hello");
+        logger(`${this.props.logName} componentWillMount`);
     }
     componentDidMount() {
-        // logger("BrokenComponentWillMount componentDidMount");
+        logger(`${this.props.logName} componentDidMount`);
     }
     componentWillReceiveProps() {
-        // logger("BrokenComponentWillMount componentWillReceiveProps");
+        logger(`${this.props.logName} componentWillReceiveProps`);
     }
     componentWillUpdate() {
-        // logger("BrokenComponentWillMount componentWillUpdate");
+        logger(`${this.props.logName} componentWillUpdate`);
     }
     componentDidUpdate() {
-        // logger("BrokenComponentWillMount componentDidUpdate");
+        logger(`${this.props.logName} componentDidUpdate`);
     }
     componentWillUnmount() {
-        // logger("BrokenComponentWillMount componentWillUnmount");
+        logger(`${this.props.logName} componentWillUnmount`);
+    }
+};
+ErrorBoundary.defaultProps = {
+    logName: "ErrorBoundary",
+    renderError(error, props) {
+        return <div ref={props.errorMessageRef}>Caught an error: {error.message}.</div>;
     }
 };
 
-const parent = ReactDOM.render(<BrokenComponentWillMount />, appRoot);
+
+
+var BrokenRender = class extends React.Component {
+    constructor(props) {
+        super(props);
+        logger("BrokenRender constructor");
+    }
+    render() {
+        logger("BrokenRender render [!]");
+        throw new Error("Hello");
+    }
+    componentWillMount() {
+        logger("BrokenRender componentWillMount");
+    }
+    componentDidMount() {
+        logger("BrokenRender componentDidMount");
+    }
+    componentWillReceiveProps() {
+        logger("BrokenRender componentWillReceiveProps");
+    }
+    componentWillUpdate() {
+        logger("BrokenRender componentWillUpdate");
+    }
+    componentDidUpdate() {
+        logger("BrokenRender componentDidUpdate");
+    }
+    componentWillUnmount() {
+        logger("BrokenRender componentWillUnmount");
+    }
+};
+
+var container1 = document.createElement("div");
+var container2 = document.createElement("div");
+var container3 = document.createElement("div");
+
+appRoot.appendChild(container1)
+appRoot.appendChild(container2)
+appRoot.appendChild(container3)
+
+ReactDOM.render(
+    <span>Before 1</span>,
+    container1
+);
+
+ReactDOM.render(
+    <span>Before 2</span>,
+    container2
+);
+
+
+ReactDOM.render(
+    <ErrorBoundary>
+        <BrokenRender />
+    </ErrorBoundary>,
+    container3
+);
+
+
+
+ReactDOM.render(<span>After 2</span>, container1);
+ReactDOM.render(<span>After 2</span>, container2);
+// ReactDOM.render(<ErrorBoundary forceRetry={true}>After 3</ErrorBoundary>, container3);
+

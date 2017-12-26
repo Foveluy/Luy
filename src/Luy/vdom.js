@@ -31,7 +31,6 @@ export function createPortal(children, container) {
     return CreatePortalVnode
 }
 
-
 let mountIndex = 0 //全局变量
 var containerMap = {}
 export var currentOwner = {
@@ -354,14 +353,24 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
         }
 
         let dom = renderByLuy(newVnode, parentDomNode, true, parentContext)
-        const parentNode = parentDomNode.parentNode
-        if (newVnode._hostNode) {
-            parentNode.insertBefore(dom, oldVnode._hostNode)
+        // disposeVnode(oldVnode);
+        newVnode._hostNode = dom
+
+        // const parentNode = parentDomNode.parentNode
+        if (oldVnode._hostNode) {
+
+            parentDomNode.insertBefore(dom, oldVnode._hostNode)
             disposeVnode(oldVnode)
         } else {
-            parentNode.appendChild(dom)
-            newVnode._hostNode = dom
+            parentDomNode.appendChild(dom)
+
         }
+        // try {
+            
+        // } catch (e) {
+        //     console.log(e);
+        // }
+
 
     }
     return newVnode
@@ -409,7 +418,7 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     currentOwner.cur = lastOwner;
 
     if (renderedVnode === void 233) {
-        console.warn('你可能忘记在组件render()方法中返回jsx了');
+        // console.warn('你可能忘记在组件render()方法中返回jsx了');
         return;
     }
     renderedVnode = renderedVnode ? renderedVnode : new VnodeClass('#text', "", null, null);
@@ -598,6 +607,7 @@ export function render(Vnode, container) {
         return Vnode._instance
     } else {
         //第一次渲染的时候
+        Vnode.isTop = true;
         container.UniqueKey = Date.now();
         containerMap[container.UniqueKey] = Vnode;
         renderByLuy(Vnode, container, false, Vnode.context, Vnode.owner);

@@ -13,8 +13,8 @@ export function disposeVnode(Vnode) {//主要用于删除Vnode对应的节点
     if (!type) return
     // clearEvents(Vnode._hostNode, props, Vnode);
     if (typeof Vnode.type === 'function') {
-        if (Vnode._instance.componentWillUnMount) {
-            catchError(Vnode._instance, 'componentWillUnMount', []);
+        if (Vnode._instance.componentWillUnmount) {
+            catchError(Vnode._instance, 'componentWillUnmount', []);
         }
 
         clearRefs(Vnode._instance.ref)
@@ -40,8 +40,8 @@ function disposeChildVnode(childVnode) {
     if (typeNumber(children) !== 7) children = [children]
     children.forEach((child) => {
         if (typeof child.type === 'function') {
-            if (child._instance.componentWillUnMount) {
-                child._instance.componentWillUnMount()
+            if (child._instance.componentWillUnmount) {
+                catchError(child._instance, 'componentWillUnmount', []);
             }
         }
         if (typeNumber(child) !== 4 && typeNumber(child) !== 3 && child._hostNode !== void 666) {

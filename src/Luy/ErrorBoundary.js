@@ -1,10 +1,11 @@
 import { disposeVnode } from './dispose';
 import { typeNumber, noop } from './utils';
+import { Com } from './component';
 
 var _errorVnode = [];
 var V_Instance = [];
 var errorMsg = '';
-var error = undefined;
+var globalError = undefined;
 
 /**
  * 捕捉错误的核心代码，错误只会发生在用户事件回调，ref，setState回调，生命周期函数
@@ -69,10 +70,14 @@ export function collectErrorVnode(error, _Vnode) {
     const error_ary = [];
     do {
         if (Vnode === void 666) break;
+
         error_ary.push(Vnode);
-        if (Vnode.return) {
-            // console.log(`<${Vnode.displayName || getName(Vnode, Vnode.type)}/> created by ${Vnode.return.displayName || getName(Vnode.return, Vnode.return.type)}`)
-            errorMsg += `in <${Vnode.displayName || getName(Vnode, Vnode.type)}/> created by ${Vnode.return.displayName || getName(Vnode.return, Vnode.return.type)}\n`;
+        if (Vnode.return || Vnode.isTop === true) {
+            try {
+                errorMsg += `in <${Vnode.displayName || getName(Vnode, Vnode.type)}/> created by ${Vnode.return.displayName || getName(Vnode.return, Vnode.return.type)}\n`;
+            } catch (e) {
+
+            }
             if (Vnode._instance) {
                 if (Vnode._instance.componentDidCatch) {
                     V_Instance.push({
@@ -87,6 +92,8 @@ export function collectErrorVnode(error, _Vnode) {
     while (Vnode = Vnode.return);
     if (V_Instance.length === 0) {
         throw error;
+    } else {
+        globalError = error;
     }
 }
 
@@ -103,12 +110,16 @@ export function runException() {
         const { instance, componentDidCatch } = ins;
         if (componentDidCatch) {
             try {
-                componentDidCatch.call(instance, error, errorMsg);
-                disposeVnode(instance.Vnode);
+
+                instance.lifeCycle = Com.CATCHING;
+                componentDidCatch.call(instance, globalError, errorMsg);
+                instance._updateInLifeCycle();
                 break;
             } catch (e) {
                 console.log(e, '多个错误发生，此处只处理一个错误');
             }
+        } else {
+            disposeVnode(instance.Vnode);
         }
     } while (ins = V_Instance.shift())
 }

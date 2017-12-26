@@ -8,7 +8,8 @@ export const Com = {
   MOUNT: 1,//节点已经挂载
   UPDATING: 2,//节点正在更新
   UPDATED: 3,//节点已经更新
-  MOUNTTING: 4//节点正在挂载
+  MOUNTTING: 4,//节点正在挂载,
+  CATCHING: 5
 }
 
 var uniqueId = 0
@@ -121,6 +122,13 @@ class ReactClass {
         this.stateMergeQueue.push(1)
         return
       }
+
+      if (this.lifeCycle === Com.CATCHING) {
+        //componentDidMount的时候调用setState
+        this.stateMergeQueue.push(1)
+        return
+      }
+
 
       if (options.async === true) {
         //事件中调用
