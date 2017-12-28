@@ -366,7 +366,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
 
         }
         // try {
-            
+
         // } catch (e) {
         //     console.log(e);
         // }
@@ -608,7 +608,7 @@ export function render(Vnode, container) {
     } else {
         //第一次渲染的时候
         Vnode.isTop = true;
-        container.UniqueKey = Date.now();
+        container.UniqueKey = mountIndexAdd();
         containerMap[container.UniqueKey] = Vnode;
         renderByLuy(Vnode, container, false, Vnode.context, Vnode.owner);
         runException();

@@ -266,7 +266,7 @@ ReactDOM.render(
 
 
 
-ReactDOM.render(<span>After 2</span>, container1);
+ReactDOM.render(<span>After 1</span>, container1);
 ReactDOM.render(<span>After 2</span>, container2);
 // ReactDOM.render(<ErrorBoundary forceRetry={true}>After 3</ErrorBoundary>, container3);
 
