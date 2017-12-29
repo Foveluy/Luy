@@ -294,6 +294,68 @@ function renderError(error) {
     return <ErrorMessage message={error.message} />;
 }
 
+const RetryErrorBoundary = class extends React.Component {
+    constructor(props) {
+        super(props);
+        logger("RetryErrorBoundary constructor");
+    }
+    render() {
+        logger("RetryErrorBoundary render");
+        return <BrokenRender />;
+    }
+    componentWillMount() {
+        logger("RetryErrorBoundary componentWillMount");
+    }
+    componentDidMount() {
+        logger("RetryErrorBoundary componentDidMount");
+    }
+    componentWillUnmount() {
+        logger("RetryErrorBoundary componentWillUnmount");
+    }
+    componentDidCatch(error) {
+        logger("RetryErrorBoundary componentDidCatch [!]");
+        // In Fiber, calling setState() (and failing) is treated as a rethrow.
+        this.setState({});
+    }
+};
+
+
+const BrokenRenderErrorBoundary = class extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { error: null };
+        logger("BrokenRenderErrorBoundary constructor");
+    }
+    render() {
+        if (this.state.error) {
+            logger("BrokenRenderErrorBoundary render error [!]");
+            throw new Error("Hello");
+        }
+        logger("BrokenRenderErrorBoundary render success");
+        return <div>{this.props.children}</div>;
+    }
+    componentWillMount() {
+        logger("BrokenRenderErrorBoundary componentWillMount");
+    }
+    componentDidMount() {
+        logger("BrokenRenderErrorBoundary componentDidMount");
+    }
+    componentWillUnmount() {
+        logger("BrokenRenderErrorBoundary componentWillUnmount");
+    }
+    componentDidCatch(error) {
+        logger("BrokenRenderErrorBoundary componentDidCatch");
+        this.setState({ error });
+    }
+};
+
+function childRef(x) {
+    logger("Child ref is set to " + x);
+}
+function errorMessageRef(x) {
+    logger("Error message ref is set to " + x);
+}
+
 
 var container3 = document.createElement("div");
 
@@ -301,8 +363,9 @@ appRoot.appendChild(container3)
 
 
 const bc = (
-    <ErrorBoundary renderError={renderError}>
-        <BrokenComponentWillMount />
+    <ErrorBoundary errorMessageRef={errorMessageRef}>
+        <div ref={childRef} />
+        <BrokenRender />
     </ErrorBoundary>
 )
 ReactDOM.render(
@@ -310,7 +373,7 @@ ReactDOM.render(
     container3
 );
 
-disposeVnode(bc._instance.Vnode);
+// disposeVnode(bc._instance.Vnode);
 
 
 // ReactDOM.render(<span>After 1</span>, container1);

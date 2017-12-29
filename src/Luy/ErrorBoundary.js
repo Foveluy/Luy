@@ -113,12 +113,15 @@ export function runException() {
         const { instance, componentDidCatch } = ins;
         if (componentDidCatch) {
             try {
-
                 instance.lifeCycle = Com.CATCHING;
                 componentDidCatch.call(instance, globalError, errorMsg);
                 instance._updateInLifeCycle();
                 break;
             } catch (e) {
+                // if (instance.componentWillUnmount) {
+                //     instance.componentWillUnmount();
+                // }
+                // disposeVnode(instance.Vnode);
                 console.log(e, '多个错误发生，此处只处理一个错误');
             }
         } else {

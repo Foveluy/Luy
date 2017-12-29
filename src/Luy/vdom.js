@@ -452,6 +452,11 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
         instance.lifeCycle = Com.MOUNT;
     }
 
+    if (instance.componentDidCatch) {
+        // runException();
+        // instance.componentDidCatch();
+    }
+
     instance._updateInLifeCycle(); // componentDidMount之后一次性更新
     return domNode
 }
