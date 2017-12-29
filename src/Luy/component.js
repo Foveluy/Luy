@@ -2,6 +2,7 @@
 import { update, currentOwner } from './vdom'
 import { options, extend } from './utils'
 import { Vnode } from './createElement'
+import { catchError } from './ErrorBoundary';
 
 export const Com = {
   CREATE: 0,//创造节点
@@ -54,7 +55,7 @@ class ReactClass {
     }
 
     if (this.componentWillUpdate) {
-      this.componentWillUpdate(this.props, this.nextState, this.context)
+      catchError(this, 'componentWillUpdate', [this.props, this.nextState, this.context]);
     }
 
     var lastOwner = currentOwner.cur;
@@ -67,7 +68,7 @@ class ReactClass {
     this.Vnode = update(oldVnode, newVnode, this.Vnode._hostNode, this.context)//这个函数返回一个更新后的Vnode
 
     if (this.componentDidUpdate) {
-      this.componentDidUpdate(this.props, prevState, oldContext)
+      catchError(this, 'componentDidUpdate', [this.props, prevState, oldContext]);
     }
 
     this._penddingState.forEach((item) => {

@@ -5,7 +5,7 @@ import { Com } from './component';
 var _errorVnode = [];
 var V_Instance = [];
 var errorMsg = '';
-var globalError = undefined;
+export var globalError = undefined;
 
 /**
  * 捕捉错误的核心代码，错误只会发生在用户事件回调，ref，setState回调，生命周期函数
@@ -19,8 +19,9 @@ export function catchError(Instance, hookname, args) {
             var resulte = void 666;
             if (hookname === 'render') {
                 resulte = Instance[hookname].apply(Instance)
+            } else {
+                resulte = Instance[hookname].apply(Instance, args)
             }
-            resulte = Instance[hookname].apply(Instance, args)
             return resulte
         }
     } catch (e) {
@@ -28,10 +29,12 @@ export function catchError(Instance, hookname, args) {
         // disposeVnode(Instance.Vnode);
         let Vnode = void 666;
         Vnode = Instance.Vnode;
-        if (hookname === 'render') {
+        if (hookname === 'render' || hookname === 'componentWillMount') {
             Vnode = args[0];
         }
-        collectErrorVnode(e, Vnode);
+        collectErrorVnode(e, Vnode, hookname);
+
+        if (hookname !== 'render') return true;
     }
 }
 
@@ -65,7 +68,7 @@ function pushErrorVnode(Vnode) {
     _errorVnode.push(Vnode);
 }
 
-export function collectErrorVnode(error, _Vnode) {
+export function collectErrorVnode(error, _Vnode, hookname) {
     var Vnode = _Vnode === void 666 ? void 666 : _Vnode.return;
     const error_ary = [];
     do {

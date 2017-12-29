@@ -5,7 +5,7 @@ import { mapProp, mappingStrategy, updateProps } from './mapProps'
 import { setRef } from './Refs'
 import { disposeVnode } from './dispose'
 import { Com } from './component'
-import { catchError, collectErrorVnode, getReturn, runException } from './ErrorBoundary';
+import { catchError, collectErrorVnode, getReturn, runException, globalError } from './ErrorBoundary';
 
 
 
@@ -169,7 +169,7 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
             for (; oldStartIndex - 1 < oldEndIndex; oldStartIndex++) {
                 if (oldChild[oldStartIndex]) {
                     let removeNode = oldChild[oldStartIndex]
-                    if (typeNumber(removeNode._hostNode) === 1) {
+                    if (typeNumber(removeNode._hostNode) <= 1) {
                         //证明这个节点已经被移除；
                         continue
                     }
@@ -347,31 +347,23 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
                     newvnode._hostNode = dom
                 }
             })
-
             disposeVnode(oldVnode)
             return newVnode
         }
+        const dom = renderByLuy(newVnode, parentDomNode, true, parentContext)
+        if (typeNumber(newVnode.type) !== 5) {
+            // disposeVnode(oldVnode);
+            newVnode._hostNode = dom
 
-        let dom = renderByLuy(newVnode, parentDomNode, true, parentContext)
-        // disposeVnode(oldVnode);
-        newVnode._hostNode = dom
+            // const parentNode = parentDomNode.parentNode
+            if (oldVnode._hostNode) {
+                parentDomNode.insertBefore(dom, oldVnode._hostNode)
+                disposeVnode(oldVnode)
+            } else {
+                parentDomNode.appendChild(dom)
 
-        // const parentNode = parentDomNode.parentNode
-        if (oldVnode._hostNode) {
-
-            parentDomNode.insertBefore(dom, oldVnode._hostNode)
-            disposeVnode(oldVnode)
-        } else {
-            parentDomNode.appendChild(dom)
-
+            }
         }
-        // try {
-
-        // } catch (e) {
-        //     console.log(e);
-        // }
-
-
     }
     return newVnode
 }
@@ -402,7 +394,8 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
 
     //生命周期函数
     if (instance.componentWillMount) {
-        catchError(instance, 'componentWillMount', [])
+        const isCatched = catchError(instance, 'componentWillMount', [Vnode]);
+        if (isCatched) return;
     }
 
     let lastOwner = currentOwner.cur;
@@ -436,7 +429,6 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     if (renderedType !== 7) {
         domNode = renderByLuy(renderedVnode, parentDomNode, false, instance.context, instance);
         // renderedVnode.displayName = Component.name;//记录名字
-
     } else {
         domNode = renderedVnode[0]._hostNode;
     }

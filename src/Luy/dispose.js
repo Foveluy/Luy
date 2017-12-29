@@ -5,7 +5,7 @@ import { catchError } from './ErrorBoundary';
 
 export function disposeVnode(Vnode) {//主要用于删除Vnode对应的节点
     const { type, props } = Vnode
-    if (typeNumber(Vnode === 7)) {
+    if (typeNumber(Vnode) === 7) {
         disposeChildVnode(Vnode);
         return;
     }
@@ -40,6 +40,12 @@ function disposeChildVnode(childVnode) {
     if (typeNumber(children) !== 7) children = [children]
     children.forEach((child) => {
         if (typeof child.type === 'function') {
+            if (typeNumber(child._hostNode) <= 1) {
+                child._hostNode = null;
+                child._instance = null;
+                return;//证明这个节点已经北删除
+            }
+
             if (child._instance.componentWillUnmount) {
                 catchError(child._instance, 'componentWillUnmount', []);
             }

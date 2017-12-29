@@ -161,7 +161,9 @@ function Child() {
     );
 }
 
-const logger = noop;
+const logger = (msg) => {
+    console.log(msg)
+};
 
 const ErrorBoundary = class extends React.Component {
     constructor(props) {
@@ -238,35 +240,80 @@ var BrokenRender = class extends React.Component {
     }
 };
 
-var container1 = document.createElement("div");
-var container2 = document.createElement("div");
+const BrokenComponentWillMount = class extends React.Component {
+    constructor(props) {
+        super(props);
+        logger("BrokenComponentWillMount constructor");
+    }
+    render() {
+        logger("BrokenComponentWillMount render");
+        return <div>{this.props.children}</div>;
+    }
+    componentWillMount() {
+        logger("BrokenComponentWillMount componentWillMount [!]");
+        throw new Error("Hello");
+    }
+    componentDidMount() {
+        logger("BrokenComponentWillMount componentDidMount");
+    }
+    componentWillReceiveProps() {
+        logger("BrokenComponentWillMount componentWillReceiveProps");
+    }
+    componentWillUpdate() {
+        logger("BrokenComponentWillMount componentWillUpdate");
+    }
+    componentDidUpdate() {
+        logger("BrokenComponentWillMount componentDidUpdate");
+    }
+    componentWillUnmount() {
+        logger("BrokenComponentWillMount componentWillUnmount");
+    }
+};
+
+const ErrorMessage = class extends React.Component {
+    constructor(props) {
+        super(props);
+        logger("ErrorMessage constructor");
+    }
+    componentWillMount() {
+        logger("ErrorMessage componentWillMount");
+    }
+    componentDidMount() {
+        logger("ErrorMessage componentDidMount");
+    }
+    componentWillUnmount() {
+        logger("ErrorMessage componentWillUnmount");
+    }
+    render() {
+        logger("ErrorMessage render");
+        return <div>Caught an error: {this.props.message}.</div>;
+    }
+};
+
+function renderError(error) {
+    return <ErrorMessage message={error.message} />;
+}
+
+
 var container3 = document.createElement("div");
 
-appRoot.appendChild(container1)
-appRoot.appendChild(container2)
 appRoot.appendChild(container3)
 
-ReactDOM.render(
-    <span>Before 1</span>,
-    container1
-);
 
+const bc = (
+    <ErrorBoundary renderError={renderError}>
+        <BrokenComponentWillMount />
+    </ErrorBoundary>
+)
 ReactDOM.render(
-    <span>Before 2</span>,
-    container2
-);
-
-
-ReactDOM.render(
-    <ErrorBoundary>
-        <BrokenRender />
-    </ErrorBoundary>,
+    bc,
     container3
 );
 
+disposeVnode(bc._instance.Vnode);
 
 
-ReactDOM.render(<span>After 1</span>, container1);
-ReactDOM.render(<span>After 2</span>, container2);
+// ReactDOM.render(<span>After 1</span>, container1);
+// ReactDOM.render(<span>After 2</span>, container2);
 // ReactDOM.render(<ErrorBoundary forceRetry={true}>After 3</ErrorBoundary>, container3);
 
