@@ -72,7 +72,7 @@ function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) 
         newStartVnode = newChild[0],
         oldEndVnode = oldChild[oldEndIndex],
         newEndVnode = newChild[newEndIndex],
-        hascode = {};
+        hascode;
 
     if (newLength >= 0 && !oldLength) {
         newChild.forEach((newVnode, index) => {
