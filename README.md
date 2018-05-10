@@ -1,3 +1,5 @@
+![](https://github.com/Foveluy/Luy/blob/master/art/luy.png?raw=true)
+
 # Luy，一个类 React 框架
 
 所谓类`React`框架就是**和 React 用法一模一样**的框架。我的目标是，缔造一个和 React 一摸一样的框架。
