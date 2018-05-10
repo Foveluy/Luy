@@ -47,6 +47,6 @@ function createElement(type, config, ...children) {
     return new Vnode(type, props, key, ref);
 }
 
-export default React = {
+export default {
     createElement: createElement
 }

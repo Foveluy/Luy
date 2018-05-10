@@ -4,9 +4,8 @@ const webpack = require('webpack');
 module.exports = {
     context: __dirname,
     entry: [
-        'react-hot-loader/patch',
         'webpack/hot/only-dev-server',
-        './study/study.js'
+        '../study/study.js'
     ],
     output: {
         path: resolve(__dirname, 'build'),//打包后的文件存放的地方
@@ -14,7 +13,7 @@ module.exports = {
         publicPath: "/"
     },
     devServer: {
-        contentBase: resolve(__dirname, 'build'),
+        contentBase: resolve(__dirname, '../build'),
         hot: true,
         publicPath: '/',
     },
@@ -27,7 +26,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.jsx?$/,
+                test: /\.(js|jsx)?$/,
                 use: [
                     'babel-loader',
                 ],
