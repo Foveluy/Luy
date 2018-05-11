@@ -173,7 +173,7 @@ function dispatchEvent(event, eventName, end) {
  * 捕获：从外到里
  * @param {array} path 
  */
-function triggerEventByPath(e, path: Array) {
+function triggerEventByPath(e, path) {
     const thisEvenType = e.type
     for (let i = 0; i < path.length; i++) {
         const events = path[i].__events
@@ -196,7 +196,7 @@ function triggerEventByPath(e, path: Array) {
 export function getEventPath(event, end) {
     let path = []
     let pathEnd = end || document
-    let begin: Element = event.target
+    let begin = event.target
 
     while (1) {
         if (begin.__events) {

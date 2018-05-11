@@ -20,29 +20,30 @@
     "react-router-dom": "^4.2.2",
     "webpack-dev-server": "^2.9.7"
   },
-  "keywords": [
-    "react-like",
-    "react",
-    "react-compat",
-    "performance"
-  ],
+  "keywords": ["react-like", "react", "react-compat", "performance"],
   "scripts": {
     "karma": "node node_modules/karma-event-driver-ext",
     "start": "node ./scripts/start.js",
     "temp": "NODE_ENV=production webpack -p --config webpack.pro.config.js ",
     "bench": "./bench.sh ",
-    "reactBench": "NODE_ENV=production webpack -p --config './performance/webpack.config/webpack.reactPerformence.config.js' ",
-    "anuBench": "NODE_ENV=production webpack -p --config './performance/webpack.config/webpack.anuPerformence.config.js' ",
+    "reactBench":
+      "NODE_ENV=production webpack -p --config './performance/webpack.config/webpack.reactPerformence.config.js' ",
+    "anuBench":
+      "NODE_ENV=production webpack -p --config './performance/webpack.config/webpack.anuPerformence.config.js' ",
     "jest": "jest --watch",
     "push": "python3 ./publish.py",
-    "anu": "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback --config 'webpack.anu.config.js' ",
-    "study": "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback --config './config/webpack.study.config.js' ",
+    "anu":
+      "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback --config 'webpack.anu.config.js' ",
+    "study":
+      "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback --config './config/webpack.study.config.js' ",
     "test": "./build.sh",
-    "dev": "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback",
-    "portal": "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback --config './webpack.example.config.js' ",
+    "dev":
+      "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback",
     "build": "./node_modules/.bin/babel --out-dir ./dist ./app/src/Luy",
-    "react": "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback --config 'webpack.react.config.js' ",
-    "luyBench": "NODE_ENV=production webpack -p --config './performance/webpack.config/webpack.luyPerformence.config.js' "
+    "react":
+      "webpack-dev-server --devtool eval-source-map --progress --host 127.0.0.1 --colors --content-base ./build --history-api-fallback --config 'webpack.react.config.js' ",
+    "luyBench":
+      "NODE_ENV=production webpack -p --config './performance/webpack.config/webpack.luyPerformence.config.js' "
   },
   "description": "",
   "version": "1.1.4",

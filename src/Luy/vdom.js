@@ -50,14 +50,14 @@ function mountIndexAdd() {
     return mountIndex++
 }
 
-function updateText(oldTextVnode, newTextVnode, parentDomNode: Element) {
-    let dom: Element = oldTextVnode._hostNode
+function updateText(oldTextVnode, newTextVnode, parentDomNode) {
+    let dom = oldTextVnode._hostNode
     if (oldTextVnode.props !== newTextVnode.props) {
         dom.nodeValue = newTextVnode.props
     }
 }
 
-function updateChild(oldChild, newChild, parentDomNode: Element, parentContext) {
+function updateChild(oldChild, newChild, parentDomNode, parentContext) {
     newChild = flattenChildren(newChild)
     oldChild = oldChild || []
     if (!Array.isArray(oldChild)) oldChild = [oldChild]
@@ -282,7 +282,7 @@ function updateComponent(oldComponentVnode, newComponentVnode, parentContext, pa
 }
 
 
-export function update(oldVnode, newVnode, parentDomNode: Element, parentContext) {
+export function update(oldVnode, newVnode, parentDomNode, parentContext) {
     newVnode._hostNode = oldVnode._hostNode
     if (oldVnode.type === newVnode.type) {
         if (typeNumber(oldVnode) === 7) {
@@ -374,7 +374,7 @@ export function update(oldVnode, newVnode, parentDomNode: Element, parentContext
  * @param {*} Vnode 
  * @param {Element} parentDomNode 
  */
-function mountComponent(Vnode, parentDomNode: Element, parentContext) {
+function mountComponent(Vnode, parentDomNode, parentContext) {
     const { type, props, key, ref } = Vnode
 
     const Component = type
@@ -461,13 +461,13 @@ function mountComponent(Vnode, parentDomNode: Element, parentContext) {
     return domNode
 }
 
-function mountNativeElement(Vnode, parentDomNode: Element, instance) {
+function mountNativeElement(Vnode, parentDomNode, instance) {
     const domNode = renderByLuy(Vnode, parentDomNode, false, {}, instance)
     Vnode._hostNode = domNode
     Vnode._mountIndex = mountIndexAdd()
     return domNode
 }
-function mountTextComponent(Vnode, domNode: Element) {
+function mountTextComponent(Vnode, domNode) {
     let fixText = Vnode.props === 'createPortal' ? '' : Vnode.props
     let textDomNode = document.createTextNode(fixText)
     domNode.appendChild(textDomNode)
@@ -476,7 +476,7 @@ function mountTextComponent(Vnode, domNode: Element) {
     return textDomNode
 }
 
-function mountChild(childrenVnode, parentDomNode: Element, parentContext, instance, parentVnode) {
+function mountChild(childrenVnode, parentDomNode, parentContext, instance, parentVnode) {
 
     let childType = typeNumber(childrenVnode)
     let flattenChildList = childrenVnode;
@@ -532,7 +532,7 @@ export function findDOMNode(ref) {
  * @param {boolean} instance 用于实现refs机制 
  */
 let depth = 0
-function renderByLuy(Vnode, container: Element, isUpdate: boolean, parentContext, instance) {
+function renderByLuy(Vnode, container, isUpdate, parentContext, instance) {
     const {
         type,
         props
