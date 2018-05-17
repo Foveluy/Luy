@@ -8,12 +8,13 @@ const RESERVED_PROPS = {
   __source: true
 }
 
-function Vnode(type, props, key, ref) {
+function Vnode(type, props, key, ref, VnodeType) {
   this.owner = currentOwner.cur
   this.type = type
   this.props = props
   this.key = key
   this.ref = ref
+  this.VnodeType = VnodeType
 }
 
 /**
@@ -59,8 +60,8 @@ function createElement(type, config, ...children) {
       }
     }
   }
-
-  return new Vnode(type, props, key, ref)
+  console.log()
+  return new Vnode(type, props, key, ref, typeNumber(type))
 }
 
 /**
