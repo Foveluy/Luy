@@ -1,5 +1,6 @@
 {
   "presets": ["env", "react"],
+  "sourceMaps": true,
   "plugins": [
     "transform-class-properties",
     "transform-runtime",
