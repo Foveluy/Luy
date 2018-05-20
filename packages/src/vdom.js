@@ -6,6 +6,10 @@ const updateQueue = []
 let nextUnitOfWork = null
 let pendingCommit = null
 let isAsync = true // 开启异步渲染的开关
+// Effect tags
+const PLACEMENT = 1
+const DELETION = 2
+const UPDATE = 3
 
 const EXPIRATION_TIME = 1 // ms async 逾期时间
 
@@ -16,6 +20,15 @@ export function render(Vnode, Container, callback) {
     props: { children: Vnode }
   })
 
+  requestIdleCallback(performWork) //开始干活
+}
+
+export function scheduleWork(instance, partialState) {
+  updateQueue.push({
+    fromTag: tag.CLASS_COMPONENT,
+    stateNode: instance,
+    partialState: partialState
+  })
   requestIdleCallback(performWork) //开始干活
 }
 
@@ -48,6 +61,7 @@ function commitAllwork(topFiber) {
   })
 
   topFiber.stateNode._rootContainerFiber = topFiber
+  topFiber.effects = []
   nextUnitOfWork = null
   pendingCommit = null
 }
@@ -60,7 +74,7 @@ function commitWork(effectFiber) {
 
   // 拿到parent的原因是，我们要将元素插入的点，插在父亲的下面
   let domParentFiber = effectFiber.return
-  while (domParentFiber.tag === tag.CLASS_COMPONENT) {
+  while (domParentFiber.tag === tag.CLASS_COMPONENT || domParentFiber.tag === tag.FunctionalComponent) {
     // 如果是 class 就直接跳过，因为 class 类型的fiber.stateNode 是其本身实例
     domParentFiber = domParentFiber.return
   }
@@ -72,7 +86,15 @@ function commitWork(effectFiber) {
       //通过 tag 检查是不是真实的节点
       domParent.appendChild(effectFiber.stateNode)
     }
+  } else if (effectFiber.effectTag == UPDATE) {
+    updateDomProperties(effectFiber.stateNode, effectFiber.alternate.props, effectFiber.props)
+  } else if (effectFiber.effectTag == DELETION) {
+    commitDeletion(effectFiber, domParent)
   }
+}
+
+function updateDomProperties(dom, prevProps, nextProps) {
+  // console.log(dom, prevProps, nextProps)
 }
 
 // 开始遍历
@@ -96,16 +118,20 @@ function beginWork(currentFiber) {
     case tag.CLASS_COMPONENT: {
       return updateClassComponent(currentFiber)
     }
+    case tag.FunctionalComponent: {
+      return updateFunctionalComponent(currentFiber)
+    }
     default: {
       return updateHostComponent(currentFiber)
     }
   }
 }
 
+//收集有 effecttag 的 fiber
 function completeWork(currentFiber) {
   if (currentFiber.tag === tag.CLASS_COMPONENT) {
-    // 不懂干嘛的
-    currentFiber.stateNode.__fiber = currentFiber
+    // 用于
+    currentFiber.stateNode._internalfiber = currentFiber
   }
 
   if (currentFiber.return) {
@@ -134,12 +160,20 @@ function updateHostComponent(currentFiber) {
   return reconcileChildrenArray(currentFiber, newChildren)
 }
 
+function updateFunctionalComponent(currentFiber) {
+  let type = currentFiber.type
+  let props = currentFiber.props
+  const newChildren = currentFiber.type(props)
+
+  return reconcileChildrenArray(currentFiber, newChildren)
+}
+
 function updateClassComponent(currentFiber) {
   let instance = currentFiber.stateNode
   if (!instance) {
     // 如果是 mount 阶段，构建一个 instance
     instance = currentFiber.stateNode = createInstance(currentFiber)
-  } else if (currentFiber.props === instance.props || !currentFiber.partialState) {
+  } else if (currentFiber.props === instance.props && !currentFiber.partialState) {
     // 如果是 update 阶段,对比发现 props 和 state 没变
     return cloneChildFiber(currentFiber)
   }
@@ -157,43 +191,74 @@ function updateClassComponent(currentFiber) {
   return reconcileChildrenArray(currentFiber, newChildren)
 }
 
+function cloneChildFiber(parentFiber) {
+  const oldFiber = parentFiber.alternate
+  if (!oldFiber.child) {
+    return
+  }
+  let oldChild = oldFiber.child
+  let prevChild = null
+  let index = 0
+  let next = void 666
+  while (oldChild) {
+    const newChild = {
+      type: oldChild.type,
+      tag: oldChild.tag,
+      stateNode: oldChild.stateNode,
+      props: oldChild.props,
+      partialState: oldChild.partialState,
+      alternate: oldChild,
+      return: parentFiber
+    }
+    if (prevChild) {
+      prevChild.sibling = newChild
+    } else {
+      parentFiber.child = newChild
+    }
+    prevChild = newChild
+    oldChild = oldChild.sibling
+
+    if (index === 0) {
+      next = newChild
+    }
+    index++
+  }
+  return next
+}
+
 function arrayfiy(val) {
   return val === null ? [] : Array.isArray(val) ? val : [val]
 }
 
-// Effect tags
-const PLACEMENT = 1
-const DELETION = 2
-const UPDATE = 3
+function createFiber(tag, type, props, Return, effectTag) {
+  return {
+    type: type,
+    tag: tag,
+    props: props,
+    return: Return,
+    effectTag: effectTag
+  }
+}
 
 function placeChild(currentFiber, newChild) {
   const type = newChild.type
 
   if (typeof newChild === 'string' || typeof newChild === 'number') {
     // 如果这个节点没有 type ,这个节点就可能是 number 或者 string
-    return {
-      type: null,
-      tag: tag.HostText,
-      props: newChild,
-      return: currentFiber,
-      effectTag: PLACEMENT
-    }
+    return createFiber(tag.HostText, null, newChild, currentFiber, PLACEMENT)
   }
 
   if (typeof type === 'string') {
-    return {
-      type: newChild.type,
-      tag: typeof newChild.type === 'string' ? tag.HOST_COMPONENT : tag.CLASS_COMPONENT, //todo: number
-      props: newChild.props,
-      return: currentFiber,
-      effectTag: PLACEMENT
-    }
+    // 原生节点
+    return createFiber(tag.HOST_COMPONENT, newChild.type, newChild.props, currentFiber, PLACEMENT)
   }
 
   if (typeof type === 'function') {
+    const _tag = type.prototype.isReactComponent ? tag.CLASS_COMPONENT : tag.FunctionalComponent
+
     return {
       type: newChild.type,
-      tag: tag.CLASS_COMPONENT,
+      tag: _tag,
       props: newChild.props,
       return: currentFiber,
       effectTag: PLACEMENT
@@ -221,7 +286,7 @@ function reconcileChildrenArray(currentFiber, newChildren) {
         type: oldFiber.type,
         tag: oldFiber.tag,
         stateNode: oldFiber.stateNode,
-        props: oldFiber.props,
+        props: newChild.props,
         return: currentFiber,
         alternate: oldFiber,
         partialState: oldFiber.partialState,
@@ -242,7 +307,7 @@ function reconcileChildrenArray(currentFiber, newChildren) {
     }
 
     if (oldFiber) {
-      oldFiber = oldFiber.sibling
+      oldFiber = oldFiber.sibling || null
     }
 
     if (index === 0) {
@@ -255,4 +320,22 @@ function reconcileChildrenArray(currentFiber, newChildren) {
     index++
   }
   return currentFiber.child
+}
+
+function commitDeletion(fiber, domParent) {
+  let node = fiber
+  while (true) {
+    if (node.tag == tag.CLASS_COMPONENT) {
+      node = node.child
+      continue
+    }
+    domParent.removeChild(node.stateNode)
+    while (node != fiber && !node.sibling) {
+      node = node.return
+    }
+    if (node == fiber) {
+      return
+    }
+    node = node.sibling
+  }
 }

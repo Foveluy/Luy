@@ -2,7 +2,8 @@ export const tag = {
   HOST_COMPONENT: 'host',
   CLASS_COMPONENT: 'class',
   HOST_ROOT: 'root',
-  HostText: 6
+  HostText: 6,
+  FunctionalComponent: 1
 }
 
 // var IndeterminateComponent = 0 // Before we know whether it is functional or class

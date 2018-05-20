@@ -1,14 +1,6 @@
 const ReactDOM = require('../src/vdom')
 const React = require('../src/Luy/index')
-
-function check(fn) {
-  jest.useFakeTimers()
-  setTimeout(() => {
-    fn()
-  }, 10)
-
-  jest.runAllTimers()
-}
+const { check } = require('../testUtils')
 
 describe('ReactRenderDOM', () => {
   let container
@@ -37,12 +29,12 @@ describe('ReactRenderDOM', () => {
   })
 
   it('should render number or text in React.Component', done => {
-    class App extends React.Component {
+    class Numberic extends React.Component {
       render() {
         return 1
       }
     }
-    ReactDOM.render(<App />, container)
+    ReactDOM.render(<Numberic />, container)
 
     check(() => {
       expect(container.innerHTML).toEqual('1')
@@ -60,6 +52,39 @@ describe('ReactRenderDOM', () => {
 
     check(() => {
       expect(container.innerHTML).toEqual('<div>123</div>')
+      done()
+    })
+  })
+
+  it('should render list child component', done => {
+    class App extends React.Component {
+      render() {
+        return (
+          <div>
+            <span>4</span>
+            <p>3</p>
+            <span>2</span>
+            <p>1</p>
+          </div>
+        )
+      }
+    }
+    ReactDOM.render(<App />, container)
+
+    check(() => {
+      expect(container.innerHTML).toEqual('<div><span>4</span><p>3</p><span>2</span><p>1</p></div>')
+      done()
+    })
+  })
+
+  it('should render stateless component', done => {
+    const App = () => {
+      return <div>stateless</div>
+    }
+    ReactDOM.render(<App />, container)
+
+    check(() => {
+      expect(container.innerHTML).toEqual('<div>stateless</div>')
       done()
     })
   })
