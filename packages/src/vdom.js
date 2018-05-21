@@ -108,22 +108,12 @@ function performUnitOfWork(workInProgress) {
     //收集当前节点的effect，然后向上传递
     completeWork(current)
     if (current.sibling) return current.sibling
+    if (!current.return) {
+      // 到达最顶端了
+      pendingCommit = current
+    }
     //没有 sibling，回到这个节点的父亲，看看有没有sibling
     current = current.return
-  }
-}
-
-function beginWork(currentFiber) {
-  switch (currentFiber.tag) {
-    case tag.CLASS_COMPONENT: {
-      return updateClassComponent(currentFiber)
-    }
-    case tag.FunctionalComponent: {
-      return updateFunctionalComponent(currentFiber)
-    }
-    default: {
-      return updateHostComponent(currentFiber)
-    }
   }
 }
 
@@ -139,9 +129,20 @@ function completeWork(currentFiber) {
     const currentEffectTag = currentFiber.effectTag ? [currentFiber] : []
     const parentEffects = currentFiber.return.effects || []
     currentFiber.return.effects = parentEffects.concat(currentEffect, currentEffectTag)
-  } else {
-    // 到达最顶端了
-    pendingCommit = currentFiber
+  }
+}
+
+function beginWork(currentFiber) {
+  switch (currentFiber.tag) {
+    case tag.CLASS_COMPONENT: {
+      return updateClassComponent(currentFiber)
+    }
+    case tag.FunctionalComponent: {
+      return updateFunctionalComponent(currentFiber)
+    }
+    default: {
+      return updateHostComponent(currentFiber)
+    }
   }
 }
 
@@ -254,6 +255,7 @@ function placeChild(currentFiber, newChild) {
   }
 
   if (typeof type === 'function') {
+    // 可能有两种
     const _tag = type.prototype.isReactComponent ? tag.CLASS_COMPONENT : tag.FunctionalComponent
 
     return {

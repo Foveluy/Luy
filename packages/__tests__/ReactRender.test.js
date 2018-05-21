@@ -1,4 +1,5 @@
 const ReactDOM = require('../src/vdom')
+const { Component } = require('../src/component')
 const React = require('../src/Luy/index')
 const { check } = require('../testUtils')
 
@@ -11,7 +12,7 @@ describe('ReactRenderDOM', () => {
     // ReactDOM.unmountComponentAtNode(container)
   })
   it('should normal render', done => {
-    class App extends React.Component {
+    class App extends Component {
       render() {
         return (
           <div>
@@ -29,7 +30,7 @@ describe('ReactRenderDOM', () => {
   })
 
   it('should render number or text in React.Component', done => {
-    class Numberic extends React.Component {
+    class Numberic extends Component {
       render() {
         return 1
       }
@@ -43,7 +44,7 @@ describe('ReactRenderDOM', () => {
   })
 
   it('should render number in inside nested element', done => {
-    class App extends React.Component {
+    class App extends Component {
       render() {
         return <div>123</div>
       }
@@ -57,7 +58,7 @@ describe('ReactRenderDOM', () => {
   })
 
   it('should render list child component', done => {
-    class App extends React.Component {
+    class App extends Component {
       render() {
         return (
           <div>
@@ -85,6 +86,32 @@ describe('ReactRenderDOM', () => {
 
     check(() => {
       expect(container.innerHTML).toEqual('<div>stateless</div>')
+      done()
+    })
+  })
+
+  it('should render array children', done => {
+    const App = () => {
+      return [<span />, <span />, <span />, <span />]
+    }
+    ReactDOM.render(<App />, container)
+
+    check(() => {
+      expect(container.innerHTML).toEqual('<span></span><span></span><span></span><span></span>')
+      done()
+    })
+  })
+
+  it('should render children', done => {
+    class App extends Component {
+      render() {
+        return <div>{this.props.children}</div>
+      }
+    }
+    ReactDOM.render(<App>hello children</App>, container)
+
+    check(() => {
+      expect(container.innerHTML).toEqual('<div>hello children</div>')
       done()
     })
   })
