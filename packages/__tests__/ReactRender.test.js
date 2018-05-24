@@ -115,4 +115,13 @@ describe('ReactRenderDOM', () => {
       done()
     })
   })
+
+  it('async mode: should render strings as children', () => {
+    const Box = ({ value }) => <div>{value}</div>
+
+    ReactDOM.render(<Box value="foo" />, container)
+    check(() => {
+      expect(container.textContent).toEqual('foo')
+    })
+  })
 })

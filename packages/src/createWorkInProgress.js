@@ -1,4 +1,4 @@
-import { tag } from './tags'
+import { tag } from './core/tags'
 
 // {
 //   from: HOST_ROOT,
