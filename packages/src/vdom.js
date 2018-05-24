@@ -1,20 +1,12 @@
-import { createInstance } from './createInstance'
+import { createInstance } from './core/createInstance'
 import { createWorkInProgress } from './createWorkInProgress'
 import { tag } from './tags'
-
-const updateQueue = []
-let nextUnitOfWork = null
-let pendingCommit = null
-let isAsync = true // 开启异步渲染的开关
-// Effect tags
-const PLACEMENT = 1
-const DELETION = 2
-const UPDATE = 3
+import { Renderer, Effect } from './renderer'
 
 const EXPIRATION_TIME = 1 // ms async 逾期时间
 
 export function render(Vnode, Container, callback) {
-  updateQueue.push({
+  Renderer.updateQueue.push({
     fromTag: tag.HOST_ROOT,
     stateNode: Container,
     props: { children: Vnode }
@@ -24,7 +16,7 @@ export function render(Vnode, Container, callback) {
 }
 
 export function scheduleWork(instance, partialState) {
-  updateQueue.push({
+  Renderer.updateQueue.push({
     fromTag: tag.CLASS_COMPONENT,
     stateNode: instance,
     partialState: partialState
@@ -34,24 +26,24 @@ export function scheduleWork(instance, partialState) {
 
 function performWork(deadline) {
   workLoop(deadline)
-  if (nextUnitOfWork || updateQueue.length > 0) {
+  if (Renderer.nextUnitOfWork || Renderer.updateQueue.length > 0) {
     requestIdleCallback(performWork) //继续干
   }
 }
 
 function workLoop(deadline) {
-  if (!nextUnitOfWork) {
+  if (!Renderer.nextUnitOfWork) {
     //一个周期内只创建一次
-    nextUnitOfWork = createWorkInProgress(updateQueue)
+    Renderer.nextUnitOfWork = createWorkInProgress(Renderer.updateQueue)
   }
 
-  while (nextUnitOfWork && deadline.timeRemaining() > EXPIRATION_TIME) {
-    nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
+  while (Renderer.nextUnitOfWork && deadline.timeRemaining() > EXPIRATION_TIME) {
+    Renderer.nextUnitOfWork = performUnitOfWork(Renderer.nextUnitOfWork)
   }
 
-  if (pendingCommit) {
-    //当全局 pendingCommit 变量被负值
-    commitAllwork(pendingCommit)
+  if (Renderer.pendingCommit) {
+    //当全局 Renderer.pendingCommit 变量被负值
+    commitAllwork(Renderer.pendingCommit)
   }
 }
 
@@ -62,8 +54,8 @@ function commitAllwork(topFiber) {
 
   topFiber.stateNode._rootContainerFiber = topFiber
   topFiber.effects = []
-  nextUnitOfWork = null
-  pendingCommit = null
+  Renderer.nextUnitOfWork = null
+  Renderer.pendingCommit = null
 }
 
 function commitWork(effectFiber) {
@@ -81,14 +73,14 @@ function commitWork(effectFiber) {
 
   //拿到父亲的真实 DOM
   const domParent = domParentFiber.stateNode
-  if (effectFiber.effectTag === PLACEMENT) {
+  if (effectFiber.effectTag === Effect.PLACEMENT) {
     if (effectFiber.tag === tag.HOST_COMPONENT || effectFiber.tag === tag.HostText) {
       //通过 tag 检查是不是真实的节点
       domParent.appendChild(effectFiber.stateNode)
     }
-  } else if (effectFiber.effectTag == UPDATE) {
+  } else if (effectFiber.effectTag == Effect.UPDATE) {
     updateDomProperties(effectFiber.stateNode, effectFiber.alternate.props, effectFiber.props)
-  } else if (effectFiber.effectTag == DELETION) {
+  } else if (effectFiber.effectTag == Effect.DELETION) {
     commitDeletion(effectFiber, domParent)
   }
 }
@@ -110,7 +102,7 @@ function performUnitOfWork(workInProgress) {
     if (current.sibling) return current.sibling
     if (!current.return) {
       // 到达最顶端了
-      pendingCommit = current
+      Renderer.pendingCommit = current
     }
     //没有 sibling，回到这个节点的父亲，看看有没有sibling
     current = current.return
@@ -246,12 +238,12 @@ function placeChild(currentFiber, newChild) {
 
   if (typeof newChild === 'string' || typeof newChild === 'number') {
     // 如果这个节点没有 type ,这个节点就可能是 number 或者 string
-    return createFiber(tag.HostText, null, newChild, currentFiber, PLACEMENT)
+    return createFiber(tag.HostText, null, newChild, currentFiber, Effect.PLACEMENT)
   }
 
   if (typeof type === 'string') {
     // 原生节点
-    return createFiber(tag.HOST_COMPONENT, newChild.type, newChild.props, currentFiber, PLACEMENT)
+    return createFiber(tag.HOST_COMPONENT, newChild.type, newChild.props, currentFiber, Effect.PLACEMENT)
   }
 
   if (typeof type === 'function') {
@@ -263,7 +255,7 @@ function placeChild(currentFiber, newChild) {
       tag: _tag,
       props: newChild.props,
       return: currentFiber,
-      effectTag: PLACEMENT
+      effectTag: Effect.PLACEMENT
     }
   }
 }
@@ -292,7 +284,7 @@ function reconcileChildrenArray(currentFiber, newChildren) {
         return: currentFiber,
         alternate: oldFiber,
         partialState: oldFiber.partialState,
-        effectTag: UPDATE
+        effectTag: Effect.UPDATE
       }
     }
 
@@ -303,7 +295,7 @@ function reconcileChildrenArray(currentFiber, newChildren) {
     if (!isSameFiber && oldFiber) {
       // 这个情况的意思是新的节点比旧的节点少
       // 这时候，我们要将变更的 effect 放在本节点的 list 里
-      oldFiber.effectTag = DELETION
+      oldFiber.effectTag = Effect.DELETION
       currentFiber.effects = currentFiber.effects || []
       currentFiber.effects.push(oldFiber)
     }

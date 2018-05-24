@@ -1,4 +1,4 @@
-import { scheduleWork } from './vdom'
+import { scheduleWork } from '../vdom'
 
 export class Component {
   constructor(props, context) {

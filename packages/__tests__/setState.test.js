@@ -1,5 +1,5 @@
 const ReactDOM = require('../src/vdom')
-const { Component } = require('../src/component')
+const { Component } = require('../src/core/component')
 const React = require('../src/Luy/index')
 const { check } = require('../testUtils')
 
