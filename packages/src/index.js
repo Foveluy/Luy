@@ -1,5 +1,5 @@
 import React from './Luy/index'
-import { Component } from './component'
+import { Component } from './core/component'
 import { render } from './vdom'
 
 class App extends Component {
