@@ -105,7 +105,7 @@ function updateChild(oldChild, newChild, parentDomNode, parentContext) {
       newEndVnode = newChild[--newEndIndex]
     } else if (isSameVnode(oldStartVnode, newEndVnode)) {
       let dom = oldStartVnode._hostNode
-      parentDomNode.insertBefore(dom, oldEndVnode.nextSibling)
+      parentDomNode.insertBefore(dom, oldEndVnode._hostNode.nextSibling)
       update(oldStartVnode, newEndVnode, oldStartVnode._hostNode._hostNode, parentContext)
       oldStartVnode = oldChild[++oldStartIndex]
       newEndVnode = newChild[--newEndIndex]
